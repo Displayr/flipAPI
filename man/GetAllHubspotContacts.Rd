@@ -9,7 +9,7 @@ GetAllHubspotContacts(hubspot.api.key, count = 100, verbose = FALSE)
 \arguments{
 \item{hubspot.api.key}{The Hubspot API key for your profile.}
 
-\item{count}{The number of contacts to request at a time. 100 is the maximum.}
+\item{count}{The number of items to request at a time. 100 is the maximum.}
 
 \item{verbose}{Print some diagnostics with each request.}
 }

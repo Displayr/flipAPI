@@ -1,7 +1,7 @@
 #' Get all Hubspot contacts
 #'
 #' @param hubspot.api.key The Hubspot API key for your profile.
-#' @param count The number of contacts to request at a time. 100 is the maximum.
+#' @param count The number of items to request at a time. 100 is the maximum.
 #' @param verbose Print some diagnostics with each request.
 #' @return A \code{data.frame} containing your contacts.
 #' @export
@@ -17,10 +17,12 @@ GetAllHubspotContacts <- function(hubspot.api.key, count = 100, verbose = FALSE)
     req.content <- hubspotParse(req)
     contacts <- req.content$contacts
 
+    i <- 0
     while (req.content$`has-more`)
     {
+        i <- i + 1
         if (verbose)
-            cat("Current offset", req.content$`vid-offset`, "\n")
+            cat(i, "Current offset", req.content$`vid-offset`, "\n")
         req <- hubspotGet(path = path,
             query = list(hapikey = hubspot.api.key, count = count, vidOffset = req.content$`vid-offset`))
         req.content <- hubspotParse(req)
@@ -80,9 +82,7 @@ GetAllHubspotContacts <- function(hubspot.api.key, count = 100, verbose = FALSE)
 
 #' Get all Hubspot companies
 #'
-#' @param hubspot.api.key The Hubspot API key for your profile.
-#' @param count The number of companies to request at a time. 100 is the maximum.
-#' @param verbose Print some diagnostics with each request.
+#' @inheritParams GetAllHubspotContacts
 #' @return A \code{data.frame} containing your companies.
 #' @export
 GetAllHubspotCompanies <- function(hubspot.api.key, count = 100, verbose = FALSE)
