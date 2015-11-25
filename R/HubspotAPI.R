@@ -158,7 +158,7 @@ GetAllHubspotCompanies <- function(hubspot.api.key, count = 100, verbose = FALSE
 #' @noRd
 hubspotGet <- function(path, ...)
 {
-    req <- GET("https://api.hubapi.com", path = path, ...)
+    req <- httr::GET("https://api.hubapi.com", path = path, ...)
     hubspotCheck(req)
 
     req
@@ -167,7 +167,7 @@ hubspotGet <- function(path, ...)
 #' @noRd
 hubspotCheck <- function(req)
 {
-    if (status_code(req) == 200)
+    if (httr::status_code(req) == 200)
         return(invisible())
 
     message <- hubspotParse(req)$message
@@ -177,13 +177,19 @@ hubspotCheck <- function(req)
 #' @noRd
 hubspotParse <- function(req)
 {
-    text <- content(req, as = "text")
+    text <- httr::content(req, as = "text")
     if (identical(text, ""))
         stop("No output to parse", call. = FALSE)
     jsonlite::fromJSON(text, simplifyVector = FALSE)
 }
 
-#' @noRd
+#' Convert a Hubspot timestamp to POSIXct
+#'
+#' Convert a Hubspot timestamp (milliseconds since UNIX epoch) to POSIXct.
+#' \code{\link{as.POSIXct}} takes seconds since epoch so we need to divide
+#' by 1000.
+#'
+#' @param timestamp A timestamp in milliseconds.
 timestampToDate <- function(timestamp)
 {
     as.POSIXct(timestamp / 1000, origin = "1970-01-01")
