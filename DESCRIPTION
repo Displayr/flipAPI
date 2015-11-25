@@ -3,11 +3,11 @@ Type: Package
 Title: Acquire Data From Web APIs
 Version: 0.1
 Date: 2015-11-06
-Author: Q Research Software <support@q-researchsoftware.com>
-Maintainer: Q Research Software <support@q-researchsoftware.com>
+Authors@R: "Numbers International <info@numbers.net.au> [aut, cre]"
 Description: Acquire data from web APIs.
-License: Copyright Q Research Software
+License: Copyright Numbers International Pty Ltd
 LazyData: TRUE
-RoxygenNote: 5.0.0
-Depends: httr
-Imports: jsonlite
+RoxygenNote: 5.0.1
+Imports:
+    httr,
+    jsonlite
