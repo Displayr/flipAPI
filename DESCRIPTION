@@ -5,7 +5,7 @@ Version: 0.1
 Date: 2015-11-06
 Authors@R: "Numbers International <info@numbers.net.au> [aut, cre]"
 Description: Acquire data from web APIs.
-License: Copyright Numbers International Pty Ltd
+License: MIT + file LICENSE
 LazyData: TRUE
 RoxygenNote: 5.0.1
 Imports:
