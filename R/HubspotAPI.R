@@ -61,7 +61,7 @@ GetAllHubspotContacts <- function(hubspot.api.key, count = 100, verbose = FALSE)
         df[i, names(contacts[[i]])] <- contacts[[i]]
     }
 
-    df <- data.frame(df)
+    df <- data.frame(df, stringsAsFactors = FALSE)
 
     logical.columns <- c("is.contact")
     logical.columns <- logical.columns[logical.columns %in% names(df)]
@@ -98,10 +98,12 @@ GetAllHubspotCompanies <- function(hubspot.api.key, count = 100, verbose = FALSE
     req.content <- hubspotParse(req)
     companies <- req.content$results
 
+    i <- 0
     while (req.content$hasMore)
     {
+        i <- i + 1
         if (verbose)
-            cat("Current offset", req.content$offset, "\n")
+            cat(i, "Current offset", req.content$offset, "\n")
         req <- hubspotGet(path = path,
             query = list(hapikey = hubspot.api.key, count = count, offset = req.content$offset))
         req.content <- hubspotParse(req)
@@ -125,7 +127,7 @@ GetAllHubspotCompanies <- function(hubspot.api.key, count = 100, verbose = FALSE
         df[i, names(companies[[i]])] <- companies[[i]]
     }
 
-    df <- data.frame(df)
+    df <- data.frame(df, stringsAsFactors = FALSE)
 
     logical.columns <- c("is_public")
     logical.columns <- logical.columns[logical.columns %in% names(df)]
