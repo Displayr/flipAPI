@@ -146,7 +146,7 @@ GetAllHubspotCompanies <- function(hubspot.api.key, count = 100, verbose = FALSE
 
     date.columns <- c("closedate", "createdate", "first_contact_createdate",
         "hs_analytics_first_timestamp", "hs_lastmodifieddate", "hubspot_owner_assigneddate",
-        "notes_last_contacted", "notes_last_updated")
+        "notes_last_contacted", "notes_last_updated", "first_deal_created_date")
     date.columns <- date.columns[date.columns %in% names(df)]
     for (date.column in date.columns)
     {
