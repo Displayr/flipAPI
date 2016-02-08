@@ -19,6 +19,8 @@
 #'   for more information about setting up your Google Analytics account for
 #'   use with this function. The parameter \code{secret.text} is the text
 #'   contained in the JSON file you get when adding a Service Account.
+#'
+#' @export
 GoogleAnalytics <- function(dimensions, metrics, start.date, end.date, secret.text, table.num = 1)
 {
     .checkGaNames <- function(x, max.num)

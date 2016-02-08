@@ -2,3 +2,4 @@
 
 export(GetAllHubspotCompanies)
 export(GetAllHubspotContacts)
+export(GoogleAnalytics)
