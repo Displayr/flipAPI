@@ -13,3 +13,6 @@
 vignettes/*.html
 vignettes/*.pdf
 .Rproj.user
+
+# testthat artifact
+tests/testthat/Rplots.pdf
