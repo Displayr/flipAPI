@@ -4,10 +4,14 @@
 \alias{GetAllHubspotContacts}
 \title{Get all Hubspot contacts}
 \usage{
-GetAllHubspotContacts(hubspot.api.key, count = 100, verbose = FALSE)
+GetAllHubspotContacts(hubspot.api.key, properties = NULL, count = 100,
+  verbose = FALSE)
 }
 \arguments{
 \item{hubspot.api.key}{The Hubspot API key for your profile.}
+
+\item{properties}{Optional properties to request. If \code{NULL}, the default
+properties are returned.}
 
 \item{count}{The number of items to request at a time. 100 is the maximum.}
 

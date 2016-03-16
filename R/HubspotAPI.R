@@ -1,11 +1,13 @@
 #' Get all Hubspot contacts
 #'
 #' @param hubspot.api.key The Hubspot API key for your profile.
+#' @param properties Optional properties to request. If \code{NULL}, the default
+#'   properties are returned.
 #' @param count The number of items to request at a time. 100 is the maximum.
 #' @param verbose Print some diagnostics with each request.
 #' @return A \code{data.frame} containing your contacts.
 #' @export
-GetAllHubspotContacts <- function(hubspot.api.key, count = 100, verbose = FALSE)
+GetAllHubspotContacts <- function(hubspot.api.key, properties = NULL, count = 100, verbose = FALSE)
 {
     path <- "contacts/v1/lists/all/contacts/all"
 
@@ -13,7 +15,13 @@ GetAllHubspotContacts <- function(hubspot.api.key, count = 100, verbose = FALSE)
     if (count <= 0 || count > 100)
         count <- 100
 
-    req <- hubspotGet(path = path, query = list(hapikey = hubspot.api.key, count = count))
+    if (!is.null(properties))
+    {
+        properties <- as.list(properties)
+        names(properties) <- rep_len("property", length(properties))
+    }
+
+    req <- hubspotGet(path = path, query = c(list(hapikey = hubspot.api.key, count = count), properties))
     req.content <- hubspotParse(req)
     contacts <- req.content$contacts
 
@@ -24,7 +32,8 @@ GetAllHubspotContacts <- function(hubspot.api.key, count = 100, verbose = FALSE)
         if (verbose)
             cat(i, "Current offset", req.content$`vid-offset`, "\n")
         req <- hubspotGet(path = path,
-            query = list(hapikey = hubspot.api.key, count = count, vidOffset = req.content$`vid-offset`))
+            query = c(list(hapikey = hubspot.api.key, count = count, vidOffset = req.content$`vid-offset`),
+                properties))
         req.content <- hubspotParse(req)
         contacts <- c(contacts, req.content$contacts)
     }
