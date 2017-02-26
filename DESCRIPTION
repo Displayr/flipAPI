@@ -1,11 +1,11 @@
 Package: flipAPI
 Type: Package
-Title: Acquire Data From Web APIs
+Title: Web APIs tools
 Version: 0.1
-Date: 2015-11-06
-Authors@R: "Numbers International <info@numbers.net.au> [aut, cre]"
-Description: Acquire data from web APIs.
-License: MIT + file LICENSE
+Author: Displayr
+Maintainer: Displayr <opensource@displayr.com>
+Description: Functions to extract data and interact with web APIs.
+License: GPL-3
 LazyData: TRUE
 Imports:
     httr,
