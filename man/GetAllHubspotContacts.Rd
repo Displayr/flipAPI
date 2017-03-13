@@ -23,4 +23,3 @@ A \code{data.frame} containing your contacts.
 \description{
 Get all Hubspot contacts
 }
-

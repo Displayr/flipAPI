@@ -19,4 +19,3 @@ A \code{data.frame} containing your companies.
 \description{
 Get all Hubspot companies
 }
-

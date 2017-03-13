@@ -36,4 +36,3 @@ See
   use with this function. The parameter \code{secret.text} is the text
   contained in the JSON file you get when adding a Service Account.
 }
-

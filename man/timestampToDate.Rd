@@ -14,4 +14,3 @@ Convert a Hubspot timestamp (milliseconds since UNIX epoch) to POSIXct.
 \code{\link{as.POSIXct}} takes seconds since epoch so we need to divide
 by 1000.
 }
-
