@@ -23,6 +23,7 @@ ExportToDropbox <- function(object, token, file=NA, verbose=TRUE)
     body=upload_file(file))
     if (verbose)
         print(pp)
+    invisible(file.remove(file))
 }
 
 #' Import R object from file in Dropbox
@@ -39,5 +40,6 @@ ImportFromDropbox <- function(importfile, token)
                config=add_headers("Authorization" = sprintf("Bearer %s", token)),
                write_disk(localfile))
     obj <- readRDS(localfile)
+    invisible(file.remove(localfile))
     return(obj)
 }
