@@ -6,6 +6,7 @@
 
 UpdateObject <- function(object, project.key)
 {
+    message("R output expires in 600")
     url <- sprintf("https://app.displayr.com/API/RunScript?project=%s",
                    project.key)
     script <- sprintf("

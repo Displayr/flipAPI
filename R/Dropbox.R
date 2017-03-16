@@ -28,7 +28,7 @@ ExportToDropbox <- function(object, token, file=NA, verbose=TRUE, update=TRUE)
         print(pp)
     if (verbose && !inherits(pp, "try-error"))
     {
-        cmd1 <- sprintf("UpdateObject(%s, <project api key>)", 
+        cmd1 <- sprintf("UpdateObject('%s', <project api key>)", 
                         as.character(substitute(object)))
         cmd2 <- sprintf("ImportFromDropbox('%s', <dropbox token>)", file)
         cat("To re-import object use:\n   >", cmd1, "\n   >", cmd2, "\n")
