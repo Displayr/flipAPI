@@ -4,7 +4,7 @@
 \alias{ExportToDropbox}
 \title{Export R object to Dropbox}
 \usage{
-ExportToDropbox(object, token, file = NA, verbose = TRUE, update = T)
+ExportToDropbox(object, token, file = NA, verbose = TRUE, update = TRUE)
 }
 \arguments{
 \item{object}{R object to export}
