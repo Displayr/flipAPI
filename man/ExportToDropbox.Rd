@@ -4,7 +4,7 @@
 \alias{ExportToDropbox}
 \title{Export R object to Dropbox}
 \usage{
-ExportToDropbox(object, token, file = NA, verbose = TRUE)
+ExportToDropbox(object, token, file = NA, verbose = TRUE, update = T)
 }
 \arguments{
 \item{object}{R object to export}
@@ -17,6 +17,8 @@ When multiple copies of the same object under different conditions are saved, it
 manually specify the filename.}
 
 \item{verbose}{Show status of export process.}
+
+\item{update}{Set to \code{TRUE} if object should be automatically re-exported from Displayr when object is updated.}
 }
 \description{
 Export R object to Dropbox

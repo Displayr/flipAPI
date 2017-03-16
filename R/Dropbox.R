@@ -6,11 +6,14 @@
 #'    When multiple copies of the same object under different conditions are saved, it may be preferrable to
 #'    manually specify the filename.
 #' @param verbose Show status of export process.
+#' @param update Set to \code{TRUE} if object should be automatically re-exported from Displayr when object is updated.
 #' @importFrom httr PUT add_headers upload_file
 #' @export
 
-ExportToDropbox <- function(object, token, file=NA, verbose=TRUE)
+ExportToDropbox <- function(object, token, file=NA, verbose=TRUE, update=TRUE)
 {
+    if (update)
+        message("R output expires in 600")
     if (is.na(file))
         file <- paste(as.character(substitute(object)), ".rds", sep="")
     saveRDS(object, file=file)
@@ -18,11 +21,18 @@ ExportToDropbox <- function(object, token, file=NA, verbose=TRUE)
          cat("Writing object to", file, "\n")
     
     put_url <- sprintf("https://content.dropboxapi.com/1/files_put/auto/%s?param=overwrite=true", file)
-    pp <- PUT(put_url, 
+    pp <- try(PUT(put_url, 
     config=add_headers("Authorization" = sprintf("Bearer %s", token)), 
-    body=upload_file(file))
+    body=upload_file(file)))
     if (verbose)
         print(pp)
+    if (verbose && !inherits(pp, "try-error"))
+    {
+        cmd1 <- sprintf("UpdateObject(%s, <project api key>)", 
+                        as.character(substitute(object)))
+        cmd2 <- sprintf("ImportFromDropbox('%s', <dropbox token>)", file)
+        cat("To re-import object use:\n   >", cmd1, "\n   >", cmd2, "\n")
+    }
     invisible(file.remove(file))
 }
 
