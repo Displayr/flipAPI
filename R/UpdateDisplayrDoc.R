@@ -1,12 +1,13 @@
-#' Update R object in a dashboard using an API post request
+#' Triggers a call to update R object in a Displayr document using an API post request
 #' @param object String containing name of R object to export
-#' @param document.key API key of the document in Displayr. This can be obtained by navigating to your documents in \code{https://app.displayr.com}, and clicking on the API button next to the specified dashboard.
+#' @param document.key API key of the source document in Displayr. This can be obtained by navigating to your documents in \code{https://app.displayr.com}, and clicking on the API button next to the source document.
+#' @param update.seconds Time in seconds after which the object in the source document will be re-updated. Note that the actual update occurs the first time the current project is open \emph{after} \code{update.seconds} has elapsed. This may occur after ImportObject is called, so that the imported object can be up to \code{\link[=ExportToDropbox]{reexport.seconds} + update.seconds} old. The default value is 1 week.
 #' @importFrom httr POST
 #' @export
 
-UpdateObject <- function(object, document.key)
+TriggerObjectUpdate <- function(object, document.key, update.seconds = 604800)
 {
-    message("R output expires in 600")
+    message(sprintf("R output expires in %d", update.seconds))
     url <- sprintf("https://app.displayr.com/API/RunScript?project=%s",
                    document.key)
     script <- sprintf("
@@ -45,4 +46,13 @@ UpdateObject <- function(object, document.key)
             returnMsg <- "Invalid document API key"
     }
     returnMsg
+}
+
+
+#' @rdname TriggerObjectUpdate
+#' @export
+UpdateObject <- function(object, document.key, update.seconds = 604800)
+{
+    warning("This function is deprecated. Please use TriggerObjectUpdate instead")
+    TriggerObjectUpdate(object, document.key, update.seconds)
 }
