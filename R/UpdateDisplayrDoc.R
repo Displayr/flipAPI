@@ -39,12 +39,16 @@ TriggerObjectUpdate <- function(object, document.key, update.seconds = 600)
     if (!inherits(req, "try-error"))
     {
         if(req$status_code == 200)
+        {
             returnMsg <- "Object updated"
+            return(returnMsg)
+        }
         if (any(grepl("Cannot read property 'update'", req$headers$'x-errormessage')))
             returnMsg <- "Object does not exist in project. Check that you are using the object name (and not the label)."
         if (any(grepl("it is not a GUID", req$headers$'x-errormessage')))
             returnMsg <- "Invalid document API key"
     }
+    warning(returnMsg)
     returnMsg
 }
 
