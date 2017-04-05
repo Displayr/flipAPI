@@ -26,14 +26,17 @@ ExportToDropbox <- function(object, token, file=NA, verbose=TRUE, update=TRUE)
     body=upload_file(file)))
     if (verbose)
         print(pp)
-    if (verbose && !inherits(pp, "try-error"))
+    
+    returnMsg <- "Could not upload object. Check that dropbox token is correct."
+    if (verbose && !inherits(pp, "try-error") && pp$status_code == 200)
     {
-        cmd1 <- sprintf("UpdateObject('%s', <project api key>)", 
+        cmd1 <- sprintf("UpdateObject('%s', <document api key>)", 
                         as.character(substitute(object)))
         cmd2 <- sprintf("ImportFromDropbox('%s', <dropbox token>)", file)
-        cat("To re-import object use:\n   >", cmd1, "\n   >", cmd2, "\n")
+        returnMsg <- paste("Object uploaded to dropbox. To re-import object use:\n   > library(flipAPI)\n   >", cmd1, "\n   >", cmd2, "\n")
     }
     invisible(file.remove(file))
+    returnMsg
 }
 
 #' Import R object from file in Dropbox
@@ -46,9 +49,16 @@ ImportFromDropbox <- function(importfile, token)
 {
     localfile = "tmp.rds"
     gurl <- sprintf("https://content.dropboxapi.com/1/files/auto/%s", importfile)
-    gg <- GET(gurl, 
+    gg <- try(GET(gurl, 
                config=add_headers("Authorization" = sprintf("Bearer %s", token)),
-               write_disk(localfile))
+               write_disk(localfile, overwrite=TRUE)))
+    
+    if (inherits(gg, "try-error") || gg$status_code == 500)
+        stop("Could not import from Dropbox. Check the dropbox token")
+    
+    if (gg$status_code != 200)
+        stop("Could not import from Dropbox. Check the name of the import file")
+    
     obj <- readRDS(localfile)
     invisible(file.remove(localfile))
     return(obj)

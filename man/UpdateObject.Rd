@@ -4,12 +4,12 @@
 \alias{UpdateObject}
 \title{Update R object in a dashboard using an API post request}
 \usage{
-UpdateObject(object, project.key)
+UpdateObject(object, document.key)
 }
 \arguments{
-\item{object}{Name of R object to export}
+\item{object}{String containing name of R object to export}
 
-\item{project.key}{Secret project key of the dashboard. This can be obtained by navigating to your documents in \code{https://app.displayr.com}, and clicking on the API button next to the specified dashboard.}
+\item{document.key}{API key of the document in Displayr. This can be obtained by navigating to your documents in \code{https://app.displayr.com}, and clicking on the API button next to the specified dashboard.}
 }
 \description{
 Update R object in a dashboard using an API post request
