@@ -5,11 +5,11 @@
 #'    named \code{<object>.rds}. This will overwrite existing files in your dropbox with the same name.
 #'    When multiple copies of the same object under different conditions are saved, it may be preferrable to
 #'    manually specify the filename.
-#' @param reexport.seconds Time in seconds after which object will be re-exported. This option works only in Displayr. See \link{TriggerObjectUpdate} for more details.
+#' @param reexport.seconds Time in seconds after which object will be re-exported. This option works only in Displayr. See \link{UpdateObject} for more details.
 #' @importFrom httr PUT add_headers upload_file
 #' @export
 
-ExportToDropbox <- function(object, token, file=NA, reexport.seconds = 600)
+ExportToDropbox <- function(object, token, file=NA, reexport.seconds = -1)
 {
     if (reexport.seconds > 0)
         message(sprintf("R output expires in %d", round(reexport.seconds)))

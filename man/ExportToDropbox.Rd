@@ -4,7 +4,7 @@
 \alias{ExportToDropbox}
 \title{Export R object to Dropbox}
 \usage{
-ExportToDropbox(object, token, file = NA, reexport.seconds = 600)
+ExportToDropbox(object, token, file = NA, reexport.seconds = -1)
 }
 \arguments{
 \item{object}{R object to export}
@@ -16,7 +16,7 @@ named \code{<object>.rds}. This will overwrite existing files in your dropbox wi
 When multiple copies of the same object under different conditions are saved, it may be preferrable to
 manually specify the filename.}
 
-\item{reexport.seconds}{Time in seconds after which object will be re-exported. This option works only in Displayr. See \link{TriggerObjectUpdate} for more details.}
+\item{reexport.seconds}{Time in seconds after which object will be re-exported. This option works only in Displayr. See \link{UpdateObject} for more details.}
 }
 \description{
 Export R object to Dropbox
