@@ -7,11 +7,11 @@
 #'    manually specify the filename.
 #' @param reexport.seconds Time in seconds after which object will be re-exported. This option works only in Displayr.
 #'    If the document is opened, and the object has not been exported for \code{reexport.seconds}, then the object
-#'    is re-exported. By default this is set to 1 week. Setting a negative value will disable the automatic update.
+#'    is re-exported. By default this option is disabled.
 #' @importFrom httr PUT add_headers upload_file
 #' @export
 
-ExportToDropbox <- function(object, token, file=NA, reexport.seconds = 604800)
+ExportToDropbox <- function(object, token, file=NA, reexport.seconds = -1)
 {
     if (reexport.seconds > 0)
         message(sprintf("R output expires in %d", round(reexport.seconds)))
