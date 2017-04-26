@@ -16,9 +16,7 @@ named \code{<object>.rds}. This will overwrite existing files in your dropbox wi
 When multiple copies of the same object under different conditions are saved, it may be preferrable to
 manually specify the filename.}
 
-\item{reexport.seconds}{Time in seconds after which object will be re-exported. This option works only in Displayr.
-If the document is opened, and the object has not been exported for \code{reexport.seconds}, then the object
-is re-exported. By default this option is disabled.}
+\item{reexport.seconds}{Time in seconds (must be greater than 600) after which object will be re-exported. This option works only in Displayr. By default this option is disabled.}
 }
 \description{
 Export R object to Dropbox

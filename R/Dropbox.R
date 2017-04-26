@@ -5,16 +5,15 @@
 #'    named \code{<object>.rds}. This will overwrite existing files in your dropbox with the same name.
 #'    When multiple copies of the same object under different conditions are saved, it may be preferrable to
 #'    manually specify the filename.
-#' @param reexport.seconds Time in seconds after which object will be re-exported. This option works only in Displayr.
-#'    If the document is opened, and the object has not been exported for \code{reexport.seconds}, then the object
-#'    is re-exported. By default this option is disabled.
+#' @param reexport.seconds Time in seconds (must be greater than 600) after which object will be re-exported. This option works only in Displayr. By default this option is disabled.
 #' @importFrom httr PUT add_headers upload_file
 #' @export
 
 ExportToDropbox <- function(object, token, file=NA, reexport.seconds = -1)
 {
-    if (reexport.seconds > 0)
-        message(sprintf("R output expires in %d", round(reexport.seconds)))
+    # Displayr server ignores expiry if less than 600
+    if (reexport.seconds > 600)
+        message(sprintf("R output expires in %d seconds with wakeup", round(reexport.seconds)))
     if (is.na(file))
         file <- paste(as.character(substitute(object)), ".rds", sep="")
     saveRDS(object, file=file)
@@ -27,10 +26,8 @@ ExportToDropbox <- function(object, token, file=NA, reexport.seconds = -1)
     returnMsg <- "Could not upload object. Check that dropbox token is correct."
     if (!inherits(pp, "try-error") && pp$status_code == 200)
     {
-        #cmd1 <- sprintf("TriggerObjectUpdate('%s', <document api key>)", 
-        #                as.character(substitute(object)))
-        cmd2 <- sprintf("ImportFromDropbox('%s', <dropbox token>)", file)
-        returnMsg <- paste("Object uploaded to dropbox. To re-import object use:\n   > library(flipAPI)\n   >", cmd2, "\n")
+        cmd <- sprintf("ImportFromDropbox('%s', <dropbox token>)", file)
+        returnMsg <- paste("Object uploaded to dropbox. To re-import object use:\n   > library(flipAPI)\n   >", cmd, "\n")
     }
     invisible(file.remove(file))
     returnMsg
