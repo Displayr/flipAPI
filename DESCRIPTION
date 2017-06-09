@@ -12,5 +12,6 @@ Imports:
     jsonlite,
     lubridate,
     RGoogleAnalytics,
-    stringr
+    stringr,
+    readxl
 RoxygenNote: 6.0.1
