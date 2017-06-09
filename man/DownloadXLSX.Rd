@@ -7,7 +7,7 @@
 DownloadXLSX(url, sheet = 1)
 }
 \arguments{
-\item{url}{Link to XLSX file. Note that this should be a direct link (See \url{https://milanaryal.com/direct-linking-to-your-files-on-dropbox-google-drive-and-onedrive/}.}
+\item{url}{Link to XLSX file.}
 
 \item{sheet}{Sheet of excel workbook to read from. By default only the first worksheet is read}
 }

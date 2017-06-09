@@ -1,9 +1,10 @@
 #' Download and read Excel (.xlsx) file
 #'
-#' @param url Link to XLSX file. Note that this should be a direct link (See \url{https://milanaryal.com/direct-linking-to-your-files-on-dropbox-google-drive-and-onedrive/}.
+#' @param url Link to XLSX file.
 #' @param sheet Sheet of excel workbook to read from. By default only the first worksheet is read
 #' @importFrom utils download.file
 #' @importFrom readxl read_xlsx
+#' @importFrom httr GET
 #' @export
 DownloadXLSX <- function(url, sheet = 1)
 {
@@ -14,12 +15,24 @@ DownloadXLSX <- function(url, sheet = 1)
     tmp.name <- tempfile(tmpdir=".")
     tmp.file <- try(download.file(url, destfile=tmp.name, mode="wb"))
     if (inherits(tmp.file, "try-error"))
-        stop("Could not download file:", url, "\n")
+        stop("Could not download file from ", url, "\n")
     res <- try(read_xlsx(tmp.name, sheet=sheet))
     if (inherits(res, "try-error"))
-        stop("Could not read file. Check that file is an a valid XLSX file and that url is a direct link.")
-    else
+    {
+        # Try to use re-direct url and try again
+        retry <- GET(url)
+        url <- gsub("redir?", "download", retry$url)
         unlink(tmp.name)
+        tmp.name <- tempfile(tmpdir=".")
+        
+        tmp.file <- try(download.file(url, destfile=tmp.name, mode="wb"))
+        if (inherits(tmp.file, "try-error"))
+            stop("Could not download file from ", url, "\n")
+        res <- try(read_xlsx(tmp.name, sheet=sheet))
+        if (inherits(res, "try-error"))
+            stop("File is not a valid XLSX file\n")
+    }
+    unlink(tmp.name)
     return(res)
 }
     
