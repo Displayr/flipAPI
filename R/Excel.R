@@ -4,6 +4,7 @@
 #' @param sheet Sheet of excel workbook to read from. By default only the first worksheet is read
 #' @importFrom utils download.file
 #' @importFrom readxl read_xlsx
+#' @export
 DownloadXLSX <- function(url, sheet = 1)
 {
     # Try to change link so that it directly download NOT preview
