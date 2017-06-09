@@ -8,9 +8,11 @@
 #' @export
 DownloadXLSX <- function(url, sheet = 1)
 {
-    # Try to change link so that it directly download NOT preview
-    # For Dropbox
-    url <- gsub("dl=0$", "dl=1", url)
+    # Convert link from a re-direct to direct URL
+    if (grepl("dropbox", url))
+        url <- gsub("dl=0$", "dl=1", url)
+    if (grepl("google", url))
+        url <- gsub("edit[#?].*", "export?format=xlsx", url)
     
     tmp.name <- tempfile(tmpdir=".")
     tmp.file <- try(download.file(url, destfile=tmp.name, mode="wb"))
@@ -21,7 +23,7 @@ DownloadXLSX <- function(url, sheet = 1)
     {
         # Try to use re-direct url and try again
         retry <- GET(url)
-        url <- gsub("redir?", "download", retry$url)
+        url <- gsub("redir?", "download", retry$url) # one-drive
         unlink(tmp.name)
         tmp.name <- tempfile(tmpdir=".")
         
