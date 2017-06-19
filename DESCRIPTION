@@ -13,5 +13,9 @@ Imports:
     lubridate,
     RGoogleAnalytics,
     stringr,
-    readxl
+    readxl,
+    flipTransformations
+Remotes: Displayr/flipTransformations
+Suggests: testthat
 RoxygenNote: 6.0.1
+
