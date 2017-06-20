@@ -5,7 +5,7 @@
 #' @importFrom utils download.file
 #' @importFrom readxl read_xlsx
 #' @importFrom httr GET
-#' @importFrom flipTransformations ParseAsDataFrame
+#' @importFrom flipTransformations ParseEnteredData ParseAsDataFrame
 #' @param want.data.frame Whether to return a data frame instead of a matrix or vector. Note that unlike \link[flipTransformations]{ParseEnteredData}, the default is \code{TRUE}, because imported data files are expected to be larger than cut-and-paste data.
 #' @param want.factors Whether a text variable should be converted to a factor in a data frame.
 #' @param want.col.names Whether to interpret the first row as column names in a data frame.
@@ -46,14 +46,16 @@ DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors =
             stop("File is not a valid XLSX file\n")
     }
     unlink(tmp.name)
-    res.formatted <- ParseAsDataFrame(res, warn=T, want.factors=want.factors, want.col.names=FALSE, 
-                                      want.row.names=want.row.names, us.format=us.format, matrix.or.vector=!want.data.frame)
+    
     if (!want.data.frame)
     {
-        if (ncol(res.formatted) > 1)
-            return(as.matrix(res.formatted))
-        else
-            return(as.vector(unlist(res.formatted)))
+        res <- as.matrix(res)
+        res[which(is.na(res))] <- ""
+        dimnames(res) <- NULL
+        return(ParseEnteredData(res, want.data.frame = FALSE))
     }
+    
+    res.formatted <- ParseAsDataFrame(res, warn=T, want.factors=want.factors, want.col.names=FALSE, 
+                                      want.row.names=want.row.names, us.format=us.format)
     return(res.formatted)
 }

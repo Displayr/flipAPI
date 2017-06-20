@@ -31,6 +31,8 @@ test_that("read_xlsx",
     expect_equal(length(sheet2), 6)
     expect_equal(is.numeric(sheet2), TRUE)
     
+    expect_error(capture.output(sheet3 <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-no-headers.xlsx?raw=true", sheet = 3), type="message"))
+    
     expect_warning(capture.output(characters <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/characters.xlsx?raw=true"), type="message"), "The entered data could not be interpreted")
     expect_equal(is.numeric(characters), FALSE)
     expect_equal(dim(characters), c(4, 4))
