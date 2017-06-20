@@ -12,7 +12,7 @@
 #' @param want.row.names Whether to interpret the first col as row names in a data frame.
 #' @param us.format Whether to use the US convention when parsing dates in a data frame.
 #' @export
-DownloadXLSX <- function(url, sheet = 1, want.data.frame = TRUE, want.factors = TRUE,
+DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors = TRUE,
                          want.col.names = TRUE, want.row.names = FALSE, us.format = TRUE)
 {
     if (!(grepl("http|^ftp", url)))
@@ -28,7 +28,7 @@ DownloadXLSX <- function(url, sheet = 1, want.data.frame = TRUE, want.factors = 
     tmp.file <- try(download.file(url, destfile=tmp.name, mode="wb"))
     if (inherits(tmp.file, "try-error"))
         stop("Could not download file from ", url, "\n")
-    res <- try(read_xlsx(tmp.name, sheet=sheet, col_names=want.col.names))
+    res <- try(read_xlsx(tmp.name, sheet=sheet, col_names=(want.data.frame && want.col.names)))
     if (inherits(res, "try-error"))
     {
         # Try to use re-direct url and try again
@@ -40,14 +40,20 @@ DownloadXLSX <- function(url, sheet = 1, want.data.frame = TRUE, want.factors = 
         tmp.file <- try(download.file(url, destfile=tmp.name, mode="wb"))
         if (inherits(tmp.file, "try-error"))
             stop("Could not download file from ", url, "\n")
-        res <- try(read_xlsx(tmp.name, sheet=sheet, col_names=want.col.names))
+        
+        res <- try(read_xlsx(tmp.name, sheet=sheet, col_names=(want.data.frame && want.col.names)))
         if (inherits(res, "try-error"))
             stop("File is not a valid XLSX file\n")
     }
     unlink(tmp.name)
-    res.formatted <- ParseAsDataFrame(res, warn=T, want.factors=want.factors, want.col.names=F, 
-                                      want.row.names=want.row.names, us.format=us.format)
+    res.formatted <- ParseAsDataFrame(res, warn=T, want.factors=want.factors, want.col.names=FALSE, 
+                                      want.row.names=want.row.names, us.format=us.format, matrix.or.vector=!want.data.frame)
     if (!want.data.frame)
-        return(as.matrix(res.formatted))
+    {
+        if (ncol(res.formatted) > 1)
+            return(as.matrix(res.formatted))
+        else
+            return(as.vector(unlist(res.formatted)))
+    }
     return(res.formatted)
 }

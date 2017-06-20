@@ -4,7 +4,7 @@
 \alias{DownloadXLSX}
 \title{Download and read Excel (.xlsx) file}
 \usage{
-DownloadXLSX(url, sheet = 1, want.data.frame = TRUE, want.factors = TRUE,
+DownloadXLSX(url, sheet = 1, want.data.frame = FALSE, want.factors = TRUE,
   want.col.names = TRUE, want.row.names = FALSE, us.format = TRUE)
 }
 \arguments{
