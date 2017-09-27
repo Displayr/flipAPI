@@ -12,7 +12,7 @@ DownloadXLSX(url, sheet = 1, want.data.frame = FALSE, want.factors = TRUE,
 
 \item{sheet}{Sheet of excel workbook to read from. By default only the first worksheet is read}
 
-\item{want.data.frame}{Whether to return a data frame instead of a matrix or vector. Note that unlike \link[flipTransformations]{ParseEnteredData}, the default is \code{TRUE}, because imported data files are expected to be larger than cut-and-paste data.}
+\item{want.data.frame}{Whether to return a data frame instead of a matrix or vector.}
 
 \item{want.factors}{Whether a text variable should be converted to a factor in a data frame.}
 
