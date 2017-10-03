@@ -45,7 +45,7 @@ ExportToDropbox <- function(object, token, file=NA, reexport.seconds = -1)
     pp <- try(POST(put_url, 
         config=add_headers("Authorization" = sprintf("Bearer %s", token),
                            "Dropbox-API-Arg" = paste0("{\"path\": \"/", file,
-                                    "\",\"mode\": \"add\",\"autorename\": true,\"mute\": false}"),
+                                    "\",\"mode\": \"overwrite\",\"autorename\": false,\"mute\": false}"),
                            "Content-Type" = "application/octet-stream"), 
         body=upload_file(file)))
     
