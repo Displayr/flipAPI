@@ -9,11 +9,11 @@ test_that("read_xlsx",
     expect_equal(colnames(numAndFactor), c("X__1", "Age", "Region"))
     expect_equal(unname(sapply(numAndFactor, class)), c("factor", "numeric", "factor"))
 
-    expect_warning(capture.output(numAndStr <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-and-factor.xlsx?raw=true"), type="message"), "the entered data could not be interpreted")
+    expect_silent(capture.output(numAndStr <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-and-factor.xlsx?raw=true"), type="message"))
     expect_equal(dimnames(numAndStr)[[1L]], LETTERS[1:5])
     expect_equal(dimnames(numAndStr)[[2L]], c("Age", "Region"))
     expect_equal(dim(numAndStr), c(5, 2))
-    expect_equal(class(numAndStr), "matrix")
+    expect_equal(class(numAndStr), "data.frame")
     expect_equal(is.numeric(numAndStr), FALSE)
 
     capture.output(num2d <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-with-headers.xlsx?raw=true"), type="message")
@@ -34,7 +34,7 @@ test_that("read_xlsx",
 
     expect_error(capture.output(sheet3 <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-no-headers.xlsx?raw=true", sheet = 3), type="message"))
 
-    expect_warning(capture.output(characters <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/characters.xlsx?raw=true"), type="message"), "the entered data could not be interpreted")
+    expect_silent(capture.output(characters <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/characters.xlsx?raw=true"), type="message"))
     expect_equal(is.numeric(characters), FALSE)
     expect_equal(dim(characters), c(3, 3))
     expect_equal(dimnames(characters)[[1L]], paste0("R", 1:3))
