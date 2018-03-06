@@ -4,7 +4,8 @@
 \alias{ExportToDropbox}
 \title{Export R object to Dropbox}
 \usage{
-ExportToDropbox(object, token, file = NA, reexport.seconds = -1)
+ExportToDropbox(object, token, file = NA, as.csv = FALSE,
+  reexport.seconds = -1)
 }
 \arguments{
 \item{object}{R object to export}
@@ -12,11 +13,15 @@ ExportToDropbox(object, token, file = NA, reexport.seconds = -1)
 \item{token}{Dropbox access token with read and write access.}
 
 \item{file}{Name of output file. If no filename is supplied, by default the object will be saved to a file
-named \code{<object>.rds}. This will overwrite existing files in your dropbox with the same name.
+named \code{<object>.rds} or \code{<object>.csv} according to \code{as.csv} described below.
+This will overwrite existing files in your dropbox with the same name.
 When multiple copies of the same object under different conditions are saved, it may be preferrable to
 manually specify the filename.}
 
-\item{reexport.seconds}{Time in seconds (must be greater than 600) after which object will be re-exported. This option works only in Displayr. By default this option is disabled.}
+\item{as.csv}{Logical; if TRUE the object will be exported as a .csv file, or else as a .rds file.}
+
+\item{reexport.seconds}{Time in seconds (must be greater than 600) after which object will be re-exported.
+This option works only in Displayr. By default this option is disabled.}
 }
 \description{
 Export R object to Dropbox

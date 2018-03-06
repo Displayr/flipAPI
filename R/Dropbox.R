@@ -24,23 +24,31 @@ CheckDropboxToken <- function(token)
 #' @param object R object to export
 #' @param token Dropbox access token with read and write access.
 #' @param file Name of output file. If no filename is supplied, by default the object will be saved to a file
-#'    named \code{<object>.rds}. This will overwrite existing files in your dropbox with the same name.
-#'    When multiple copies of the same object under different conditions are saved, it may be preferrable to
-#'    manually specify the filename.
-#' @param reexport.seconds Time in seconds (must be greater than 600) after which object will be re-exported. This option works only in Displayr. By default this option is disabled.
+#' named \code{<object>.rds} or \code{<object>.csv} according to \code{as.csv} described below.
+#' This will overwrite existing files in your dropbox with the same name.
+#' When multiple copies of the same object under different conditions are saved, it may be preferrable to
+#' manually specify the filename.
+#' @param as.csv Logical; if TRUE the object will be exported as a .csv file, or else as a .rds file.
+#' @param reexport.seconds Time in seconds (must be greater than 600) after which object will be re-exported.
+#' This option works only in Displayr. By default this option is disabled.
 #' @importFrom httr POST add_headers upload_file
+#' @importFrom utils write.csv
 #' @export
 
-ExportToDropbox <- function(object, token, file=NA, reexport.seconds = -1)
+ExportToDropbox <- function(object, token, file = NA, as.csv = FALSE, reexport.seconds = -1)
 {
     # Displayr server ignores expiry if less than 600
     if (reexport.seconds > 600)
         message(sprintf("R output expires in %d seconds with wakeup", round(reexport.seconds)))
+    extension <- if (as.csv) ".csv" else ".rds" 
     if (is.na(file))
-        file <- paste(as.character(substitute(object)), ".rds", sep="")
-    saveRDS(object, file=file)
+        file <- paste(as.character(substitute(object)), extension, sep="")
     
-    #put_url <- sprintf("https://content.dropboxapi.com/1/files_put/auto/%s?param=overwrite=true", file)
+    if (as.csv)
+        write.csv(object, file = file)
+    else
+        saveRDS(object, file = file)
+    
     put_url <- "https://content.dropboxapi.com/2/files/upload"
     pp <- try(POST(put_url, 
         config=add_headers("Authorization" = sprintf("Bearer %s", token),
@@ -67,17 +75,19 @@ ExportToDropbox <- function(object, token, file=NA, reexport.seconds = -1)
 #' @param importfile Name of file that the object was saved to. This is generally of the form \code{<object>.rds}.
 #' @param token Dropbox access token with read and write access.
 #' @importFrom httr POST add_headers write_disk content
+#' @importFrom utils read.csv
 #' @export
 
 ImportFromDropbox <- function(importfile, token)
 {
-    localfile = "tmp.rds"
-    #url <- sprintf("https://content.dropboxapi.com/1/files/auto/%s", importfile)
+    extension <- substr(importfile, nchar(importfile) - 2, nchar(importfile))
+    localfile <- if (extension == "csv") "tmp.csv" else "tmp.rds"
+    
     url <- "https://content.dropboxapi.com/2/files/download"
     pp <- try(POST(url, 
                config=add_headers("Authorization" = sprintf("Bearer %s", token),
                                   "Dropbox-API-Arg" = paste0("{\"path\": \"/", importfile, "\"}")),
-               write_disk(localfile, overwrite=TRUE)))
+               write_disk(localfile, overwrite = TRUE)))
     
     if (inherits(pp, "try-error") || pp$status_code == 500)
         stop("Could not import from Dropbox. Check the dropbox token")
@@ -85,7 +95,7 @@ ImportFromDropbox <- function(importfile, token)
     if (pp$status_code != 200)
         stop("Could not import from Dropbox. Check the name of the import file")
     
-    obj <- readRDS(localfile)
+    obj <- if (extension == "csv") read.csv(localfile) else readRDS(localfile)
     invisible(file.remove(localfile))
     return(obj)
 }

@@ -14,6 +14,7 @@ Imports:
     RGoogleAnalytics,
     stringr,
     readxl,
+    utils,
     flipTransformations
 Remotes: Displayr/flipTransformations
 Suggests: testthat
