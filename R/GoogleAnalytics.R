@@ -9,6 +9,7 @@
 #'   identifies your account.
 #' @param table.num If your account contains multiple tables, use this to select
 #'   the table to query. Defaults to the first table.
+#' @importFrom RGoogleAnalytics GetProfiles QueryBuilder GetReportData Init
 #'
 #' @details See
 #'   \url{https://developers.google.com/analytics/devguides/reporting/core/dimsmets}
