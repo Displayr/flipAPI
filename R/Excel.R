@@ -1,3 +1,22 @@
+#' Converts URL from cloud storage to direct link
+#' 
+#' @description Currently only supports links from Dropbox, OneDrive and Google Drive
+#' @param url String; url to convert
+#' @export
+GetDirectLink <- function (url)
+{
+    # Convert link from a re-direct to direct URL
+    if (grepl("dropbox", url))
+        return(gsub("dl=0$", "dl=1", url))
+    if (grepl("doc.google.com", url))
+        return(gsub("edit[#?].*", "export?format=xlsx", url))
+    if (grepl("drive.google.com", url))
+        return(gsub("/open?", "/uc?export=download&", url, fixed = TRUE))
+    if (grepl("sharepoint.com", url) && substr(url, nchar(url), nchar(url)) != "1")
+        return(paste0(url, "?download=1"))
+    return(url)
+}
+
 #' Download and read Excel (.xlsx) file
 #'
 #' @param url Link to XLSX file. Can also be the path to a file on your local machine.
@@ -11,7 +30,7 @@
 #' @param want.col.names Whether to interpret the first row as column names in a data frame.
 #' @param want.row.names Whether to interpret the first col as row names in a data frame.
 #' @param us.format Whether to use the US convention when parsing dates in a data frame.
-#' @param ... Other parameters tot pass to readxl::read_xlsx
+#' @param ... Other parameters to pass to readxl::read_xlsx
 #' @export
 DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors = TRUE,
                          want.col.names = TRUE, want.row.names = FALSE, us.format = TRUE, ...)
@@ -23,18 +42,13 @@ DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors =
         if (!(grepl("http|^ftp", url)))
             stop("URL should begin with 'http', 'https' or 'ftp'")
     
-        # Convert link from a re-direct to direct URL
-        if (grepl("dropbox", url))
-            url <- gsub("dl=0$", "dl=1", url)
-        if (grepl("google", url))
-            url <- gsub("edit[#?].*", "export?format=xlsx", url)
-    
+        url <- GetDirectLink(url) 
         tmp.name <- tempfile(tmpdir = ".")
-        tmp.file <- try(download.file(url, destfile=tmp.name, mode="wb"))
+        tmp.file <- try(download.file(url, destfile = tmp.name, mode = "wb"))
         if (inherits(tmp.file, "try-error"))
             stop("Could not download file from ", url, "\n")
     }
-    res <- try(read_xlsx(tmp.name, sheet=sheet, col_names=(want.data.frame && want.col.names), ...))
+    res <- try(read_xlsx(tmp.name, sheet = sheet, col_names = (want.data.frame && want.col.names), ...))
     if (!use.local && inherits(res, "try-error"))
     {
         # Try to use re-direct url and try again
@@ -45,11 +59,17 @@ DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors =
 
         tmp.file <- try(download.file(url, destfile = tmp.name, mode="wb"))
         if (inherits(tmp.file, "try-error"))
+        {
+            unlink(tmp.name)
             stop("Could not download file from ", url, "\n")
-
+        }
+        
         res <- try(read_xlsx(tmp.name, sheet = sheet, col_names = (want.data.frame && want.col.names), ...))
         if (inherits(res, "try-error"))
+        {
+            unlink(tmp.name)
             stop("File is not a valid XLSX file\n")
+        }
     }
     if (!use.local)
         unlink(tmp.name)

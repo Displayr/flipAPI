@@ -22,7 +22,7 @@ DownloadXLSX(url, sheet = 1, want.data.frame = FALSE, want.factors = TRUE,
 
 \item{us.format}{Whether to use the US convention when parsing dates in a data frame.}
 
-\item{...}{Other parameters tot pass to readxl::read_xlsx}
+\item{...}{Other parameters to pass to readxl::read_xlsx}
 }
 \description{
 Download and read Excel (.xlsx) file

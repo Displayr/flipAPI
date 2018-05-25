@@ -3,6 +3,7 @@
 export(CheckDropboxToken)
 export(DownloadXLSX)
 export(ExportToDropbox)
+export(GetDirectLink)
 export(GoogleAnalytics)
 export(ImportFromDropbox)
 importFrom(RGoogleAnalytics,GetProfiles)
