@@ -5,10 +5,10 @@
 \title{Download and read Excel (.xlsx) file}
 \usage{
 DownloadXLSX(url, sheet = 1, want.data.frame = FALSE, want.factors = TRUE,
-  want.col.names = TRUE, want.row.names = FALSE, us.format = TRUE)
+  want.col.names = TRUE, want.row.names = FALSE, us.format = TRUE, ...)
 }
 \arguments{
-\item{url}{Link to XLSX file.}
+\item{url}{Link to XLSX file. Can also be the path to a file on your local machine.}
 
 \item{sheet}{Sheet of excel workbook to read from. By default only the first worksheet is read}
 
@@ -21,6 +21,8 @@ DownloadXLSX(url, sheet = 1, want.data.frame = FALSE, want.factors = TRUE,
 \item{want.row.names}{Whether to interpret the first col as row names in a data frame.}
 
 \item{us.format}{Whether to use the US convention when parsing dates in a data frame.}
+
+\item{...}{Other parameters tot pass to readxl::read_xlsx}
 }
 \description{
 Download and read Excel (.xlsx) file
