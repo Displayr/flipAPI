@@ -55,8 +55,8 @@ GoogleAnalytics <- function(dimensions, metrics, start.date, end.date, secret.te
     start.date <- lubridate::floor_date(start.date - one.day, "week") + one.day
     end.date   <- lubridate::ceiling_date(end.date, "week")
 
-    secret.txt <- gsub("[^\x20-\x7E]", "", secret.txt)
-    secrets <- jsonlite::fromJSON(secret.txt)
+    secret.text <- gsub("[^\x20-\x7E]", "", secret.text)
+    secrets <- jsonlite::fromJSON(secret.text)
     secrets$private_key <- gsub("-----BEGIN PRIVATE KEY-----", 
                                 "-----BEGIN PRIVATE KEY-----\n",
                                 secrets$private_key)
