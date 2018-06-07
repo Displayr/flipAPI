@@ -57,6 +57,12 @@ GoogleAnalytics <- function(dimensions, metrics, start.date, end.date, secret.te
 
     secret.text <- gsub("\n([^[:space:]}])", "\\\\n\\1", secret.text)
     secrets <- jsonlite::fromJSON(secret.text)
+    secrets$private_key <- gsub("-----BEGIN PRIVATE KEY-----", 
+                                "-----BEGIN PRIVATE KEY-----\n",
+                                secrets$private_key)
+    secrets$private_key <- gsub("-----END PRIVATE KEY-----", 
+                                "\n-----END PRIVATE KEY-----\n",
+                                secrets$private_key)
 
     scope <- "https://www.googleapis.com/auth/analytics.readonly"
 
