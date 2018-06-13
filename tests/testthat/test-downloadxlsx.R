@@ -46,10 +46,10 @@ test_that("read_xlsx",
     expect_equal(dimnames(percentages), NULL)
     expect_equal(sum(percentages < 1), 6)
     
-    expect_silent(cola1 <- DownloadXLSX("https://wiki.q-researchsoftware.com/images/b/b9/Cola_Discriminant_Functions.xlsx", want.col.names = TRUE, range="A2:G9"))
+    expect_silent(cola1 <- DownloadXLSX("https://wiki.q-researchsoftware.com/images/b/b9/Cola_Discriminant_Functions.xlsx", range="A2:G9"))
     expect_equal(class(cola1), "matrix")
     expect_equal(dim(cola1), c(7, 6))
-    expect_silent(cola2 <- DownloadXLSX("https://wiki.q-researchsoftware.com/images/b/b9/Cola_Discriminant_Functions.xlsx", want.col.names = TRUE, want.row.names = FALSE, sheet=2, range="AB2:AC330"))
+    expect_silent(cola2 <- DownloadXLSX("https://wiki.q-researchsoftware.com/images/b/b9/Cola_Discriminant_Functions.xlsx", want.data.frame = TRUE, want.col.names = TRUE, want.row.names = FALSE, sheet=2, range="AB2:AC330"))
     expect_equal(class(cola2), "data.frame")
     expect_equal(dim(cola2), c(328, 2))
 })

@@ -25,18 +25,25 @@ GetDirectLink <- function (url)
 #' @importFrom readxl read_xlsx
 #' @importFrom httr GET
 #' @importFrom flipTransformations ParseUserEnteredTable ParseAsDataFrame
-#' @param want.data.frame Whether to return a data frame instead of a matrix or vector.
+#' @param want.data.frame Whether to return a data frame instead of a matrix or vector. If this is set to \code{FALSE} (default), then the function will return the simplest data structure it can.
 #' @param want.factors Whether a text variable should be converted to a factor in a data frame.
-#' @param want.col.names Whether to interpret the first row as column names in a data frame.
-#' @param want.row.names Whether to interpret the first col as row names in a data frame.
+#' @param want.col.names Whether to interpret the first row as column names in a data frame. This is ignored if \code{want.data.frame} is \code{FALSE}.
+#' @param want.row.names Whether to interpret the first col as row names in a data frame. This is ignored if \code{want.data.frame} is \code{FALSE}.
 #' @param us.format Whether to use the US convention when parsing dates in a data frame.
 #' @param ... Other parameters to pass to readxl::read_xlsx
 #' @export
 DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors = TRUE,
-                         want.col.names = TRUE, want.row.names = FALSE, us.format = TRUE, ...)
+                         want.col.names = NULL, want.row.names = NULL, us.format = TRUE, ...)
 {
     use.local <- file.exists(url)
     tmp.name <- url
+    if (want.data.frame)
+    {
+        if (is.null(want.col.names))
+            want.col.names <- TRUE
+        if (is.null(want.row.names))
+            want.row.names <- FALSE
+    }
     if (!use.local)
     {
         if (!(grepl("http|^ftp", url)))
@@ -76,6 +83,10 @@ DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors =
 
     if (!want.data.frame)
     {
+        if (!is.null(want.row.names))
+            warning("Parameter 'want.row.names' is ignored want 'want.data.frame' is false.")
+        if (!is.null(want.col.names))
+            warning("Parameter 'want.col.names' is ignored want 'want.data.frame' is false.")
         res <- as.matrix(res)
         res[which(is.na(res))] <- ""
         dimnames(res) <- NULL
