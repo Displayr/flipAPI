@@ -5,20 +5,20 @@
 \title{Download and read Excel (.xlsx) file}
 \usage{
 DownloadXLSX(url, sheet = 1, want.data.frame = FALSE, want.factors = TRUE,
-  want.col.names = TRUE, want.row.names = FALSE, us.format = TRUE, ...)
+  want.col.names = NULL, want.row.names = NULL, us.format = TRUE, ...)
 }
 \arguments{
 \item{url}{Link to XLSX file. Can also be the path to a file on your local machine.}
 
 \item{sheet}{Sheet of excel workbook to read from. By default only the first worksheet is read}
 
-\item{want.data.frame}{Whether to return a data frame instead of a matrix or vector.}
+\item{want.data.frame}{Whether to return a data frame instead of a matrix or vector. If this is set to \code{FALSE} (default), then the function will return the simplest data structure it can.}
 
 \item{want.factors}{Whether a text variable should be converted to a factor in a data frame.}
 
-\item{want.col.names}{Whether to interpret the first row as column names in a data frame.}
+\item{want.col.names}{Whether to interpret the first row as column names in a data frame. This is ignored if \code{want.data.frame} is \code{FALSE}.}
 
-\item{want.row.names}{Whether to interpret the first col as row names in a data frame.}
+\item{want.row.names}{Whether to interpret the first col as row names in a data frame. This is ignored if \code{want.data.frame} is \code{FALSE}.}
 
 \item{us.format}{Whether to use the US convention when parsing dates in a data frame.}
 
