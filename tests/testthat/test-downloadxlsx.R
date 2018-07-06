@@ -24,7 +24,6 @@ test_that("read_xlsx",
     expect_equal(colnames(num2d)[1], "Pre-breakfast")
 
     capture.output(numAndDate <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-with-headers.xlsx?raw=true", want.data.frame = TRUE), type="message")
-    expect_equal("POSIXct" %in% class(numAndDate[,1]), TRUE)
     expect_equal(class(numAndDate[,2]), "numeric")
 
     capture.output(sheet2 <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-no-headers.xlsx?raw=true", sheet = 2), type="message")
