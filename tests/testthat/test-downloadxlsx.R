@@ -27,8 +27,7 @@ test_that("read_xlsx",
     expect_equal(class(numAndDate[,2]), "numeric")
 
     capture.output(sheet2 <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-no-headers.xlsx?raw=true", sheet = 2), type="message")
-    expect_equal(dim(sheet2), NULL)
-    expect_equal(length(sheet2), 6)
+    expect_equal(dim(sheet2), c(6, 1))
     expect_equal(is.numeric(sheet2), TRUE)
 
     expect_error(capture.output(sheet3 <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-no-headers.xlsx?raw=true", sheet = 3), type="message"))
