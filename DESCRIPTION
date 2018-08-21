@@ -14,10 +14,10 @@ Imports:
     RGoogleAnalytics,
     stringr,
     readxl,
+    rgeolocate,
     utils,
     flipTransformations
 Remotes: Displayr/flipTransformations,
          Tatvic/RGoogleAnalytics
 Suggests: testthat
-RoxygenNote: 6.0.1
-
+RoxygenNote: 6.1.0
