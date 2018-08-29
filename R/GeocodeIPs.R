@@ -21,13 +21,13 @@ GeocodeIPs <- function(ips) {
     
     if (length(dim(ips)) == 2)
     {
+        if (dim(ips)[2] != 1)
+            warning("Only the first column will be geocoded.")
         ips <- ips[, 1]
-        warning("Only the first column will be geocoded.")
     }
     if (!((is.character(ips) && is.null(dim(ips))) || is.factor(ips)))
         stop("Please provide a character vector of IP addresses.")
-    ips <- as.vector(ips)
-    
+
     file <- system.file("extdata", "GeoLite2-Country.mmdb", package = "rgeolocate")
     
     locations <- maxmind(ips, file,
