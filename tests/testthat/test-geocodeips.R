@@ -18,7 +18,7 @@ test_that("Geocoding: input types",
               geocodes <- GeocodeIPs(ips)
               expect_warning(GeocodeIPs(df), "Only the first column will be geocoded.")
               expect_warning(GeocodeIPs(mat), "Only the first column will be geocoded.")
-              expect_error(GeocodeIPs(list(LETTERS[1:10])), "Please provide a charcater vector of IP addresses.")
-              expect_error(GeocodeIPs(seq(10)), "Please provide a charcater vector of IP addresses.")
+              expect_error(GeocodeIPs(list(LETTERS[1:10])), "Please provide a character vector of IP addresses.")
+              expect_error(GeocodeIPs(seq(10)), "Please provide a character vector of IP addresses.")
           }
 )

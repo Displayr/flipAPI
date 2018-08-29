@@ -24,8 +24,8 @@ GeocodeIPs <- function(ips) {
         ips <- ips[, 1]
         warning("Only the first column will be geocoded.")
     }
-    if (!((is.character(ips) && is.vector(ips)) || is.factor(ips)))
-        stop("Please provide a charcater vector of IP addresses.")
+    if (!((is.character(ips) && is.null(dim(ips))) || is.factor(ips)))
+        stop("Please provide a character vector of IP addresses.")
     
     
     file <- system.file("extdata", "GeoLite2-Country.mmdb", package = "rgeolocate")
