@@ -22,7 +22,7 @@ GetDirectLink <- function (url)
 #' @param url Link to XLSX file. Can also be the path to a file on your local machine.
 #' @param sheet Sheet of excel workbook to read from. By default only the first worksheet is read
 #' @importFrom utils download.file
-#' @importFrom readxl read_xlsx
+#' @importFrom readxl read_excel
 #' @importFrom httr GET
 #' @importFrom flipTransformations ParseUserEnteredTable ParseAsDataFrame
 #' @param want.data.frame Whether to return a data frame instead of a matrix or vector. If this is set to \code{FALSE} (default), then the function will return the simplest data structure it can.
@@ -30,7 +30,7 @@ GetDirectLink <- function (url)
 #' @param want.col.names Whether to interpret the first row as column names in a data frame. This is ignored if \code{want.data.frame} is \code{FALSE}.
 #' @param want.row.names Whether to interpret the first col as row names in a data frame. This is ignored if \code{want.data.frame} is \code{FALSE}.
 #' @param us.format Whether to use the US convention when parsing dates in a data frame.
-#' @param ... Other parameters to pass to readxl::read_xlsx
+#' @param ... Other parameters to pass to readxl::read_excel
 #' @export
 DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors = TRUE,
                          want.col.names = NULL, want.row.names = NULL, us.format = TRUE, ...)
@@ -55,7 +55,7 @@ DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors =
         if (inherits(tmp.file, "try-error"))
             stop("Could not download file from ", url, "\n")
     }
-    res <- try(read_xlsx(tmp.name, sheet = sheet, col_names = (want.data.frame && want.col.names), ...))
+    res <- try(read_excel(tmp.name, sheet = sheet, col_names = (want.data.frame && want.col.names), ...))
     if (!use.local && inherits(res, "try-error"))
     {
         # Try to use re-direct url and try again
@@ -71,11 +71,11 @@ DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors =
             stop("Could not download file from ", url, "\n")
         }
         
-        res <- try(read_xlsx(tmp.name, sheet = sheet, col_names = (want.data.frame && want.col.names), ...))
+        res <- try(read_xls(tmp.name, sheet = sheet, col_names = (want.data.frame && want.col.names), ...))
         if (inherits(res, "try-error"))
         {
             unlink(tmp.name)
-            stop("File is not a valid XLSX file\n")
+            stop("File is not a valid XLSX or XLS file\n")
         }
     }
     if (!use.local)

@@ -5,7 +5,7 @@ context("Parsing Excel files")
 test_that("read_xlsx",
 {
     capture.output(numAndFactor <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-and-factor.xlsx?raw=true", want.data.frame = TRUE), type="message")
-    expect_equal("data.frame" %in% class(numAndFactor) , TRUE)
+    expect_equal("data.frame" %in% class(numAndFactor), TRUE)
     expect_equal(colnames(numAndFactor), c("X__1", "Age", "Region"))
     expect_equal(unname(sapply(numAndFactor, class)), c("factor", "numeric", "factor"))
 
@@ -50,4 +50,9 @@ test_that("read_xlsx",
     expect_silent(cola2 <- DownloadXLSX("https://wiki.q-researchsoftware.com/images/b/b9/Cola_Discriminant_Functions.xlsx", want.data.frame = TRUE, want.col.names = TRUE, want.row.names = FALSE, sheet=2, range="AB2:AC330"))
     expect_equal(class(cola2), "data.frame")
     expect_equal(dim(cola2), c(328, 2))
+    
+    capture.output(xlsRemovedHeader <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/xls-with-header.xls", skip = 15), type="message")
+    expect_equal("data.frame" %in% class(xlsRemovedHeader), TRUE)
+    expect_equal(all(dim(xlsRemovedHeader) == c(240, 10)), TRUE)
+
 })
