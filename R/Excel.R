@@ -71,7 +71,7 @@ DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors =
             stop("Could not download file from ", url, "\n")
         }
         
-        res <- try(read_xls(tmp.name, sheet = sheet, col_names = (want.data.frame && want.col.names), ...))
+        res <- try(read_excel(tmp.name, sheet = sheet, col_names = (want.data.frame && want.col.names), ...))
         if (inherits(res, "try-error"))
         {
             unlink(tmp.name)
