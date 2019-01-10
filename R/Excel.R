@@ -55,7 +55,7 @@ DownloadXLSX <- function(url, sheet = 1, want.data.frame = FALSE, want.factors =
         if (inherits(tmp.file, "try-error"))
             stop("Could not download file from ", url, "\n")
     }
-    res <- try(read_excel(tmp.name, sheet = sheet, col_names = (want.data.frame && want.col.names), ...))
+    res <- suppressMessages(try(read_excel(tmp.name, sheet = sheet, col_names = (want.data.frame && want.col.names), ...)))
     if (!use.local && inherits(res, "try-error"))
     {
         # Try to use re-direct url and try again

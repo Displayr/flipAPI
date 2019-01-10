@@ -6,7 +6,7 @@ test_that("read_xlsx",
 {
     capture.output(numAndFactor <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-and-factor.xlsx?raw=true", want.data.frame = TRUE), type="message")
     expect_equal("data.frame" %in% class(numAndFactor), TRUE)
-    expect_equal(colnames(numAndFactor), c("X__1", "Age", "Region"))
+    expect_equal(colnames(numAndFactor), c("..1", "Age", "Region"))
     expect_equal(unname(sapply(numAndFactor, class)), c("factor", "numeric", "factor"))
 
     expect_silent(capture.output(numAndStr <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/numeric-and-factor.xlsx?raw=true"), type="message"))
