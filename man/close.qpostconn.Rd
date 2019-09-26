@@ -4,7 +4,7 @@
 \alias{close.qpostconn}
 \title{Closes a QFileOpen connection}
 \usage{
-\method{close}{qpostconn}(conn)
+\method{close}{qpostconn}(conn, ...)
 }
 \arguments{
 \item{conn}{connection object of class 'qpostconn'. Connection opened with QFileOpen}

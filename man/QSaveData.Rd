@@ -11,9 +11,6 @@ QSaveData(object, filename)
 
 \item{filename}{character string. Name of the file to be written to}
 }
-\value{
-
-}
 \description{
 Saves an object to the Data Mart as an *.rds file of the given name.
 If the name is given an extension, this must be '.rds'. If there is no

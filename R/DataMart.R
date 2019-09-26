@@ -12,10 +12,10 @@
 QFileExists <- function(filename) 
 {
     companySecret <- ifelse(exists("companySecret"), companySecret, "")
-    projectId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
+    clientId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
     res <- try(HEAD(paste0("https://test.displayr.com/api/DataMart?filename=", filename), 
                     config=add_headers("X-Q-Company-Secret" = companySecret,
-                                       "X-Q-Project-ID" = projectId)))
+                                       "X-Q-Project-ID" = clientId)))
     
     if (is.null(res$status_code) || res$status_code != 200)
     {
@@ -44,8 +44,8 @@ QFileExists <- function(filename)
 #' 
 #' @return A curl connection (read) or a file connection (write)
 #' 
-#' @importFrom curl curl new_handle
-#' @importFrom httr POST upload_file add_headers handle 
+#' @importFrom curl curl new_handle handle_setheaders
+#' @importFrom httr POST upload_file add_headers handle
 #' @importFrom tools file_ext
 #' 
 #' @export
@@ -57,11 +57,11 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
     if (mode == "r" || mode == "rb") 
     {
         companySecret <- ifelse(exists("companySecret"), companySecret, "")
-        projectId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
+        clientId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
         h <- new_handle()
         handle_setheaders(h,
             "X-Q-Company-Secret" = companySecret,
-            "X-Q-Project-ID" = projectId
+            "X-Q-Project-ID" = clientId
         )
         conn <- try(curl(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
                         open = mode,
@@ -104,9 +104,10 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
 #' @param conn connection object of class 'qpostconn'. Connection opened with QFileOpen
 #' 
 #' @importFrom httr POST add_headers upload_file
+#' @importFrom mime guess_type
 #' 
 #' @export
-close.qpostconn = function(conn) 
+close.qpostconn = function(conn, ...) 
 {
     close.connection(conn)
     filename <- attr(conn, "filename")
@@ -114,11 +115,11 @@ close.qpostconn = function(conn)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
     companySecret <- ifelse(exists("companySecret"), companySecret, "")
-    projectId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
+    clientId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
     res <- try(POST(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
-                config = add_headers("Content-Type" = mime::guess_type(filename),
+                config = add_headers("Content-Type" = guess_type(filename),
                                      "X-Q-Company-Secret" = companySecret,
-                                     "X-Q-Project-ID" = projectId),
+                                     "X-Q-Project-ID" = clientId),
                 encode = "raw",
                 body = upload_file(tmpfile)))
     
@@ -147,10 +148,10 @@ QLoadData <- function(filename)
     
     tmpfile <- tempfile()
     companySecret <- ifelse(exists("companySecret"), companySecret, "")
-    projectId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
+    clientId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
     req <- try(GET(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
                config=add_headers("X-Q-Company-Secret" = companySecret,
-                                  "X-Q-Project-ID" = projectId),
+                                  "X-Q-Project-ID" = clientId),
                write_disk(tmpfile, overwrite = TRUE)))
     
     if (inherits(req, "try-error") || req$status_code != 200)
@@ -174,8 +175,6 @@ QLoadData <- function(filename)
 #' @param object object. The object to be uploaded
 #' @param filename character string. Name of the file to be written to
 #' 
-#' @return 
-#' 
 #' @importFrom httr POST add_headers upload_file
 #' @importFrom tools file_ext
 #' 
@@ -193,11 +192,11 @@ QSaveData <- function(object, filename)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
     
     companySecret <- ifelse(exists("companySecret"), companySecret, "")
-    projectId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
+    clientId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
     res <- try(POST(paste0("https://test.displayr.com/api/DataMart?filename=", filename), 
                 config = add_headers("Content-Type" = "application/x-gzip", # default is gzip for saveRDS
                                      "X-Q-Company-Secret" = companySecret,
-                                     "X-Q-Project-ID" = projectId),
+                                     "X-Q-Project-ID" = clientId),
                 encode = "raw",
                 body = upload_file(tmpfile)))
     
