@@ -12,7 +12,7 @@
 QFileExists <- function(filename) 
 {
     companySecret <- ifelse(exists("companySecret"), companySecret, "")
-    clientId <- ifelse(exists("clientId") && clientId != NULL, gsub("[^0-9]", "", clientId), "")
+    clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
     res <- try(HEAD(paste0("https://test.displayr.com/api/DataMart?filename=", filename), 
                     config=add_headers("X-Q-Company-Secret" = companySecret,
                                        "X-Q-Project-ID" = clientId)))
@@ -57,7 +57,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
     if (mode == "r" || mode == "rb") 
     {
         companySecret <- ifelse(exists("companySecret"), companySecret, "")
-        clientId <- ifelse(exists("clientId") && clientId != NULL, gsub("[^0-9]", "", clientId), "")
+        clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
         h <- new_handle()
         handle_setheaders(h,
             "X-Q-Company-Secret" = companySecret,
@@ -115,7 +115,7 @@ close.qpostconn = function(conn, ...)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
     companySecret <- ifelse(exists("companySecret"), companySecret, "")
-    clientId <- ifelse(exists("clientId") && clientId != NULL, gsub("[^0-9]", "", clientId), "")
+    clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
     res <- try(POST(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
                 config = add_headers("Content-Type" = guess_type(filename),
                                      "X-Q-Company-Secret" = companySecret,
@@ -148,7 +148,7 @@ QLoadData <- function(filename)
     
     tmpfile <- tempfile()
     companySecret <- ifelse(exists("companySecret"), companySecret, "")
-    clientId <- ifelse(exists("clientId") && clientId != NULL, gsub("[^0-9]", "", clientId), "")
+    clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
     req <- try(GET(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
                config=add_headers("X-Q-Company-Secret" = companySecret,
                                   "X-Q-Project-ID" = clientId),
@@ -192,7 +192,7 @@ QSaveData <- function(object, filename)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
     
     companySecret <- ifelse(exists("companySecret"), companySecret, "")
-    clientId <- ifelse(exists("clientId") && clientId != NULL, gsub("[^0-9]", "", clientId), "")
+    clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
     res <- try(POST(paste0("https://test.displayr.com/api/DataMart?filename=", filename), 
                 config = add_headers("Content-Type" = "application/x-gzip", # default is gzip for saveRDS
                                      "X-Q-Company-Secret" = companySecret,
