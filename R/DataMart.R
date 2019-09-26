@@ -11,7 +11,7 @@
 #' @export
 QFileExists <- function(filename) 
 {
-    companySecret <- ifelse(exists("companySecret"), companySecret, "")
+    companySecret <- ifelse(exists("companySecret") && !identical(companySecret, NULL), companySecret, "")
     clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
     res <- try(HEAD(paste0("https://test.displayr.com/api/DataMart?filename=", filename), 
                     config=add_headers("X-Q-Company-Secret" = companySecret,
@@ -56,7 +56,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
     mode <- tolower(open)
     if (mode == "r" || mode == "rb") 
     {
-        companySecret <- ifelse(exists("companySecret"), companySecret, "")
+        companySecret <- ifelse(exists("companySecret") && !identical(companySecret, NULL), companySecret, "")
         clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
         h <- new_handle()
         handle_setheaders(h,
@@ -78,7 +78,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         return (conn)
     } else if (mode == "w" || mode == "wb") 
     {
-        if (!exists("companySecret"))
+        if (!exists("companySecret") || identical(companySecret, NULL))
             stop("Could not connect to Data Mart.")
         
         tmpfile <- paste0(tempfile(), ".", file_ext(filename))
@@ -114,7 +114,7 @@ close.qpostconn = function(conn, ...)
     tmpfile <- attr(conn, "tmpfile")
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
-    companySecret <- ifelse(exists("companySecret"), companySecret, "")
+    companySecret <- ifelse(exists("companySecret") && !identical(companySecret, NULL), companySecret, "")
     clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
     res <- try(POST(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
                 config = add_headers("Content-Type" = guess_type(filename),
@@ -147,7 +147,7 @@ QLoadData <- function(filename)
         stop("Can only load data from *.rds objects.")
     
     tmpfile <- tempfile()
-    companySecret <- ifelse(exists("companySecret"), companySecret, "")
+    companySecret <- ifelse(exists("companySecret") && !identical(companySecret, NULL), companySecret, "")
     clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
     req <- try(GET(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
                config=add_headers("X-Q-Company-Secret" = companySecret,
@@ -191,7 +191,7 @@ QSaveData <- function(object, filename)
     saveRDS(object, tmpfile)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
     
-    companySecret <- ifelse(exists("companySecret"), companySecret, "")
+    companySecret <- ifelse(exists("companySecret") && !identical(companySecret, NULL), companySecret, "")
     clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
     res <- try(POST(paste0("https://test.displayr.com/api/DataMart?filename=", filename), 
                 config = add_headers("Content-Type" = "application/x-gzip", # default is gzip for saveRDS
