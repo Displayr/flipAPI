@@ -12,13 +12,14 @@
 QFileExists <- function(filename) 
 {
     companySecret <- ifelse(exists("companySecret"), companySecret, "")
+    projectId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
     res <- try(HEAD(paste0("https://test.displayr.com/api/DataMart?filename=", filename), 
-                    config=add_headers("X-Q-Company-Secret" = companySecret)))
+                    config=add_headers("X-Q-Company-Secret" = companySecret,
+                                       "X-Q-Project-ID" = projectId)))
     
     if (is.null(res$status_code) || res$status_code != 200)
     {
-        msg <- ifelse(res$status_code == 404 , "File not found.", "Could not connect to Data Mart.")
-        warning(msg)
+        warning("File not found.")
         return (FALSE)
     } else 
     {
@@ -56,9 +57,11 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
     if (mode == "r" || mode == "rb") 
     {
         companySecret <- ifelse(exists("companySecret"), companySecret, "")
+        projectId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
         h <- new_handle()
         handle_setheaders(h,
-            "X-Q-Company-Secret" = companySecret
+            "X-Q-Company-Secret" = companySecret,
+            "X-Q-Project-ID" = projectId
         )
         conn <- try(curl(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
                         open = mode,
@@ -66,10 +69,8 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
                     silent = TRUE)
         
         if (!inherits(conn,"connection"))
-        {
-            msg <- ifelse(grepl("404", conn), "File not found.", "Could not connect to Data Mart.")
-            stop(msg)
-        }
+            stop("File not found.")
+
         
         # to allow functions to parse this 'like' a url connection
         # e.g. so readRDS will wrap this in gzcon when reading
@@ -77,7 +78,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         return (conn)
     } else if (mode == "w" || mode == "wb") 
     {
-        if (!exists('companySecret'))
+        if (!exists("companySecret"))
             stop("Could not connect to Data Mart.")
         
         tmpfile <- paste0(tempfile(), ".", file_ext(filename))
@@ -112,10 +113,12 @@ close.qpostconn = function(conn)
     tmpfile <- attr(conn, "tmpfile")
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
-    companySecret <- ifelse(exists("companySecret"), companySecret, "")    
+    companySecret <- ifelse(exists("companySecret"), companySecret, "")
+    projectId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
     res <- try(POST(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
                 config = add_headers("Content-Type" = mime::guess_type(filename),
-                                     "X-Q-Company-Secret" = companySecret),
+                                     "X-Q-Company-Secret" = companySecret,
+                                     "X-Q-Project-ID" = projectId),
                 encode = "raw",
                 body = upload_file(tmpfile)))
     
@@ -144,15 +147,15 @@ QLoadData <- function(filename)
     
     tmpfile <- tempfile()
     companySecret <- ifelse(exists("companySecret"), companySecret, "")
+    projectId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
     req <- try(GET(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
-               config=add_headers("X-Q-Company-Secret" = companySecret),
+               config=add_headers("X-Q-Company-Secret" = companySecret,
+                                  "X-Q-Project-ID" = projectId),
                write_disk(tmpfile, overwrite = TRUE)))
     
     if (inherits(req, "try-error") || req$status_code != 200)
-    {
-        msg <- ifelse(req$status_code == 404, "File not found.", "Could not connect to Data Mart.")
-        stop(msg)
-    }
+        stop("File not found.")
+
     if (file.exists(tmpfile)) 
     {
         obj <- readRDS(tmpfile) 
@@ -190,9 +193,11 @@ QSaveData <- function(object, filename)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
     
     companySecret <- ifelse(exists("companySecret"), companySecret, "")
+    projectId <- ifelse(exists('clientId'), gsub("^[0-9]", "", clientId), "")
     res <- try(POST(paste0("https://test.displayr.com/api/DataMart?filename=", filename), 
                 config = add_headers("Content-Type" = "application/x-gzip", # default is gzip for saveRDS
-                                     "X-Q-Company-Secret" = companySecret),
+                                     "X-Q-Company-Secret" = companySecret,
+                                     "X-Q-Project-ID" = projectId),
                 encode = "raw",
                 body = upload_file(tmpfile)))
     

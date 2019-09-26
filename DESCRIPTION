@@ -9,6 +9,8 @@ Encoding: UTF-8
 License: GPL-3
 LazyData: TRUE
 Imports:
+    curl,
+    tools,
     httr,
     jsonlite,
     lubridate,
