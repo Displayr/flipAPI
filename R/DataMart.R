@@ -7,13 +7,14 @@
 #' @return TRUE if the file exists, otherwise FALSE
 #' 
 #' @importFrom httr HEAD add_headers
+#' @importFrom utils URLencode
 #' 
 #' @export
 QFileExists <- function(filename) 
 {
     companySecret <- ifelse(exists("companySecret") && !identical(companySecret, NULL), companySecret, "")
     clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
-    res <- try(HEAD(paste0("https://test.displayr.com/api/DataMart?filename=", filename), 
+    res <- try(HEAD(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)), 
                     config=add_headers("X-Q-Company-Secret" = companySecret,
                                        "X-Q-Project-ID" = clientId)))
     
@@ -47,6 +48,7 @@ QFileExists <- function(filename)
 #' @importFrom curl curl new_handle handle_setheaders
 #' @importFrom httr POST upload_file add_headers handle
 #' @importFrom tools file_ext
+#' @importFrom utils URLencode
 #' 
 #' @export
 QFileOpen <- function(filename, open = "r", blocking = TRUE, 
@@ -63,7 +65,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
             "X-Q-Company-Secret" = companySecret,
             "X-Q-Project-ID" = clientId
         )
-        conn <- try(curl(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
+        conn <- try(curl(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)),
                         open = mode,
                         handle = h), 
                     silent = TRUE)
@@ -105,6 +107,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
 #' 
 #' @importFrom httr POST add_headers upload_file
 #' @importFrom mime guess_type
+#' @importFrom utils URLencode
 #' 
 #' @export
 close.qpostconn = function(conn, ...) 
@@ -116,7 +119,7 @@ close.qpostconn = function(conn, ...)
 
     companySecret <- ifelse(exists("companySecret") && !identical(companySecret, NULL), companySecret, "")
     clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
-    res <- try(POST(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
+    res <- try(POST(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)),
                 config = add_headers("Content-Type" = guess_type(filename),
                                      "X-Q-Company-Secret" = companySecret,
                                      "X-Q-Project-ID" = clientId),
@@ -139,6 +142,7 @@ close.qpostconn = function(conn, ...)
 #' 
 #' @importFrom httr GET add_headers write_disk
 #' @importFrom tools file_ext
+#' @importFrom utils URLencode
 #' 
 #' @export
 QLoadData <- function(filename) 
@@ -149,7 +153,7 @@ QLoadData <- function(filename)
     tmpfile <- tempfile()
     companySecret <- ifelse(exists("companySecret") && !identical(companySecret, NULL), companySecret, "")
     clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
-    req <- try(GET(paste0("https://test.displayr.com/api/DataMart?filename=", filename),
+    req <- try(GET(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)),
                config=add_headers("X-Q-Company-Secret" = companySecret,
                                   "X-Q-Project-ID" = clientId),
                write_disk(tmpfile, overwrite = TRUE)))
@@ -177,6 +181,7 @@ QLoadData <- function(filename)
 #' 
 #' @importFrom httr POST add_headers upload_file
 #' @importFrom tools file_ext
+#' @importFrom utils URLencode
 #' 
 #' @export 
 QSaveData <- function(object, filename)
@@ -193,7 +198,7 @@ QSaveData <- function(object, filename)
     
     companySecret <- ifelse(exists("companySecret") && !identical(companySecret, NULL), companySecret, "")
     clientId <- ifelse(exists("clientId") && !identical(clientId, NULL), gsub("[^0-9]", "", clientId), "")
-    res <- try(POST(paste0("https://test.displayr.com/api/DataMart?filename=", filename), 
+    res <- try(POST(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)), 
                 config = add_headers("Content-Type" = "application/x-gzip", # default is gzip for saveRDS
                                      "X-Q-Company-Secret" = companySecret,
                                      "X-Q-Project-ID" = clientId),
