@@ -9,6 +9,10 @@
 \arguments{
 \item{conn}{connection object of class 'qpostconn'. Connection opened with QFileOpen}
 }
+\value{
+NULL invisibly. Called for the purpose of uploading data
+and assumed to succeed if no errors are thrown.
+}
 \description{
 This is an overload for close.connection which writes the file contents 
 of a connection opened using QFileOpen to the Data Mart.
