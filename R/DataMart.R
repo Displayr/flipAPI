@@ -85,7 +85,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         
         tmpfile <- paste0(tempfile(), ".", file_ext(filename))
         conn <- file(tmpfile, mode, blocking, encoding, raw, method)
-        class(conn) = append("qpostconn", class(conn))
+        class(conn) = append("qpostcon", class(conn))
         
         # store attributes for later access
         attr(conn, "tmpfile") <- tmpfile
@@ -103,7 +103,8 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
 #' This is an overload for close.connection which writes the file contents 
 #' of a connection opened using QFileOpen to the Data Mart.
 #' 
-#' @param conn connection object of class 'qpostconn'. Connection opened with QFileOpen
+#' @param con connection object of class 'qpostconn'. Connection opened with QFileOpen
+#' @param ... arguments passed to or from other methods.
 #' 
 #' @importFrom httr POST add_headers upload_file
 #' @importFrom mime guess_type
@@ -113,11 +114,11 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
 #' and assumed to succeed if no errors are thrown.
 #' 
 #' @export
-close.qpostconn = function(conn, ...) 
+close.qpostcon = function(con, ...) 
 {
-    close.connection(conn, ...)
-    filename <- attr(conn, "filename")
-    tmpfile <- attr(conn, "tmpfile")
+    close.connection(con, ...)
+    filename <- attr(con, "filename")
+    tmpfile <- attr(con, "tmpfile")
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
     companySecret <- get0("companySecret", ifnotfound = "")

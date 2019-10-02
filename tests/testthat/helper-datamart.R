@@ -1,0 +1,1 @@
+companySecret <- get0("companySecret", ifnotfound = Sys.getenv("companySecret"))
