@@ -7,7 +7,7 @@
 \method{close}{qpostcon}(con, ...)
 }
 \arguments{
-\item{con}{connection object of class 'qpostconn'. Connection opened with QFileOpen}
+\item{con}{connection object of class 'qpostcon'. Connection opened with QFileOpen}
 
 \item{...}{arguments passed to or from other methods.}
 }

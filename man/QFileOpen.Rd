@@ -6,7 +6,7 @@
 \usage{
 QFileOpen(filename, open = "r", blocking = TRUE,
   encoding = getOption("encoding"), raw = FALSE,
-  method = getOption("url.method", "default"))
+  method = getOption("url.method", "default"), company_token = "")
 }
 \arguments{
 \item{filename}{character string. Name of file to be opened}
@@ -20,6 +20,9 @@ QFileOpen(filename, open = "r", blocking = TRUE,
 \item{raw}{logical. Whether this connection should be treated as a byte stream}
 
 \item{method}{character string. See documentation for connections}
+
+\item{company_token}{displayr company secret token. This token specifies an access key which determines 
+which data mart will be accessed}
 }
 \value{
 A curl connection (read) or a file connection (write)

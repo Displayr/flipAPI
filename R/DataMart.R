@@ -42,6 +42,8 @@ QFileExists <- function(filename)
 #' @param encoding character string. The name of the encoding to be assumed.
 #' @param raw logical. Whether this connection should be treated as a byte stream
 #' @param method character string. See documentation for connections
+#' @param company_token displayr company secret token. This token specifies an access key which determines 
+#' which data mart will be accessed
 #' 
 #' @return A curl connection (read) or a file connection (write)
 #' 
@@ -53,12 +55,13 @@ QFileExists <- function(filename)
 #' @export
 QFileOpen <- function(filename, open = "r", blocking = TRUE, 
                       encoding = getOption("encoding"), raw = FALSE, 
-                      method = getOption("url.method", "default"))
+                      method = getOption("url.method", "default"),
+                      company_token = "")
 {
     mode <- tolower(open)
     if (mode == "r" || mode == "rb") 
     {
-        companySecret <- get0("companySecret", ifnotfound = "")
+        companySecret <- if (missing(company_token)) get0("companySecret", ifnotfound = "") else company_token
         clientId <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
         h <- new_handle()
         handle_setheaders(h,
@@ -72,7 +75,6 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         
         if (!inherits(conn,"connection"))
             stop("File not found.")
-
         
         # to allow functions to parse this 'like' a url connection
         # e.g. so readRDS will wrap this in gzcon when reading
@@ -80,6 +82,9 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         return (conn)
     } else if (mode == "w" || mode == "wb") 
     {
+        if (company_token != "") 
+            stop("'company_token' can only be specified for read operations.")
+        
         if (!exists("companySecret") || identical(companySecret, NULL))
             stop("Could not connect to Data Mart.")
         
@@ -103,7 +108,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
 #' This is an overload for close.connection which writes the file contents 
 #' of a connection opened using QFileOpen to the Data Mart.
 #' 
-#' @param con connection object of class 'qpostconn'. Connection opened with QFileOpen
+#' @param con connection object of class 'qpostcon'. Connection opened with QFileOpen
 #' @param ... arguments passed to or from other methods.
 #' 
 #' @importFrom httr POST add_headers upload_file
@@ -150,6 +155,8 @@ close.qpostcon = function(con, ...)
 #' Loads an *.rds file from the data mart and converts this to an R object.
 #' 
 #' @param filename character string. Name of the file to be opened from the Data Mart
+#' @param company_token displayr company secret token. This token specifies an access key which determines 
+#' which data mart will be accessed
 #' 
 #' @return An R object
 #' 
@@ -158,13 +165,13 @@ close.qpostcon = function(con, ...)
 #' @importFrom utils URLencode
 #' 
 #' @export
-QLoadData <- function(filename) 
+QLoadData <- function(filename, company_token = "") 
 {
     if (file_ext(filename) != "rds") 
         stop("Can only load data from *.rds objects.")
     
     tmpfile <- tempfile()
-    companySecret <- get0("companySecret", ifnotfound = "")
+    companySecret <- if (missing(company_token)) get0("companySecret", ifnotfound = "") else company_token
     clientId <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
     req <- try(GET(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)),
                config=add_headers("X-Q-Company-Secret" = companySecret,
