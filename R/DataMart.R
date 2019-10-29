@@ -56,7 +56,7 @@ QFileExists <- function(filename)
 QFileOpen <- function(filename, open = "r", blocking = TRUE, 
                       encoding = getOption("encoding"), raw = FALSE, 
                       method = getOption("url.method", "default"),
-                      company_token = "")
+                      company_token)
 {
     mode <- tolower(open)
     if (mode == "r" || mode == "rb") 
@@ -82,8 +82,8 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         return (conn)
     } else if (mode == "w" || mode == "wb") 
     {
-        if (company_token != "") 
-            stop("'company_token' can only be specified for read operations.")
+        if (!missing(company_token)) 
+            stop("'company_token' can only be specified for read operations.\nYou cannot write files to another company's Data Mart.")
         
         if (!exists("companySecret") || identical(companySecret, NULL))
             stop("Could not connect to Data Mart.")
@@ -165,7 +165,7 @@ close.qpostcon = function(con, ...)
 #' @importFrom utils URLencode
 #' 
 #' @export
-QLoadData <- function(filename, company_token = "") 
+QLoadData <- function(filename, company_token) 
 {
     if (file_ext(filename) != "rds") 
         stop("Can only load data from *.rds objects.")
@@ -210,7 +210,7 @@ QLoadData <- function(filename, company_token = "")
 QSaveData <- function(object, filename)
 {
     if (file_ext(filename) == "") 
-        filename <- append(filename, ".rds")
+        filename <- paste0(filename, ".rds")
     
     if (file_ext(filename) != "rds")
         stop("File must be of type *.rds")
