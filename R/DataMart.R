@@ -2,9 +2,9 @@
 #' 
 #' Check whether a file of a given name exists in the Data Mart.
 #' 
-#' @param filename character string. Name of the file to search for
+#' @param filename character string. Name of the file to search for.
 #' 
-#' @return TRUE if the file exists, otherwise FALSE
+#' @return TRUE if the file exists, otherwise FALSE.
 #' 
 #' @importFrom httr HEAD add_headers
 #' @importFrom utils URLencode
@@ -12,11 +12,9 @@
 #' @export
 QFileExists <- function(filename) 
 {
-#OCB: You should not attempt the GET if you don't have companySecret or clientId.  Rather you sohuld fail("This function can only be used within Displayr")
-    companySecret <- get0("companySecret", ifnotfound = "")
-    clientId <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
-#OCB: Please use a shared constant for the API root https://app.displayr.com/api/DataMart
-    res <- try(HEAD(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)), 
+    companySecret <- GetCompanySecret()
+    clientId <- GetClientId()
+    res <- try(HEAD(paste0(apiRoot, "?filename=", URLencode(filename, TRUE)), 
                     config=add_headers("X-Q-Company-Secret" = companySecret,
                                        "X-Q-Project-ID" = clientId)))
     
@@ -24,8 +22,8 @@ QFileExists <- function(filename)
     {
         warning("File not found.")
         return (FALSE)
-    #OCB: Please follow our R coding guide wrt brances, and elsewhere
-    } else 
+    } 
+    else 
     {
         message("File was found.")
         return (TRUE)
@@ -38,18 +36,16 @@ QFileExists <- function(filename)
 #' In the reading case, it opens a stream to the file in the Data Mart. 
 #' In the writing case, it opens a temporary file for writing to and uploads this to the Data Mart on close.
 #' Note that writing to a file which already exists will overwrite that file's contents.
+#' For more documentation on this function's parameters, see R documentation for opening connections.
 #' 
 #' @param filename character string. Name of file to be opened
-#OCB: You need to either explain this parameter or refer to somewhere else that documents it.
-#' @param open character string. A description of how to open the connection
-#' @param blocking logical. Whether or not the connection blocks can be specified
-#' @param encoding character string. The name of the encoding to be assumed.
-#' @param raw logical. Whether this connection should be treated as a byte stream
-#' @param method character string. See documentation for connections
+#' @param open character string. See documentation for connections.
+#' @param blocking logical. See documentation for connections.
+#' @param encoding character string. See documentation for connections.
+#' @param raw logical. See documentation for connections.
+#' @param method character string. See documentation for connections.
+#' @param mime_type character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.
 #' @param company_token Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.
-#OCB: You should probably allow the MIME type to be specified too.
-#OCB: If the MIME type is not specified then use mime::guess_type to work it out, and then pass it on.
-#OCB: Other sources (e.g. exporting images and R outputs and tables) should _specify_ the MIME type.  Please check.
 #' 
 #' @return A curl connection (read) or a file connection (write)
 #' 
@@ -62,32 +58,30 @@ QFileExists <- function(filename)
 QFileOpen <- function(filename, open = "r", blocking = TRUE, 
                       encoding = getOption("encoding"), raw = FALSE, 
                       method = getOption("url.method", "default"),
-#OCB: Will R insist a company_token be provided, since there is no default?  Either way, I think it would be more obvious if it had a default.
-                      company_token)
+                      mime_type = "", company_token = NA)
 {
     mode <- tolower(open)
     if (mode == "r" || mode == "rb") 
     {
-        companySecret <- if (missing(company_token)) get0("companySecret", ifnotfound = "") else company_token
-        clientId <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
-#OCB: Similarly you cannot proceed without a secret and clientId.
+        companySecret <- if (missing(company_token)) GetCompanySecret() else company_token
+        clientId <- GetClientId()
         h <- new_handle()
         handle_setheaders(h,
             "X-Q-Company-Secret" = companySecret,
             "X-Q-Project-ID" = clientId
         )
-        conn <- try(curl(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)),
+        con <- try(curl(paste0(apiRoot, "?filename=", URLencode(filename, TRUE)),
                         open = mode,
                         handle = h), 
                     silent = TRUE)
         
-        if (!inherits(conn,"connection"))
+        if (!inherits(con,"connection"))
             stop("File not found.")
         
         # to allow functions to parse this 'like' a url connection
         # e.g. so readRDS will wrap this in gzcon when reading
-        class(conn) <- append(class(conn), "url")
-        return (conn)
+        class(con) <- append(class(con), "url")
+        return (con)
     } else if (mode == "w" || mode == "wb") 
     {
         # We need to make a temporary file because RCurl cannot make a connection for
@@ -99,14 +93,15 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
             stop("Could not connect to Data Mart.")
         
         tmpfile <- paste0(tempfile(), ".", file_ext(filename))
-        conn <- file(tmpfile, mode, blocking, encoding, raw, method)
-        class(conn) = append("qpostcon", class(conn))
+        con <- file(tmpfile, mode, blocking, encoding, raw, method)
+        class(con) = append("qpostcon", class(con))
         
         # store attributes for later access
-        attr(conn, "tmpfile") <- tmpfile
-        attr(conn, "filename") <- filename
+        attr(con, "tmpfile") <- tmpfile
+        attr(con, "filename") <- filename
+        attr(con, "mimetype") <- mime_type
 
-        return (conn)
+        return (con)
     } else 
     {
         stop("Invalid mode - please use either 'r', 'rb','w' or 'wb'.")
@@ -115,10 +110,10 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
 
 #' Closes a QFileOpen connection
 #' 
-#' This is an overload for close.connection which writes the file contents 
+#' This is an overload for close.connection which writes the file contents.
 #' of a connection opened using QFileOpen to the Data Mart.
 #' 
-#' @param con connection object of class 'qpostcon'. Connection opened with QFileOpen
+#' @param con connection object of class 'qpostcon'. Connection opened with QFileOpen.
 #' @param ... arguments passed to or from other methods.
 #' 
 #' @importFrom httr POST add_headers upload_file
@@ -134,17 +129,18 @@ close.qpostcon = function(con, ...)
     close.connection(con, ...)
     filename <- attr(con, "filename")
     tmpfile <- attr(con, "tmpfile")
+    mimetype <- attr(con, "mimetype")
+    if (mimetype == "") mimetype <- guess_type(filename)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
-    companySecret <- get0("companySecret", ifnotfound = "")
-    clientId <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
-    res <- try(POST(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)),
-                config = add_headers("Content-Type" = guess_type(filename),
+    companySecret <- GetCompanySecret()
+    clientId <- GetClientId()
+    res <- try(POST(paste0(apiRoot, "?filename=", URLencode(filename, TRUE)),
+                config = add_headers("Content-Type" = mimetype,
                                      "X-Q-Company-Secret" = companySecret,
                                      "X-Q-Project-ID" = clientId),
                 encode = "raw",
                 body = upload_file(tmpfile)))
-#OCB: Do you delete the temporary file?  You should.
 
     if (inherits(res, "try-error") || res$status_code != 200)
     {
@@ -165,7 +161,7 @@ close.qpostcon = function(con, ...)
 #' 
 #' Loads an *.rds file from the data mart and converts this to an R object.
 #' 
-#' @param filename character string. Name of the file to be opened from the Data Mart
+#' @param filename character string. Name of the file to be opened from the Data Mart.
 #' @param company_token Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.
 #' 
 #' @return An R object
@@ -175,16 +171,15 @@ close.qpostcon = function(con, ...)
 #' @importFrom utils URLencode
 #' 
 #' @export
-#OCB: Will R insist a company_token be provided, since there is no default?  Either way, I think it would be more obvious if it had a default.
-QLoadData <- function(filename, company_token) 
+QLoadData <- function(filename, company_token = NA) 
 {
     if (file_ext(filename) != "rds") 
         stop("Can only load data from *.rds objects.")
     
     tmpfile <- tempfile()
-    companySecret <- if (missing(company_token)) get0("companySecret", ifnotfound = "") else company_token
-    clientId <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
-    req <- try(GET(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)),
+    companySecret <- if (missing(company_token)) GetCompanySecret() else company_token
+    clientId <- GetClientId()
+    req <- try(GET(paste0(apiRoot, "?filename=", URLencode(filename, TRUE)),
                config=add_headers("X-Q-Company-Secret" = companySecret,
                                   "X-Q-Project-ID" = clientId),
                write_disk(tmpfile, overwrite = TRUE)))
@@ -207,14 +202,13 @@ QLoadData <- function(filename, company_token)
 #' If the name is given an extension, this must be '.rds'. If there is no
 #' extension specified, this defaults to '.rds'.
 #' 
-#' @param object object. The object to be uploaded
-#' @param filename character string. Name of the file to be written to
+#' @param object object. The object to be uploaded.
+#' @param filename character string. Name of the file to be written to.
 #' 
 #' @importFrom httr POST add_headers upload_file
 #' @importFrom tools file_ext
 #' @importFrom utils URLencode
 #' 
-#OCB: MIME type again.
 #' @return NULL invisibly. Called for the purpose of uploading data
 #' and assumed to succeed if no errors are thrown.
 #' 
@@ -231,9 +225,9 @@ QSaveData <- function(object, filename)
     saveRDS(object, tmpfile)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
     
-    companySecret <- get0("companySecret", ifnotfound = "")
-    clientId <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
-    res <- try(POST(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)), 
+    companySecret <- GetCompanySecret()
+    clientId <- GetClientId()
+    res <- try(POST(paste0(apiRoot, "?filename=", URLencode(filename, TRUE)), 
                 config = add_headers("Content-Type" = "application/x-gzip", # default is gzip for saveRDS
                                      "X-Q-Company-Secret" = companySecret,
                                      "X-Q-Project-ID" = clientId),
@@ -254,5 +248,37 @@ QSaveData <- function(object, filename)
            sep = "\n")
     message(msg)
     invisible()
+}
+
+################ HELPER FUNCTIONS AND CONSTANTS ####################
+
+#' Constant endpoint address for accessing the Data Mart.
+apiRoot <- "https://app.displayr.com/api/DataMart"
+
+#' Error when someone tries to use this package outside of Displayr.
+#' 
+#' @return Throws an error.
+StopNotDisplayr <- function() {
+    stop("This function can only be used from within Displayr.")
+}
+
+#' Gets company secret from the environment. Throws an error if not found.
+#' 
+#' @return Company secret token as a string.
+GetCompanySecret <- function() 
+{
+    secret <- get0("companySecret", ifnotfound = "")
+    if (secret == "") StopNotDisplayr()
+    secret
+    
+}
+#' Gets the client Id (project id) from the environment. Throws an error if not found.
+#' 
+#' @return The client id as a string
+GetClientId <- function() 
+{
+    clientId <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
+    if (clientId == "") StopNotDisplayr()
+    clientId
 }
 

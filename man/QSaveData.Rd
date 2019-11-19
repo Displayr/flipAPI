@@ -7,9 +7,9 @@
 QSaveData(object, filename)
 }
 \arguments{
-\item{object}{object. The object to be uploaded}
+\item{object}{object. The object to be uploaded.}
 
-\item{filename}{character string. Name of the file to be written to}
+\item{filename}{character string. Name of the file to be written to.}
 }
 \value{
 NULL invisibly. Called for the purpose of uploading data

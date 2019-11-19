@@ -6,23 +6,25 @@
 \usage{
 QFileOpen(filename, open = "r", blocking = TRUE,
   encoding = getOption("encoding"), raw = FALSE,
-  method = getOption("url.method", "default"), company_token = "")
+  method = getOption("url.method", "default"), mime_type = "",
+  company_token = NA)
 }
 \arguments{
 \item{filename}{character string. Name of file to be opened}
 
-\item{open}{character string. A description of how to open the connection}
+\item{open}{character string. See documentation for connections.}
 
-\item{blocking}{logical. Whether or not the connection blocks can be specified}
+\item{blocking}{logical. See documentation for connections.}
 
-\item{encoding}{character string. The name of the encoding to be assumed.}
+\item{encoding}{character string. See documentation for connections.}
 
-\item{raw}{logical. Whether this connection should be treated as a byte stream}
+\item{raw}{logical. See documentation for connections.}
 
-\item{method}{character string. See documentation for connections}
+\item{method}{character string. See documentation for connections.}
 
-\item{company_token}{displayr company secret token. This token specifies an access key which determines 
-which data mart will be accessed}
+\item{mime_type}{character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.}
+
+\item{company_token}{Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.}
 }
 \value{
 A curl connection (read) or a file connection (write)
@@ -32,4 +34,5 @@ Opens a connection for either reading OR writing to a file of a given name.
 In the reading case, it opens a stream to the file in the Data Mart. 
 In the writing case, it opens a temporary file for writing to and uploads this to the Data Mart on close.
 Note that writing to a file which already exists will overwrite that file's contents.
+For more documentation on this function's parameters, see R documentation for opening connections.
 }
