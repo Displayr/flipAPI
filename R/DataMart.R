@@ -12,8 +12,10 @@
 #' @export
 QFileExists <- function(filename) 
 {
+#OCB: You should not attempt the GET if you don't have companySecret or clientId.  Rather you sohuld fail("This function can only be used within Displayr")
     companySecret <- get0("companySecret", ifnotfound = "")
     clientId <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
+#OCB: Please use a shared constant for the API root https://app.displayr.com/api/DataMart
     res <- try(HEAD(paste0("https://app.displayr.com/api/DataMart?filename=", URLencode(filename, TRUE)), 
                     config=add_headers("X-Q-Company-Secret" = companySecret,
                                        "X-Q-Project-ID" = clientId)))
@@ -22,6 +24,7 @@ QFileExists <- function(filename)
     {
         warning("File not found.")
         return (FALSE)
+    #OCB: Please follow our R coding guide wrt brances, and elsewhere
     } else 
     {
         message("File was found.")
@@ -37,13 +40,16 @@ QFileExists <- function(filename)
 #' Note that writing to a file which already exists will overwrite that file's contents.
 #' 
 #' @param filename character string. Name of file to be opened
+#OCB: You need to either explain this parameter or refer to somewhere else that documents it.
 #' @param open character string. A description of how to open the connection
 #' @param blocking logical. Whether or not the connection blocks can be specified
 #' @param encoding character string. The name of the encoding to be assumed.
 #' @param raw logical. Whether this connection should be treated as a byte stream
 #' @param method character string. See documentation for connections
-#' @param company_token displayr company secret token. This token specifies an access key which determines 
-#' which data mart will be accessed
+#' @param company_token Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.
+#OCB: You should probably allow the MIME type to be specified too.
+#OCB: If the MIME type is not specified then use mime::guess_type to work it out, and then pass it on.
+#OCB: Other sources (e.g. exporting images and R outputs and tables) should _specify_ the MIME type.  Please check.
 #' 
 #' @return A curl connection (read) or a file connection (write)
 #' 
@@ -56,6 +62,7 @@ QFileExists <- function(filename)
 QFileOpen <- function(filename, open = "r", blocking = TRUE, 
                       encoding = getOption("encoding"), raw = FALSE, 
                       method = getOption("url.method", "default"),
+#OCB: Will R insist a company_token be provided, since there is no default?  Either way, I think it would be more obvious if it had a default.
                       company_token)
 {
     mode <- tolower(open)
@@ -63,6 +70,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
     {
         companySecret <- if (missing(company_token)) get0("companySecret", ifnotfound = "") else company_token
         clientId <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
+#OCB: Similarly you cannot proceed without a secret and clientId.
         h <- new_handle()
         handle_setheaders(h,
             "X-Q-Company-Secret" = companySecret,
@@ -82,6 +90,8 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         return (conn)
     } else if (mode == "w" || mode == "wb") 
     {
+        # We need to make a temporary file because RCurl cannot make a connection for
+        # writing, because HTTP needs to know the content length up front.
         if (!missing(company_token)) 
             stop("'company_token' can only be specified for read operations.\nYou cannot write files to another company's Data Mart.")
         
@@ -134,7 +144,8 @@ close.qpostcon = function(con, ...)
                                      "X-Q-Project-ID" = clientId),
                 encode = "raw",
                 body = upload_file(tmpfile)))
-    
+#OCB: Do you delete the temporary file?  You should.
+
     if (inherits(res, "try-error") || res$status_code != 200)
     {
         msg <- "Could not write to data mart." 
@@ -155,8 +166,7 @@ close.qpostcon = function(con, ...)
 #' Loads an *.rds file from the data mart and converts this to an R object.
 #' 
 #' @param filename character string. Name of the file to be opened from the Data Mart
-#' @param company_token displayr company secret token. This token specifies an access key which determines 
-#' which data mart will be accessed
+#' @param company_token Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.
 #' 
 #' @return An R object
 #' 
@@ -165,6 +175,7 @@ close.qpostcon = function(con, ...)
 #' @importFrom utils URLencode
 #' 
 #' @export
+#OCB: Will R insist a company_token be provided, since there is no default?  Either way, I think it would be more obvious if it had a default.
 QLoadData <- function(filename, company_token) 
 {
     if (file_ext(filename) != "rds") 
@@ -203,6 +214,7 @@ QLoadData <- function(filename, company_token)
 #' @importFrom tools file_ext
 #' @importFrom utils URLencode
 #' 
+#OCB: MIME type again.
 #' @return NULL invisibly. Called for the purpose of uploading data
 #' and assumed to succeed if no errors are thrown.
 #' 
