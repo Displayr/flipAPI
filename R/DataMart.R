@@ -181,9 +181,9 @@ QLoadData <- function(filename, company.token = NA)
     
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
-    type <- getResponseFileType(filename)
+    type <- getResponseFileType(res)
     if (is.null(type))
-        type <- getFileType(res)
+        type <- getFileType(filename)
     
     if (is.null(type)) 
         stop("Invalid file type specified. Only 'rds' or 'csv' files are supported.")
