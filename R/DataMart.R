@@ -181,9 +181,9 @@ QLoadData <- function(filename, company.token = NA)
     
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
-    type <- getFileType(filename)
+    type <- getResponseFileType(filename)
     if (is.null(type))
-        type <- getResponseFileType(res)
+        type <- getFileType(res)
     
     if (is.null(type)) 
         stop("Invalid file type specified. Only 'rds' or 'csv' files are supported.")
@@ -231,7 +231,7 @@ QSaveData <- function(object, filename)
     company.secret <- getCompanySecret()
     client.id <- getClientId()
     res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)), 
-                config = add_headers("Content-Type" = "application/x-gzip", # default is gzip for saveRDS
+                config = add_headers("Content-Type" = guess_type(filename),
                                      "X-Q-Company-Secret" = company.secret,
                                      "X-Q-Project-ID" = client.id),
                 encode = "raw",
