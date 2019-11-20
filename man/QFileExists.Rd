@@ -7,10 +7,10 @@
 QFileExists(filename)
 }
 \arguments{
-\item{filename}{character string. Name of the file to search for}
+\item{filename}{character string. Name of the file to search for.}
 }
 \value{
-TRUE if the file exists, otherwise FALSE
+TRUE if the file exists, otherwise FALSE.
 }
 \description{
 Check whether a file of a given name exists in the Data Mart.

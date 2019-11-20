@@ -62,7 +62,8 @@ ExportToDropbox <- function(object, token, file = NA, as.csv = FALSE, reexport.s
     {
         cmd <- sprintf("ImportFromDropbox('%s', <dropbox token>)", file)
         returnMsg <- paste("Object uploaded to dropbox. To re-import object use:\n   > library(flipAPI)\n   >", cmd, "\n")
-    } else if (!inherits(pp, "try-error"))
+    } 
+    else if (!inherits(pp, "try-error"))
     {
         res <- content(pp)
         returnMsg <- res[[1]]

@@ -7,7 +7,7 @@
 \method{close}{qpostcon}(con, ...)
 }
 \arguments{
-\item{con}{connection object of class 'qpostcon'. Connection opened with QFileOpen}
+\item{con}{connection object of class 'qpostcon'. Connection opened with QFileOpen.}
 
 \item{...}{arguments passed to or from other methods.}
 }
@@ -16,6 +16,6 @@ NULL invisibly. Called for the purpose of uploading data
 and assumed to succeed if no errors are thrown.
 }
 \description{
-This is an overload for close.connection which writes the file contents 
+This is an overload for close.connection which writes the file contents.
 of a connection opened using QFileOpen to the Data Mart.
 }
