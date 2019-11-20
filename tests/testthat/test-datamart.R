@@ -6,19 +6,27 @@ test_that("SaveData/LoadData", {
   # RDS
   expect_invisible(QSaveData(mtcars, "mtcars.rds"))
   expect_true(QFileExists("mtcars.rds"))
-  
   rds <- QLoadData("mtcars.rds")
   expect_equivalent(mtcars, rds)
+  
+  # CSV
+  expect_invisible(QSaveData(mtcars, "mtcars.csv"))
+  expect_true(QFileExists("mtcars.csv"))
+  expect_error(QLoadData("mtcars.csv"), NA)
 })
 
 test_that("Save/Load Data: bad cases", {
   skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
   
-  # Bad cases
+  # Not-existent file
   bad_name <- "anamethatdoesnotexistfortesting"
   expect_warning(expect_false(QFileExists(bad_name)))
   expect_error(QLoadData(bad_name))
-  expect_error(QSaveData(mtcars,"mtcars.notrds"))
+  
+  # Invalid filetypes 
+  # - note that we don't have tests for Content-Types 
+  expect_error(QSaveData(mtcars,"mtcars.notrdsorcsv"))
+  expect_error(QLoadData("mtcars.notrdsorcsv"))
 })
 
 test_that("File Connection: raw", {

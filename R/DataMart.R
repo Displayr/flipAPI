@@ -12,11 +12,11 @@
 #' @export
 QFileExists <- function(filename) 
 {
-    companySecret <- GetCompanySecret()
-    clientId <- GetClientId()
-    res <- try(HEAD(paste0(apiRoot, "?filename=", URLencode(filename, TRUE)), 
-                    config=add_headers("X-Q-Company-Secret" = companySecret,
-                                       "X-Q-Project-ID" = clientId)))
+    company.secret <- getCompanySecret()
+    client.id <- getClientId()
+    res <- try(HEAD(paste0(api.root, "?filename=", URLencode(filename, TRUE)), 
+                    config=add_headers("X-Q-Company-Secret" = company.secret,
+                                       "X-Q-Project-ID" = client.id)))
     
     if (is.null(res$status_code) || res$status_code != 200)
     {
@@ -44,8 +44,8 @@ QFileExists <- function(filename)
 #' @param encoding character string. See documentation for connections.
 #' @param raw logical. See documentation for connections.
 #' @param method character string. See documentation for connections.
-#' @param mime_type character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.
-#' @param company_token Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.
+#' @param mime.type character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.
+#' @param company.token Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.
 #' 
 #' @return A curl connection (read) or a file connection (write)
 #' 
@@ -58,39 +58,42 @@ QFileExists <- function(filename)
 QFileOpen <- function(filename, open = "r", blocking = TRUE, 
                       encoding = getOption("encoding"), raw = FALSE, 
                       method = getOption("url.method", "default"),
-                      mime_type = "", company_token = NA)
+                      mime.type = NA, company.token = NA)
 {
     mode <- tolower(open)
     if (mode == "r" || mode == "rb") 
     {
-        companySecret <- if (missing(company_token)) GetCompanySecret() else company_token
-        clientId <- GetClientId()
+        company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+        client.id <- getClientId()
         h <- new_handle()
         handle_setheaders(h,
-            "X-Q-Company-Secret" = companySecret,
-            "X-Q-Project-ID" = clientId
+            "X-Q-Company-Secret" = company.secret,
+            "X-Q-Project-ID" = client.id
         )
-        con <- try(curl(paste0(apiRoot, "?filename=", URLencode(filename, TRUE)),
+        con <- try(curl(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                         open = mode,
                         handle = h), 
                     silent = TRUE)
         
-        if (!inherits(con,"connection"))
-            stop("File not found.")
+        if (!inherits(con, "connection"))
+            stopBadRequest(con, "File not found.")
         
         # to allow functions to parse this 'like' a url connection
         # e.g. so readRDS will wrap this in gzcon when reading
         class(con) <- append(class(con), "url")
+        
         return (con)
-    } else if (mode == "w" || mode == "wb") 
+    } 
+    else if (mode == "w" || mode == "wb") 
     {
         # We need to make a temporary file because RCurl cannot make a connection for
         # writing, because HTTP needs to know the content length up front.
-        if (!missing(company_token)) 
-            stop("'company_token' can only be specified for read operations.\nYou cannot write files to another company's Data Mart.")
+        if (!missing(company.token)) 
+            stop("'company.token' can only be specified for read operations.\nYou cannot write files to another company's Data Mart.")
         
-        if (!exists("companySecret") || identical(companySecret, NULL))
-            stop("Could not connect to Data Mart.")
+        # Check if in valid environment
+        getCompanySecret() 
+        getClientId()
         
         tmpfile <- paste0(tempfile(), ".", file_ext(filename))
         con <- file(tmpfile, mode, blocking, encoding, raw, method)
@@ -99,10 +102,12 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         # store attributes for later access
         attr(con, "tmpfile") <- tmpfile
         attr(con, "filename") <- filename
-        attr(con, "mimetype") <- mime_type
+        if (missing(mime.type)) mime.type <- guess_type(filename)
+        attr(con, "mimetype") <- mime.type
 
         return (con)
-    } else 
+    } 
+    else 
     {
         stop("Invalid mode - please use either 'r', 'rb','w' or 'wb'.")
     }
@@ -117,7 +122,6 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
 #' @param ... arguments passed to or from other methods.
 #' 
 #' @importFrom httr POST add_headers upload_file
-#' @importFrom mime guess_type
 #' @importFrom utils URLencode
 #' 
 #' @return NULL invisibly. Called for the purpose of uploading data
@@ -130,30 +134,25 @@ close.qpostcon = function(con, ...)
     filename <- attr(con, "filename")
     tmpfile <- attr(con, "tmpfile")
     mimetype <- attr(con, "mimetype")
-    if (mimetype == "") mimetype <- guess_type(filename)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
-    companySecret <- GetCompanySecret()
-    clientId <- GetClientId()
-    res <- try(POST(paste0(apiRoot, "?filename=", URLencode(filename, TRUE)),
+    company.secret <- getCompanySecret()
+    client.id <- getClientId()
+    res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                 config = add_headers("Content-Type" = mimetype,
-                                     "X-Q-Company-Secret" = companySecret,
-                                     "X-Q-Project-ID" = clientId),
+                                     "X-Q-Company-Secret" = company.secret,
+                                     "X-Q-Project-ID" = client.id),
                 encode = "raw",
                 body = upload_file(tmpfile)))
 
     if (inherits(res, "try-error") || res$status_code != 200)
     {
-        msg <- "Could not write to data mart." 
-        if (inherits(res, "response"))
-            msg <- paste0(msg, " Http status: ", res$status_code)
-        stop(msg)
+        stopBadRequest(res, "Could not write to data mart.")
     }
     else 
     {
         message("File was written successfully.")
     }
-    
     invisible()
 }
 
@@ -162,35 +161,40 @@ close.qpostcon = function(con, ...)
 #' Loads an *.rds file from the data mart and converts this to an R object.
 #' 
 #' @param filename character string. Name of the file to be opened from the Data Mart.
-#' @param company_token Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.
+#' @param company.token Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.
 #' 
 #' @return An R object
 #' 
 #' @importFrom httr GET add_headers write_disk
-#' @importFrom tools file_ext
 #' @importFrom utils URLencode
 #' 
 #' @export
-QLoadData <- function(filename, company_token = NA) 
+QLoadData <- function(filename, company.token = NA) 
 {
-    if (file_ext(filename) != "rds") 
-        stop("Can only load data from *.rds objects.")
-    
     tmpfile <- tempfile()
-    companySecret <- if (missing(company_token)) GetCompanySecret() else company_token
-    clientId <- GetClientId()
-    req <- try(GET(paste0(apiRoot, "?filename=", URLencode(filename, TRUE)),
-               config=add_headers("X-Q-Company-Secret" = companySecret,
-                                  "X-Q-Project-ID" = clientId),
+    company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+    client.id <- getClientId()
+    res <- try(GET(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
+               config=add_headers("X-Q-Company-Secret" = company.secret,
+                                  "X-Q-Project-ID" = client.id),
                write_disk(tmpfile, overwrite = TRUE)))
     
-    if (inherits(req, "try-error") || req$status_code != 200)
-        stop("File not found.")
+    on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
+
+    type <- getFileType(filename)
+    if (is.null(type))
+        type <- getResponseFileType(res)
+    
+    if (is.null(type)) 
+        stop("Invalid file type specified. Only 'rds' or 'csv' files are supported.")
+    
+    if (inherits(res, "try-error") || res$status_code != 200)
+        stopBadRequest(res, "Could not load file.")
 
     if (file.exists(tmpfile)) 
     {
-        obj <- readRDS(tmpfile) 
-        file.remove(tmpfile)
+        if (type == "csv") obj <- read.csv(tmpfile) 
+        else if (type == "rds") obj <- readRDS(tmpfile)
         return (obj)
     }
     stop("Could not read from file.")
@@ -206,7 +210,6 @@ QLoadData <- function(filename, company_token = NA)
 #' @param filename character string. Name of the file to be written to.
 #' 
 #' @importFrom httr POST add_headers upload_file
-#' @importFrom tools file_ext
 #' @importFrom utils URLencode
 #' 
 #' @return NULL invisibly. Called for the purpose of uploading data
@@ -215,32 +218,27 @@ QLoadData <- function(filename, company_token = NA)
 #' @export 
 QSaveData <- function(object, filename)
 {
-    if (file_ext(filename) == "") 
-        filename <- paste0(filename, ".rds")
-    
-    if (file_ext(filename) != "rds")
-        stop("File must be of type *.rds")
+    type <- getFileType(filename)
+    if (is.null(type))
+        stop("Invalid file type specified. Please name an '.rds' or '.csv' file.")
     
     tmpfile <- tempfile()
-    saveRDS(object, tmpfile)
+    if (type == "csv") write.csv(object, tmpfile) 
+    else if (type == "rds") saveRDS(object, tmpfile)
+    
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
     
-    companySecret <- GetCompanySecret()
-    clientId <- GetClientId()
-    res <- try(POST(paste0(apiRoot, "?filename=", URLencode(filename, TRUE)), 
+    company.secret <- getCompanySecret()
+    client.id <- getClientId()
+    res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)), 
                 config = add_headers("Content-Type" = "application/x-gzip", # default is gzip for saveRDS
-                                     "X-Q-Company-Secret" = companySecret,
-                                     "X-Q-Project-ID" = clientId),
+                                     "X-Q-Company-Secret" = company.secret,
+                                     "X-Q-Project-ID" = client.id),
                 encode = "raw",
                 body = upload_file(tmpfile)))
     
     if (inherits(res, "try-error") || res$status_code != 200)
-    {
-        msg <- "Could not write to data mart." 
-        if (inherits(res, "response"))
-            msg <- paste0(msg, " Http status: ", res$status_code)
-        stop(msg)
-    }
+        stopBadRequest(res, "Could not save file.")
     
     msg <- paste("Object uploaded to Data Mart To re-import object use:",
                   "   > library(flipAPI)",
@@ -250,35 +248,91 @@ QSaveData <- function(object, filename)
     invisible()
 }
 
-################ HELPER FUNCTIONS AND CONSTANTS ####################
+########################## HELPER FUNCTIONS AND CONSTANTS ###########################
 
 #' Constant endpoint address for accessing the Data Mart.
-apiRoot <- "https://app.displayr.com/api/DataMart"
+api.root <- "https://app.displayr.com/api/DataMart"
 
 #' Error when someone tries to use this package outside of Displayr.
 #' 
 #' @return Throws an error.
-StopNotDisplayr <- function() {
+stopNotDisplayr <- function() {
     stop("This function can only be used from within Displayr.")
 }
 
 #' Gets company secret from the environment. Throws an error if not found.
 #' 
 #' @return Company secret token as a string.
-GetCompanySecret <- function() 
+getCompanySecret <- function() 
 {
     secret <- get0("companySecret", ifnotfound = "")
-    if (secret == "") StopNotDisplayr()
-    secret
-    
+    if (secret == "") stopNotDisplayr()
+    return (secret)
 }
+
 #' Gets the client Id (project id) from the environment. Throws an error if not found.
 #' 
 #' @return The client id as a string
-GetClientId <- function() 
+getClientId <- function() 
 {
-    clientId <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
-    if (clientId == "") StopNotDisplayr()
-    clientId
+    client.id <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
+    if (client.id == "") stopNotDisplayr()
+    return (client.id)
+}
+
+
+#' Guesses the type of file from the filename. Used for QSaveData/QLoadData
+#' 
+#' @param filename string. Filename which we are checking
+#' 
+#' @importFrom mime guess_type
+#' @importFrom tools file_ext
+#' 
+#' @return string or NULL. The supported file type which we have determined the file to be.
+getFileType <- function(filename) 
+{
+    if (file_ext(filename) == "rds")
+        return ("rds")
+    
+    # probably redundant
+    if (file_ext(filename) == "csv" || guess_type(filename) == "text/csv")
+        return ("csv")
+    
+    return (NULL)
+}
+
+#' Gets the file type of a response based on Content-Type. Used for QSaveData/QLoadData
+#' 
+#' @param response Response object.
+#' 
+#' @return string (or NULL). The supported file type which we have determined the file to be else NULL.
+getResponseFileType <- function(response)
+{
+    content.type <- response$headers$"content-type"
+    if (content.type == "text/csv")
+        return ("csv")
+    
+    return (NULL)
+}
+
+#' Throws an error given a response. Appends error received from API if we have one.
+#'
+#' @param obj object. Either a bad response or a try-error.
+#' @param message error string. The error message which will be thrown to the user.
+stopBadRequest <- function(obj, message = "") 
+{
+    # curl throws a try error and doesn't let us see the error header
+    if (inherits(obj, 'try-error'))
+        stop(paste0(message))
+    
+    headers <- obj$headers
+    if (!is.null(headers)) 
+    {
+        # Errors thrown from API when a bad status is received are in this header
+        err <- headers$"x-errormessage"
+        if (!is.null(err) && err != "")
+            stop(paste0(message, "\nError: ", err))
+    }
+    stop(message)
 }
 

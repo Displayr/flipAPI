@@ -6,8 +6,8 @@
 \usage{
 QFileOpen(filename, open = "r", blocking = TRUE,
   encoding = getOption("encoding"), raw = FALSE,
-  method = getOption("url.method", "default"), mime_type = "",
-  company_token = NA)
+  method = getOption("url.method", "default"), mime.type = NA,
+  company.token = NA)
 }
 \arguments{
 \item{filename}{character string. Name of file to be opened}
@@ -22,9 +22,9 @@ QFileOpen(filename, open = "r", blocking = TRUE,
 
 \item{method}{character string. See documentation for connections.}
 
-\item{mime_type}{character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.}
+\item{mime.type}{character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.}
 
-\item{company_token}{Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.}
+\item{company.token}{Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.}
 }
 \value{
 A curl connection (read) or a file connection (write)

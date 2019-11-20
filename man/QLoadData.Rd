@@ -4,12 +4,12 @@
 \alias{QLoadData}
 \title{Loads an object}
 \usage{
-QLoadData(filename, company_token = NA)
+QLoadData(filename, company.token = NA)
 }
 \arguments{
 \item{filename}{character string. Name of the file to be opened from the Data Mart.}
 
-\item{company_token}{Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.}
+\item{company.token}{Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.}
 }
 \value{
 An R object
