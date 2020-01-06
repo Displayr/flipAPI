@@ -202,9 +202,8 @@ QLoadData <- function(filename, company.token = NA)
 
 #' Save an object
 #' 
-#' Saves an object to the Data Mart as an *.rds file of the given name.
-#' If the name is given an extension, this must be '.rds'. If there is no
-#' extension specified, this defaults to '.rds'.
+#' Saves an object to the Data Mart without any transformation.
+#' Filename string must have a .csv or .rds extension.
 #' 
 #' @param object object. The object to be uploaded.
 #' @param filename character string. Name of the file to be written to.
