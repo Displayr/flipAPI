@@ -16,7 +16,6 @@ NULL invisibly. Called for the purpose of uploading data
 and assumed to succeed if no errors are thrown.
 }
 \description{
-Saves an object to the Data Mart as an *.rds file of the given name.
-If the name is given an extension, this must be '.rds'. If there is no
-extension specified, this defaults to '.rds'.
+Saves an object to the Data Mart without any transformation.
+Filename string must have a .csv or .rds extension.
 }
