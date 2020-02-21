@@ -14,6 +14,7 @@ QFileExists <- function(filename)
 {
     company.secret <- getCompanySecret()
     client.id <- getClientId()
+    api.root <- getApiRoot()
     res <- try(HEAD(paste0(api.root, "?filename=", URLencode(filename, TRUE)), 
                     config=add_headers("X-Q-Company-Secret" = company.secret,
                                        "X-Q-Project-ID" = client.id)))
@@ -65,6 +66,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
     {
         company.secret <- if (missing(company.token)) getCompanySecret() else company.token
         client.id <- getClientId()
+        api.root <- getApiRoot()
         h <- new_handle()
         handle_setheaders(h,
             "X-Q-Company-Secret" = company.secret,
@@ -138,6 +140,7 @@ close.qpostcon = function(con, ...)
 
     company.secret <- getCompanySecret()
     client.id <- getClientId()
+    api.root <- getApiRoot()
     res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                 config = add_headers("Content-Type" = mimetype,
                                      "X-Q-Company-Secret" = company.secret,
@@ -174,6 +177,7 @@ QLoadData <- function(filename, company.token = NA)
     tmpfile <- tempfile()
     company.secret <- if (missing(company.token)) getCompanySecret() else company.token
     client.id <- getClientId()
+    api.root <- getApiRoot()
     res <- try(GET(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                config=add_headers("X-Q-Company-Secret" = company.secret,
                                   "X-Q-Project-ID" = client.id),
@@ -229,6 +233,7 @@ QSaveData <- function(object, filename)
     
     company.secret <- getCompanySecret()
     client.id <- getClientId()
+    api.root <- getApiRoot()
     res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)), 
                 config = add_headers("Content-Type" = guess_type(filename),
                                      "X-Q-Company-Secret" = company.secret,
@@ -249,9 +254,6 @@ QSaveData <- function(object, filename)
 
 ########################## HELPER FUNCTIONS AND CONSTANTS ###########################
 
-#' Constant endpoint address for accessing the Data Mart.
-api.root <- "https://app.displayr.com/api/DataMart"
-
 #' Error when someone tries to use this package outside of Displayr.
 #' 
 #' @return Throws an error.
@@ -267,6 +269,15 @@ getCompanySecret <- function()
     secret <- get0("companySecret", ifnotfound = "")
     if (secret == "") stopNotDisplayr()
     return (secret)
+}
+
+#' Gets region from the environment and builds the api root. Throws an error if not found.
+#' 
+#' @return Region-specific api root as a string.
+getApiRoot <- function() 
+{
+    api.root <- paste0("https://", URLencode(get0("region", ifnotfound = "app"), TRUE), ".displayr.com/api/DataMart/")
+    return (api.root)
 }
 
 #' Gets the client Id (project id) from the environment. Throws an error if not found.
