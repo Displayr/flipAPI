@@ -276,7 +276,9 @@ getCompanySecret <- function()
 #' @return Region-specific api root as a string.
 getApiRoot <- function() 
 {
-    api.root <- paste0("https://", URLencode(get0("region", ifnotfound = "app"), TRUE), ".displayr.com/api/DataMart/")
+    region <- URLencode(get0("region", ifnotfound = ""), TRUE)
+    if (region == "") stopNotDisplayr()
+    api.root <- paste0("https://", region, ".displayr.com/api/DataMart/")
     return (api.root)
 }
 
