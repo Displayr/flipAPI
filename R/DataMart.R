@@ -257,8 +257,8 @@ QSaveData <- function(object, filename)
 #' Error when someone tries to use this package outside of Displayr.
 #' 
 #' @return Throws an error.
-stopNotDisplayr <- function() {
-    stop("This function can only be used from within Displayr.")
+stopNotDisplayr <- function(code) {
+    stop(paste("This function can only be used from within Displayr. Missing", code))
 }
 
 #' Gets company secret from the environment. Throws an error if not found.
@@ -267,7 +267,7 @@ stopNotDisplayr <- function() {
 getCompanySecret <- function() 
 {
     secret <- get0("companySecret", ifnotfound = "")
-    if (secret == "") stopNotDisplayr()
+    if (secret == "") stopNotDisplayr("companySecret")
     return (secret)
 }
 
@@ -277,7 +277,7 @@ getCompanySecret <- function()
 getApiRoot <- function() 
 {
     region <- URLencode(get0("region", ifnotfound = ""), TRUE)
-    if (region == "") stopNotDisplayr()
+    if (region == "") stopNotDisplayr("region")
     api.root <- paste0("https://", region, ".displayr.com/api/DataMart/")
     return (api.root)
 }
@@ -288,7 +288,7 @@ getApiRoot <- function()
 getClientId <- function() 
 {
     client.id <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
-    if (client.id == "") stopNotDisplayr()
+    if (client.id == "") stopNotDisplayr("clientId")
     return (client.id)
 }
 
