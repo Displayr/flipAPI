@@ -4,8 +4,13 @@
 \alias{ExportToDropbox}
 \title{Export R object to Dropbox}
 \usage{
-ExportToDropbox(object, token, file = NA, as.csv = FALSE,
-  reexport.seconds = -1)
+ExportToDropbox(
+  object,
+  token,
+  file = NA,
+  as.csv = FALSE,
+  reexport.seconds = -1
+)
 }
 \arguments{
 \item{object}{R object to export}

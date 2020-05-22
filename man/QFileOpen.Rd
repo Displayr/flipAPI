@@ -4,10 +4,16 @@
 \alias{QFileOpen}
 \title{Opens a Connection}
 \usage{
-QFileOpen(filename, open = "r", blocking = TRUE,
-  encoding = getOption("encoding"), raw = FALSE,
-  method = getOption("url.method", "default"), mime.type = NA,
-  company.token = NA)
+QFileOpen(
+  filename,
+  open = "r",
+  blocking = TRUE,
+  encoding = getOption("encoding"),
+  raw = FALSE,
+  method = getOption("url.method", "default"),
+  mime.type = NA,
+  company.token = NA
+)
 }
 \arguments{
 \item{filename}{character string. Name of file to be opened}

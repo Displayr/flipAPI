@@ -4,8 +4,14 @@
 \alias{GoogleAnalytics}
 \title{Request data from Google Analytics}
 \usage{
-GoogleAnalytics(dimensions, metrics, start.date, end.date, secret.text,
-  table.num = 1)
+GoogleAnalytics(
+  dimensions,
+  metrics,
+  start.date,
+  end.date,
+  secret.text,
+  table.num = 1
+)
 }
 \arguments{
 \item{dimensions}{A string (comma separated) or list of strings containing

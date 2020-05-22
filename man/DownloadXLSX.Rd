@@ -4,9 +4,16 @@
 \alias{DownloadXLSX}
 \title{Download and read Excel (.xlsx) file}
 \usage{
-DownloadXLSX(url, sheet = 1, want.data.frame = FALSE,
-  want.factors = TRUE, want.col.names = NULL, want.row.names = NULL,
-  us.format = TRUE, ...)
+DownloadXLSX(
+  url,
+  sheet = 1,
+  want.data.frame = FALSE,
+  want.factors = TRUE,
+  want.col.names = NULL,
+  want.row.names = NULL,
+  us.format = TRUE,
+  ...
+)
 }
 \arguments{
 \item{url}{Link to XLSX file. Can also be the path to a file on your local machine.}
