@@ -53,6 +53,6 @@ test_that("read_xlsx",
 
     capture.output(xlsRemovedHeader <- DownloadXLSX("https://github.com/Displayr/flipAPI/blob/master/tests/testthat/xlsxfiles/xls-with-header.xls?raw=true", skip = 15), type="message")
     expect_equal("data.frame" %in% class(xlsRemovedHeader), TRUE)
-    expect_equal(all(dim(xlsRemovedHeader) == c(240, 10)), TRUE)
+    expect_equal(all(dim(xlsRemovedHeader) == c(240, 9)), TRUE)
 
 })
