@@ -1,6 +1,6 @@
 #' Check if a file exists
 #' 
-#' Check whether a file of a given name exists in the Data Mart.
+#' Check whether a file of a given name exists in the Displayr Cloud Drive.
 #' 
 #' @param filename character string. Name of the file to search for.
 #' 
@@ -34,8 +34,8 @@ QFileExists <- function(filename)
 #' Opens a Connection
 #' 
 #' Opens a connection for either reading OR writing to a file of a given name.
-#' In the reading case, it opens a stream to the file in the Data Mart. 
-#' In the writing case, it opens a temporary file for writing to and uploads this to the Data Mart on close.
+#' In the reading case, it opens a stream to the file in the Displayr Cloud Drive.
+#' In the writing case, it opens a temporary file for writing to and uploads this to the Displayr Cloud Drive on close.
 #' Note that writing to a file which already exists will overwrite that file's contents.
 #' For more documentation on this function's parameters, see R documentation for opening connections.
 #' 
@@ -46,7 +46,7 @@ QFileExists <- function(filename)
 #' @param raw logical. See documentation for connections.
 #' @param method character string. See documentation for connections.
 #' @param mime.type character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.
-#' @param company.token Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.
+#' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
 #' 
 #' @return A curl connection (read) or a file connection (write)
 #' 
@@ -91,7 +91,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         # We need to make a temporary file because RCurl cannot make a connection for
         # writing, because HTTP needs to know the content length up front.
         if (!missing(company.token)) 
-            stop("'company.token' can only be specified for read operations.\nYou cannot write files to another company's Data Mart.")
+            stop("'company.token' can only be specified for read operations.\nYou cannot write files to another company's Displayr Cloud Drive.")
         
         # Check if in valid environment
         getCompanySecret() 
@@ -118,7 +118,7 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
 #' Closes a QFileOpen connection
 #' 
 #' This is an overload for close.connection which writes the file contents.
-#' of a connection opened using QFileOpen to the Data Mart.
+#' of a connection opened using QFileOpen to the Displayr Cloud Drive.
 #' 
 #' @param con connection object of class 'qpostcon'. Connection opened with QFileOpen.
 #' @param ... arguments passed to or from other methods.
@@ -148,9 +148,12 @@ close.qpostcon = function(con, ...)
                 encode = "raw",
                 body = upload_file(tmpfile)))
 
-    if (inherits(res, "try-error") || res$status_code != 200)
+    if (res$status_code == 413) {
+        stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
+    }
+    else if (inherits(res, "try-error") || res$status_code != 200)
     {
-        stopBadRequest(res, "Could not write to data mart.")
+        stopBadRequest(res, "Could not write to Displayr Cloud Drive. Please try again later.")
     }
     else 
     {
@@ -161,10 +164,10 @@ close.qpostcon = function(con, ...)
 
 #' Loads an object
 #' 
-#' Loads an *.rds file from the data mart and converts this to an R object.
+#' Loads an *.rds file from the Displayr Cloud Drive and converts this to an R object.
 #' 
-#' @param filename character string. Name of the file to be opened from the Data Mart.
-#' @param company.token Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.
+#' @param filename character string. Name of the file to be opened from the Displayr Cloud Drive.
+#' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
 #' 
 #' @return An R object
 #' 
@@ -206,7 +209,7 @@ QLoadData <- function(filename, company.token = NA)
 
 #' Save an object
 #' 
-#' Saves an object to the Data Mart without any transformation.
+#' Saves an object to the Displayr Cloud Drive without any transformation.
 #' Filename string must have a .csv or .rds extension.
 #' 
 #' @param object object. The object to be uploaded.
@@ -240,11 +243,17 @@ QSaveData <- function(object, filename)
                                      "X-Q-Project-ID" = client.id),
                 encode = "raw",
                 body = upload_file(tmpfile)))
-    
-    if (inherits(res, "try-error") || res$status_code != 200)
+
+    if (res$status_code == 413)
+    {
+        stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
+    }
+    else if (inherits(res, "try-error") || res$status_code != 200)
+    {
         stopBadRequest(res, "Could not save file.")
+    }
     
-    msg <- paste("Object uploaded to Data Mart To re-import object use:",
+    msg <- paste("Object uploaded to Displayr Cloud Drive To re-import object use:",
                   "   > library(flipAPI)",
            paste0("   > QLoadData('", filename, "')"),
            sep = "\n")
