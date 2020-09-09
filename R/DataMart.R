@@ -148,11 +148,11 @@ close.qpostcon = function(con, ...)
                 encode = "raw",
                 body = upload_file(tmpfile)))
 
-    if (res$status_code == 413) {
+    if (!inherits(res, "try-error") && res$status_code == 413)
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
-    }
     else if (inherits(res, "try-error") || res$status_code != 200)
     {
+        mpwarn("Closing QFileOpen write connection has encountered an unknown error.")
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Please try again later.")
     }
     else
@@ -242,12 +242,11 @@ QSaveData <- function(object, filename)
                 encode = "raw",
                 body = upload_file(tmpfile)))
 
-    if (res$status_code == 413)
-    {
+    if (!inherits(res, "try-error") && res$status_code == 413)
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
-    }
     else if (inherits(res, "try-error") || res$status_code != 200)
     {
+        mpwarn("QSaveData has encountered an unknown error.")
         stopBadRequest(res, "Could not save file.")
     }
     
