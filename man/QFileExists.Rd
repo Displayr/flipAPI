@@ -13,5 +13,5 @@ QFileExists(filename)
 TRUE if the file exists, otherwise FALSE.
 }
 \description{
-Check whether a file of a given name exists in the Data Mart.
+Check whether a file of a given name exists in the Displayr Cloud Drive.
 }

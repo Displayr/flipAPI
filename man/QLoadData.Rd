@@ -7,13 +7,13 @@
 QLoadData(filename, company.token = NA)
 }
 \arguments{
-\item{filename}{character string. Name of the file to be opened from the Data Mart.}
+\item{filename}{character string. Name of the file to be opened from the Displayr Cloud Drive.}
 
-\item{company.token}{Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.}
+\item{company.token}{Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.}
 }
 \value{
 An R object
 }
 \description{
-Loads an *.rds file from the data mart and converts this to an R object.
+Loads an *.rds file from the Displayr Cloud Drive and converts this to an R object.
 }

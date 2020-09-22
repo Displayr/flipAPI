@@ -30,15 +30,15 @@ QFileOpen(
 
 \item{mime.type}{character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.}
 
-\item{company.token}{Use this if you need to read from a different Displayr company's data mart.  You need to contact Support to get this token.}
+\item{company.token}{Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.}
 }
 \value{
 A curl connection (read) or a file connection (write)
 }
 \description{
 Opens a connection for either reading OR writing to a file of a given name.
-In the reading case, it opens a stream to the file in the Data Mart. 
-In the writing case, it opens a temporary file for writing to and uploads this to the Data Mart on close.
+In the reading case, it opens a stream to the file in the Displayr Cloud Drive.
+In the writing case, it opens a temporary file for writing to and uploads this to the Displayr Cloud Drive on close.
 Note that writing to a file which already exists will overwrite that file's contents.
 For more documentation on this function's parameters, see R documentation for opening connections.
 }
