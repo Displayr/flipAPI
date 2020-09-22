@@ -16,6 +16,6 @@ NULL invisibly. Called for the purpose of uploading data
 and assumed to succeed if no errors are thrown.
 }
 \description{
-Saves an object to the Data Mart without any transformation.
+Saves an object to the Displayr Cloud Drive without any transformation.
 Filename string must have a .csv or .rds extension.
 }

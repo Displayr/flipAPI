@@ -263,6 +263,8 @@ QSaveData <- function(object, filename)
 #' Error when someone tries to use this package outside of Displayr.
 #' 
 #' @return Throws an error.
+#'
+#' @noRd
 stopNotDisplayr <- function(code) {
     stop(paste("This function can only be used from within Displayr. Missing", code))
 }
@@ -270,6 +272,8 @@ stopNotDisplayr <- function(code) {
 #' Gets company secret from the environment. Throws an error if not found.
 #' 
 #' @return Company secret token as a string.
+#'
+#' @noRd
 getCompanySecret <- function() 
 {
     secret <- get0("companySecret", ifnotfound = "")
@@ -280,6 +284,8 @@ getCompanySecret <- function()
 #' Gets region from the environment and builds the api root. Throws an error if not found.
 #' 
 #' @return Region-specific api root as a string.
+#'
+#' @noRd
 getApiRoot <- function() 
 {
     region <- URLencode(get0("region", ifnotfound = ""), TRUE)
@@ -291,6 +297,8 @@ getApiRoot <- function()
 #' Gets the client Id (project id) from the environment. Throws an error if not found.
 #' 
 #' @return The client id as a string
+#'
+#' @noRd
 getClientId <- function() 
 {
     client.id <- gsub("[^0-9]", "", get0("clientId", ifnotfound = ""))
@@ -307,6 +315,8 @@ getClientId <- function()
 #' @importFrom tools file_ext
 #' 
 #' @return string or NULL. The supported file type which we have determined the file to be.
+#'
+#' @noRd
 getFileType <- function(filename) 
 {
     if (file_ext(filename) == "rds")
@@ -324,6 +334,8 @@ getFileType <- function(filename)
 #' @param response Response object.
 #' 
 #' @return string (or NULL). The supported file type which we have determined the file to be else NULL.
+#'
+#' @noRd
 getResponseFileType <- function(response)
 {
     content.type <- response$headers$"content-type"
@@ -337,6 +349,8 @@ getResponseFileType <- function(response)
 #'
 #' @param obj object. Either a bad response or a try-error.
 #' @param message error string. The error message which will be thrown to the user.
+#'
+#' @noRd
 stopBadRequest <- function(obj, message = "") 
 {
     # curl throws a try error and doesn't let us see the error header

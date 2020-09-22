@@ -17,5 +17,5 @@ and assumed to succeed if no errors are thrown.
 }
 \description{
 This is an overload for close.connection which writes the file contents.
-of a connection opened using QFileOpen to the Data Mart.
+of a connection opened using QFileOpen to the Displayr Cloud Drive.
 }
