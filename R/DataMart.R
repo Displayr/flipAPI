@@ -166,14 +166,15 @@ close.qpostcon = function(con, ...)
 #' 
 #' @param filename character string. Name of the file to be opened from the Displayr Cloud Drive.
 #' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
-#' 
+#' @param ... Other parameters to pass to read.csv.
+#'
 #' @return An R object
 #' 
 #' @importFrom httr GET add_headers write_disk
 #' @importFrom utils URLencode
 #' 
 #' @export
-QLoadData <- function(filename, company.token = NA) 
+QLoadData <- function(filename, company.token = NA, ...)
 {
     tmpfile <- tempfile()
     company.secret <- if (missing(company.token)) getCompanySecret() else company.token
@@ -198,8 +199,8 @@ QLoadData <- function(filename, company.token = NA)
 
     if (file.exists(tmpfile)) 
     {
-        if (type == "csv") obj <- read.csv(tmpfile) 
-        else if (type == "rds") obj <- readRDS(tmpfile)
+        if (type == "csv") obj <- read.csv(tmpfile, ...)
+        else if (type == "rds") obj <- readRDS(tmpfile, ...)
         return (obj)
     }
     stop("Could not read from file.")
@@ -212,6 +213,7 @@ QLoadData <- function(filename, company.token = NA)
 #' 
 #' @param object object. The object to be uploaded.
 #' @param filename character string. Name of the file to be written to.
+#' @param ... Other parameters to pass to write.csv or saveRDS.
 #' 
 #' @importFrom httr POST add_headers upload_file
 #' @importFrom utils URLencode
@@ -220,15 +222,15 @@ QLoadData <- function(filename, company.token = NA)
 #' and assumed to succeed if no errors are thrown.
 #' 
 #' @export 
-QSaveData <- function(object, filename)
+QSaveData <- function(object, filename, ...)
 {
     type <- getFileType(filename)
     if (is.null(type))
         stop("Invalid file type specified. Please name an '.rds' or '.csv' file.")
     
     tmpfile <- tempfile()
-    if (type == "csv") write.csv(object, tmpfile) 
-    else if (type == "rds") saveRDS(object, tmpfile)
+    if (type == "csv") write.csv(object, tmpfile, ...)
+    else if (type == "rds") saveRDS(object, tmpfile, ...)
     
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
     
