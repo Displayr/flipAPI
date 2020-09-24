@@ -4,12 +4,14 @@
 \alias{QSaveData}
 \title{Save an object}
 \usage{
-QSaveData(object, filename)
+QSaveData(object, filename, ...)
 }
 \arguments{
 \item{object}{object. The object to be uploaded.}
 
 \item{filename}{character string. Name of the file to be written to.}
+
+\item{...}{Other parameters to pass to write.csv or saveRDS.}
 }
 \value{
 NULL invisibly. Called for the purpose of uploading data
