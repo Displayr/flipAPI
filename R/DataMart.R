@@ -72,13 +72,12 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
             "X-Q-Company-Secret" = company.secret,
             "X-Q-Project-ID" = client.id
         )
-        con <- try(curl(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
-                        open = mode,
-                        handle = h), 
-                    silent = TRUE)
-        
+        uri <- paste0(api.root, "?filename=", URLencode(filename, TRUE))
+        con <- tryCatch(curl(uri, open=mode, handle=h), error=function(c) c)
+        if (inherits(con, "condition"))
+            stopBadRequest(con, paste0("Could not open ", filename, ": ", conditionMessage(con)))
+
         if (!inherits(con, "connection"))
-            stopBadRequest(con, "File not found.")
         
         # to allow functions to parse this 'like' a url connection
         # e.g. so readRDS will wrap this in gzcon when reading
@@ -148,7 +147,7 @@ close.qpostcon = function(con, ...)
                 encode = "raw",
                 body = upload_file(tmpfile)))
 
-    if (!inherits(res, "try-error") && res$status_code == 413)
+    if (!inherits(res, "try-error") && res$status_code == 413)  # 413 comes from IIS when we violate its web.config limits
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
     else if (inherits(res, "try-error") || res$status_code != 200)
     {
@@ -244,7 +243,7 @@ QSaveData <- function(object, filename, ...)
                 encode = "raw",
                 body = upload_file(tmpfile)))
 
-    if (!inherits(res, "try-error") && res$status_code == 413)
+    if (!inherits(res, "try-error") && res$status_code == 413)  # 413 comes from IIS when we violate its web.config limits
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
     else if (inherits(res, "try-error") || res$status_code != 200)
     {
