@@ -74,8 +74,12 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         )
         uri <- paste0(api.root, "?filename=", URLencode(filename, TRUE))
         con <- tryCatch(curl(uri, open=mode, handle=h), error=function(c) c)
-        if (inherits(con, "condition"))
-            stopBadRequest(con, paste0("Could not open ", filename, ": ", conditionMessage(con)))
+        if (inherits(con, "condition")) {
+            problem <- conditionMessage(con)
+            if (problem == "HTTP error 404.")
+                problem <- "file not found"
+            stopBadRequest(con, paste0("Could not open ", filename, ": ", problem))
+        }
 
         if (!inherits(con, "connection"))
         
