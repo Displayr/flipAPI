@@ -224,6 +224,7 @@ QLoadData <- function(filename, company.token = NA, ...)
 #' @param filename character string. Name of the file to be written to.
 #' @param ... Other parameters to pass to write.csv or saveRDS.
 #'
+#' @importFrom haven write_sav
 #' @importFrom httr POST add_headers upload_file
 #' @importFrom utils URLencode
 #'
