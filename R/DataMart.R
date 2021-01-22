@@ -209,7 +209,7 @@ QLoadData <- function(filename, company.token = NA, ...)
         else if (type == "rds")
             obj <- readRDS(tmpfile, ...)
         else if (type == "sav")
-            obj <- read_save(tmpfile, ...)
+            obj <- read_sav(tmpfile, ...)
         return (obj)
     }
     stop("Could not read from file.")
