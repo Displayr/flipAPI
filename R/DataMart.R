@@ -235,7 +235,7 @@ QLoadData <- function(filename, company.token = NA, ...)
 QSaveData <- function(object, filename, ...)
 {
     type <- getFileType(filename)
-    if (is.null(type))
+    if (is.null(type) || type == "rda")
         stop("Invalid file type specified. Please name an '.rds' or '.csv' file.")
 
     tmpfile <- tempfile()
@@ -272,6 +272,71 @@ QSaveData <- function(object, filename, ...)
            sep = "\n")
     message(msg)
     invisible()
+}
+
+qSaveImage <- function(filename)
+{
+    type <- getFileType(filename)
+    if (type != "rda")
+        stop("File extension needs to be .rda to use QSaveImage")
+
+    tmpfile <- tempfile()
+    save.image(tmpfile)
+    on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
+
+    company.secret <- getCompanySecret()
+    client.id <- getClientId()
+    api.root <- getApiRoot()
+    res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
+                    config = add_headers("Content-Type" = guess_type(filename),
+                                         "X-Q-Company-Secret" = company.secret,
+                                         "X-Q-Project-ID" = client.id),
+                    encode = "raw",
+                    body = upload_file(tmpfile)))
+
+    if (!inherits(res, "try-error") && res$status_code == 413)  # 413 comes from IIS when we violate its web.config limits
+        stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
+    else if (inherits(res, "try-error") || res$status_code != 200)
+    {
+        mpwarn("QSaveData has encountered an unknown error.")
+        stopBadRequest(res, "Could not save file.")
+    }
+
+    msg <- paste("Object uploaded to Displayr Cloud Drive To re-import object use:",
+                 "   > library(flipAPI)",
+                 paste0("   > QLoadImage('", filename, "')"),
+                 sep = "\n")
+    message(msg)
+    invisible()
+}
+
+qLoadImage <- function(filename, company.token = NA)
+{
+    tmpfile <- tempfile()
+    company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+    client.id <- getClientId()
+    api.root <- getApiRoot()
+    res <- try(GET(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
+                   config=add_headers("X-Q-Company-Secret" = company.secret,
+                                      "X-Q-Project-ID" = client.id),
+                   write_disk(tmpfile, overwrite = TRUE)))
+
+    on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
+
+    type <- getResponseFileType(res)
+    if (is.null(type))
+        type <- getFileType(filename)
+
+    if (type != "rda")
+        stop("Invalid file type specified. Only 'rda' files are supported.")
+
+    if (inherits(res, "try-error") || res$status_code != 200)
+        stopBadRequest(res, "Could not load file.")
+
+    if (file.exists(tmpfile))
+        load(tmpfile, envir = .GlobalEnv)
+    else
+        stop("Could not read from file.")
 }
 
 ########################## HELPER FUNCTIONS AND CONSTANTS ###########################
@@ -346,6 +411,9 @@ getFileType <- function(filename)
     # probably redundant
     if (file_ext(filename) == "csv" || guess_type(filename) == "text/csv")
         return ("csv")
+
+    if (file_ext(filename) == "rda")
+        return ("rda")
 
     return (NULL)
 }
