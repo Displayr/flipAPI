@@ -155,7 +155,7 @@ close.qpostcon = function(con, ...)
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
     else if (inherits(res, "try-error") || res$status_code != 200)
     {
-        mpwarn("Closing QFileOpen write connection has encountered an unknown error.")
+        warning("Closing QFileOpen write connection has encountered an unknown error.")
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Please try again later.")
     }
     else
@@ -251,7 +251,7 @@ QSaveData <- function(object, filename, ...)
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
     else if (inherits(res, "try-error") || res$status_code != 200)
     {
-        mpwarn("QSaveData has encountered an unknown error.")
+        warning("QSaveData has encountered an unknown error.")
         stopBadRequest(res, "Could not save file.")
     }
 
@@ -287,7 +287,7 @@ qSaveImage <- function(filename)
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
     else if (inherits(res, "try-error") || res$status_code != 200)
     {
-        mpwarn("QSaveData has encountered an unknown error.")
+        warning("QSaveData has encountered an unknown error.")
         stopBadRequest(res, "Could not save file.")
     }
 
