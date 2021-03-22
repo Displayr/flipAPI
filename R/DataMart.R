@@ -190,6 +190,9 @@ QLoadData <- function(filename, company.token = NA, ...)
 
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
+    if (inherits(res, "try-error") || res$status_code != 200)
+        stopBadRequest(res, "Could not load file.")
+
     type <- getResponseFileType(res)
     if (is.null(type))
         type <- getFileType(filename)
@@ -197,8 +200,6 @@ QLoadData <- function(filename, company.token = NA, ...)
     if (is.null(type))
         stop("Invalid file type specified. Only 'rds' or 'csv' files are supported.")
 
-    if (inherits(res, "try-error") || res$status_code != 200)
-        stopBadRequest(res, "Could not load file.")
 
     if (file.exists(tmpfile))
     {
@@ -312,6 +313,9 @@ qLoadImage <- function(filename, company.token = NA)
 
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
+    if (inherits(res, "try-error") || res$status_code != 200)
+        stopBadRequest(res, "Could not load file.")
+
     type <- getResponseFileType(res)
     if (is.null(type))
         type <- getFileType(filename)
@@ -319,8 +323,6 @@ qLoadImage <- function(filename, company.token = NA)
     if (type != "rda")
         stop("Invalid file type specified. Only 'rda' files are supported.")
 
-    if (inherits(res, "try-error") || res$status_code != 200)
-        stopBadRequest(res, "Could not load file.")
 
     if (file.exists(tmpfile))
         load(tmpfile, envir = .GlobalEnv)
@@ -430,7 +432,7 @@ stopBadRequest <- function(obj, message = "")
 {
     # curl throws a try error and doesn't let us see the error header
     if (inherits(obj, 'try-error'))
-        stop(paste0(message))
+        stop(message)
 
     headers <- obj$headers
     if (!is.null(headers))
