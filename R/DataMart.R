@@ -155,7 +155,7 @@ close.qpostcon = function(con, ...)
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
     else if (inherits(res, "try-error") || res$status_code != 200)
     {
-        mpwarn("Closing QFileOpen write connection has encountered an unknown error.")
+        warning("Closing QFileOpen write connection has encountered an unknown error.")
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Please try again later.")
     }
     else
@@ -191,6 +191,9 @@ QLoadData <- function(filename, company.token = NA, ...)
 
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
+    if (inherits(res, "try-error") || res$status_code != 200)
+        stopBadRequest(res, "Could not load file.")
+
     type <- getResponseFileType(res)
     if (is.null(type))
         type <- getFileType(filename)
@@ -199,8 +202,6 @@ QLoadData <- function(filename, company.token = NA, ...)
         stop("Invalid file type specified. Only 'rds', 'csv' or 'sav' files ",
              "are supported.")
 
-    if (inherits(res, "try-error") || res$status_code != 200)
-        stopBadRequest(res, "Could not load file.")
 
     if (file.exists(tmpfile))
     {
@@ -262,7 +263,7 @@ QSaveData <- function(object, filename, ...)
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
     else if (inherits(res, "try-error") || res$status_code != 200)
     {
-        mpwarn("QSaveData has encountered an unknown error.")
+        warning("QSaveData has encountered an unknown error.")
         stopBadRequest(res, "Could not save file.")
     }
 
@@ -298,7 +299,7 @@ qSaveImage <- function(filename)
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
     else if (inherits(res, "try-error") || res$status_code != 200)
     {
-        mpwarn("QSaveData has encountered an unknown error.")
+        warning("QSaveData has encountered an unknown error.")
         stopBadRequest(res, "Could not save file.")
     }
 
@@ -323,6 +324,9 @@ qLoadImage <- function(filename, company.token = NA)
 
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
+    if (inherits(res, "try-error") || res$status_code != 200)
+        stopBadRequest(res, "Could not load file.")
+
     type <- getResponseFileType(res)
     if (is.null(type))
         type <- getFileType(filename)
@@ -330,8 +334,6 @@ qLoadImage <- function(filename, company.token = NA)
     if (type != "rda")
         stop("Invalid file type specified. Only 'rda' files are supported.")
 
-    if (inherits(res, "try-error") || res$status_code != 200)
-        stopBadRequest(res, "Could not load file.")
 
     if (file.exists(tmpfile))
         load(tmpfile, envir = .GlobalEnv)
@@ -444,7 +446,7 @@ stopBadRequest <- function(obj, message = "")
 {
     # curl throws a try error and doesn't let us see the error header
     if (inherits(obj, 'try-error'))
-        stop(paste0(message))
+        stop(message)
 
     headers <- obj$headers
     if (!is.null(headers))
