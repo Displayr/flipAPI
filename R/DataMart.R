@@ -173,6 +173,7 @@ close.qpostcon = function(con, ...)
 #'
 #' @return An R object
 #'
+#' @importFrom haven read_sav
 #' @importFrom httr GET add_headers write_disk
 #' @importFrom utils URLencode
 #'
@@ -198,13 +199,18 @@ QLoadData <- function(filename, company.token = NA, ...)
         type <- getFileType(filename)
 
     if (is.null(type))
-        stop("Invalid file type specified. Only 'rds' or 'csv' files are supported.")
+        stop("Invalid file type specified. Only 'rds', 'csv' or 'sav' files ",
+             "are supported.")
 
 
     if (file.exists(tmpfile))
     {
-        if (type == "csv") obj <- read.csv(tmpfile, ...)
-        else if (type == "rds") obj <- readRDS(tmpfile, ...)
+        if (type == "csv")
+            obj <- read.csv(tmpfile, ...)
+        else if (type == "rds")
+            obj <- readRDS(tmpfile, ...)
+        else if (type == "sav")
+            obj <- read_sav(tmpfile, ...)
         return (obj)
     }
     stop("Could not read from file.")
@@ -219,6 +225,7 @@ QLoadData <- function(filename, company.token = NA, ...)
 #' @param filename character string. Name of the file to be written to.
 #' @param ... Other parameters to pass to write.csv or saveRDS.
 #'
+#' @importFrom haven write_sav
 #' @importFrom httr POST add_headers upload_file
 #' @importFrom utils URLencode
 #'
@@ -233,8 +240,12 @@ QSaveData <- function(object, filename, ...)
         stop("Invalid file type specified. Please name an '.rds' or '.csv' file.")
 
     tmpfile <- tempfile()
-    if (type == "csv") write.csv(object, tmpfile, ...)
-    else if (type == "rds") saveRDS(object, tmpfile, ...)
+    if (type == "csv")
+        write.csv(object, tmpfile, ...)
+    else if (type == "rds")
+        saveRDS(object, tmpfile, ...)
+    else if (type == "sav")
+        write_sav(object, tmpfile, ...)
 
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
@@ -395,6 +406,9 @@ getFileType <- function(filename)
 {
     if (file_ext(filename) == "rds")
         return ("rds")
+
+    if (file_ext(filename) == "sav")
+        return ("sav")
 
     # probably redundant
     if (file_ext(filename) == "csv" || guess_type(filename) == "text/csv")
