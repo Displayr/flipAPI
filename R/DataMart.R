@@ -443,6 +443,7 @@ getResponseFileType <- function(response)
 #' @param message error string. The error message which will be thrown to the user.
 #'
 #' @noRd
+#' @importFrom httr http_status
 stopBadRequest <- function(obj, message = "")
 {
     # curl throws a try error and doesn't let us see the error header
