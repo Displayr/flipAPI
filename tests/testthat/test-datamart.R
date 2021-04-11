@@ -103,3 +103,14 @@ test_that("File Connection: json", {
 
   expect_silent(expect_invisible(close(conn)))
 })
+
+test_that("DS-3269: Data Mart unavailable",
+{
+    library(httptest)
+    skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
+
+    without_internet({
+        expect_error(QLoadData("mtcars.rds"),
+                     "issue connecting to your Displayr Cloud Drive")
+    })
+})

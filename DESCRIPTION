@@ -24,5 +24,6 @@ Imports:
     haven
 Remotes: Displayr/flipTransformations,
          Tatvic/RGoogleAnalytics
-Suggests: testthat
+Suggests: testthat,
+    httptest
 RoxygenNote: 7.1.1

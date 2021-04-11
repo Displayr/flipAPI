@@ -192,7 +192,8 @@ QLoadData <- function(filename, company.token = NA, ...)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
     if (inherits(res, "try-error") || res$status_code != 200)
-        stopBadRequest(res, "Could not load file.")
+        stopBadRequest(res, paste0("Sorry, there was an issue connecting to your ",
+                                   "Displayr Cloud Drive. Please try again later or contact support."))
 
     type <- getResponseFileType(res)
     if (is.null(type))
@@ -446,16 +447,16 @@ stopBadRequest <- function(obj, message = "")
 {
     # curl throws a try error and doesn't let us see the error header
     if (inherits(obj, 'try-error'))
-        stop(message)
+        stop(message, call. = FALSE)
 
     headers <- obj$headers
-    if (!is.null(headers))
+    if (!is.null(headers) && isTRUE(nzchar(err <- headers$"x-errormessage")))
     {
         # Errors thrown from API when a bad status is received are in this header
-        err <- headers$"x-errormessage"
-        if (!is.null(err) && err != "")
-            stop(paste0(message, "\nError: ", err))
+        msg <- paste0(message, "\nError: ", err)
+        stop(msg, call. = FALSE)
     }
-    stop(message)
+    msg <- paste(message, http_status(obj)$message, sep = "\n")
+    stop(msg, call. = FALSE)
 }
 
