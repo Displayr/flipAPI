@@ -3,6 +3,8 @@
 #' Check whether a file of a given name exists in the Displayr Cloud Drive.
 #'
 #' @param filename character string. Name of the file to search for.
+#' @param show.warning logical scalar. Whether to show a warning when the file
+#'   does not exist.
 #'
 #' @return TRUE if the file exists, otherwise FALSE.
 #'
@@ -10,7 +12,7 @@
 #' @importFrom utils URLencode
 #'
 #' @export
-QFileExists <- function(filename)
+QFileExists <- function(filename, show.warning = TRUE)
 {
     company.secret <- getCompanySecret()
     client.id <- getClientId()
@@ -21,7 +23,8 @@ QFileExists <- function(filename)
 
     if (is.null(res$status_code) || res$status_code != 200)
     {
-        warning("File not found.")
+        if (show.warning)
+            warning("File not found.")
         return (FALSE)
     }
     else
@@ -192,8 +195,16 @@ QLoadData <- function(filename, company.token = NA, ...)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
     if (inherits(res, "try-error") || res$status_code != 200)
-        stopBadRequest(res, paste0("Sorry, there was an issue connecting to your ",
-                                   "Displayr Cloud Drive. Please try again later or contact support."))
+    {
+        if (!QFileExists(filename, show.warning = FALSE))
+            stop("The data file '", filename, "' does not exist in the Displayr cloud drive. ",
+                 "Ensure that the data file is in the Displayr cloud drive and its name has been correctly specified.",
+                 call. = FALSE)
+        else
+            stopBadRequest(res,
+                           paste0("Sorry, there was an issue connecting to your Displayr Cloud Drive. ",
+                                  "Please try again later or contact support."))
+    }
 
     type <- getResponseFileType(res)
     if (is.null(type))
