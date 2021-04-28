@@ -461,3 +461,12 @@ stopBadRequest <- function(obj, message = "")
     stop(msg, call. = FALSE)
 }
 
+#' Check that Displayr cloud drive is available by looking for the
+#' companySecret variable.
+#' @return TRUE if cloud drive is available, otherwise FALSE
+#' @export
+IsDisplayrCloudDriveAvailable <- function()
+{
+    company.secret <- get0("companySecret")
+    !is.null(company.secret) && company.secret != "UNKNOWN"
+}
