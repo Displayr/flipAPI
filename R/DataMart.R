@@ -194,16 +194,18 @@ QLoadData <- function(filename, company.token = NA, ...)
 
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
-    if (inherits(res, "try-error") || res$status_code != 200)
+    msg <- paste0("Sorry, there was an issue connecting to your Displayr Cloud Drive. ",
+                  "Please try again later or contact support.")
+    if (inherits(res, "try-error"))
+        stopBadRequest(res, msg)
+    else if (res$status_code != 200)
     {
         if (!QFileExists(filename, show.warning = FALSE))
             stop("The data file '", filename, "' does not exist in the Displayr cloud drive. ",
                  "Ensure that the data file is in the Displayr cloud drive and its name has been correctly specified.",
                  call. = FALSE)
         else
-            stopBadRequest(res,
-                           paste0("Sorry, there was an issue connecting to your Displayr Cloud Drive. ",
-                                  "Please try again later or contact support."))
+            stopBadRequest(res, msg)
     }
 
     type <- getResponseFileType(res)
