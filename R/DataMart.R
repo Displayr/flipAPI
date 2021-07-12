@@ -483,3 +483,221 @@ IsDisplayrCloudDriveAvailable <- function()
     company.secret <- get0("companySecret")
     !is.null(company.secret) && company.secret != "UNKNOWN"
 }
+
+uploadRScript <- function(r.code,
+                          js.code = NULL,
+                          filename,
+                          upload = TRUE,
+                          api.root = Sys.getenv("API_ROOT"),
+                          company.secret = Sys.getenv("COMPANY_SECRET"),
+                          client.id = Sys.getenv("CLIENT_ID"))
+{
+    if (missing(filename))
+        stop(substitute(filename), " argument required as ",
+             "filename to write in Displayr Drive is required.")
+    type <- file_ext(filename)
+    stopifnot("rscript filename extension required" = type == "rscript")
+    if (upload)
+        checkUploadPossible(api.root = api.root, company.secret = company.secret, client.id = client.id)
+    tmpfile <- tempfile()
+    file <- file(tmpfile, "wb")
+    r.filenames <- if (is.list(r.code)) unlist(list(r.code)) else r.code
+    for (current.file in r.filenames)
+    {
+        cat("# R code below\n", file = tmpfile, append = TRUE)
+        file.append(tmpfile, current.file)
+    }
+    if (!is.null(js.code))
+    {
+        cat("\n\n// JS Code below\n\n", file = tmpfile, append = TRUE)
+        js.filenames <- if (is.list(js.code)) unlist(list(js.code)) else js.code
+        for (current.file in js.filenames)
+            file.append(tmpfile, current.file)
+    }
+    close(file)
+    if (upload)
+    {
+        res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
+                        config = add_headers("Content-Type" = guess_type(filename),
+                                             "X-Q-Company-Secret" = company.secret,
+                                             "X-Q-Project-ID" = client.id),
+                        encode = "raw",
+                        body = upload_file(tmpfile)))
+        if (!inherits(res, "try-error") && res$status_code == 413)  # 413 comes from IIS when we violate its web.config limits
+            stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
+        else if (inherits(res, "try-error") || res$status_code != 200)
+        {
+            warning("uploadRScript has encountered an unknown error.")
+            stopBadRequest(res, "Could not save file.")
+        }
+
+        msg <- paste("RScript uploaded to Displayr Cloud Drive with name", filename,
+                     sep = "\n")
+    } else
+    {
+        file.copy(tmpfile, filename, overwrite = TRUE)
+        msg <- paste("RScript created locally with name", filename,
+                     "In the directory",
+                     getwd(),
+                     sep = "\n")
+    }
+
+    message(msg)
+    invisible()
+}
+
+uploadStandardR <- function(directory = ".", filename = NULL, upload = TRUE)
+{
+    od <- setwd(directory)
+    on.exit(setwd(od))
+    js.file <- list.files(pattern = ".js")
+     r.file <- list.files(pattern = ".R")
+    if (length(r.file) > 1)
+        stop("Only 1 R source file expected but the following were found: ", r.file,
+             " in the directory ", directory)
+    if (length(js.file) > 1)
+        stop("Only 1 JS source file expected but the following were found: ", js.file,
+              " in the directory ", directory)
+    if (length(r.file) + length(js.file) < 1L)
+        stop("At least one valid file is required to create a Standard R but none were found.")
+    if (is.null(filename))
+    {
+        git.path <- git2r::discover_repository()
+        if (is.null(git.path))
+            stop("Current provided path is not part of a git repo")
+        git.path <- gsub(".git", "", git.path)
+        standard.r.page <- gsub(git.path, "", getwd())
+        filename <- paste0(paste0(splitPath(standard.r.page), collapse = " - "),
+                           ".rscript")
+    }
+    type <- file_ext(filename)
+    stopifnot("rscript filename extension required" = type == "rscript",
+              "javascript soruce file not found at specified directory" = !is.null(js.file),
+              "R source file not found at specified directory" = !is.null(r.file))
+    if (!upload)
+        filename <- file.path(od, filename)
+    uploadRScript(r.file, js.file, filename, upload = upload)
+}
+
+splitPath <- function(path)
+    strsplit(path, "^(?=/)(?!//)|(?<!^)(?<!^/)/", perl = TRUE)[[1L]]
+
+uploadQScript <- function(..., filename = NULL,
+                          check.include.web = TRUE,
+                          upload = TRUE,
+                          api.root = Sys.getenv("API_ROOT"),
+                          company.secret = Sys.getenv("COMPANY_SECRET"),
+                          client.id = Sys.getenv("CLIENT_ID"))
+{
+    script.files <- pairlist(...)
+    stopifnot("One or more paths to files are required to create a .qscript output file" = !is.null(script.files))
+    all.character <- all(vapply(script.files, is.character, logical(1L)))
+    stopifnot("All provided file paths should be character strings" = all.character)
+    files.exist <- vapply(script.files, file.exists, logical(1L))
+    if (any(!files.exist))
+        stop("Cannot find the input file(s): ", unlist(script.files)[!files.exist])
+    if (is.null(filename))
+    {
+        git.path <- lapply(script.files, git2r::discover_repository)
+        if (is.null(unlist(git.path)))
+            stop("Current provided path is not part of a git repo")
+        git.path <- unique(unlist(git.path))
+        git.path <- gsub(".git", "", git.path)
+        script.files <- lapply(script.files, normalizePath)
+        qscript.page.candidates <- gsub(git.path, "", script.files)
+        correct.slash <- .Platform$file.sep
+        leading.qscript <- paste0("^QScript", correct.slash)
+        qscript.page.candidates <- Filter(function(x) grepl(leading.qscript, x),
+                                          qscript.page.candidates)
+        if (length(qscript.page.candidates) != 1L)
+            stop("Cannot deduce correct qscript output name from available input files. ",
+                 "Please provide a filename before re-running")
+        qscript.page <- sub(leading.qscript, "", qscript.page.candidates)
+        feature <- gsub(".js$", "", qscript.page)
+        filename <- paste0(paste0(splitPath(feature), collapse = " - "), ".qscript")
+    }
+    type <- file_ext(filename)
+    stopifnot("qscript filename extension required" = type == "qscript")
+    if (upload)
+        checkUploadPossible(api.root = api.root, company.secret = company.secret, client.id = client.id)
+    tmpfile <- tempfile()
+    file <- file(tmpfile, "wb")
+    if (!check.include.web)
+    {
+        for (current.file in unlist(script.files))
+            file.append(tmpfile, current.file)
+    }
+    else
+    {
+        files.used <- vapply(tools::file_path_sans_ext(script.files),
+                             function(x) rev(splitPath(x))[1],
+                             character(1L),
+                             USE.NAMES = FALSE)
+        code.lines <- lapply(script.files, readLines)
+        includeWeb.called <- lapply(code.lines, function(x) grepl("includeWeb\\(", x, perl = TRUE))
+        if (any(unlist(includeWeb.called)))
+        {
+            include.web.lines <- mapply(function(lines, include.lines) lines[include.lines],
+                                        code.lines, includeWeb.called,
+                                        SIMPLIFY = FALSE)
+            files.used.patt <- paste0(files.used, collapse = "|")
+            dev.includeweb <- lapply(include.web.lines,
+                                     function(x) grepl(files.used.patt, x))
+            if (any(unlist(dev.includeweb)))
+            {
+                code.lines <- mapply(function(code.lines, include.web.lines, dev.includeweb, ind) {
+                    if (any(dev.includeweb))
+                    {
+                        code.call <- paste0(code.lines[which(include.web.lines)[dev.includeweb]], sep = '\n')
+                        warning("Line of code calling \n\n", code.call,
+                                "\nhas been removed since this file is used as an input file in the QScript.",
+                                call. = FALSE)
+                        code.lines <- code.lines[-which(include.web.lines)[dev.includeweb]]
+                    }
+                    code.lines
+                },
+                code.lines, includeWeb.called, dev.includeweb, seq_along(code.lines),
+                SIMPLIFY = FALSE)
+            }
+        }
+        lapply(code.lines, cat, sep = "\n", file = file)
+    }
+    close(file)
+    if (upload)
+    {
+        res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
+                        config = add_headers("Content-Type" = guess_type(filename),
+                                             "X-Q-Company-Secret" = company.secret,
+                                             "X-Q-Project-ID" = client.id),
+                        encode = "raw",
+                        body = upload_file(tmpfile)))
+
+        if (!inherits(res, "try-error") && res$status_code == 413)  # 413 comes from IIS when we violate its web.config limits
+            stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
+        else if (inherits(res, "try-error") || res$status_code != 200)
+        {
+            warning("QSaveData has encountered an unknown error.")
+            stopBadRequest(res, "Could not save file.")
+        }
+
+        msg <- paste("QScript uploaded to Displayr Cloud Drive with name", filename,
+                     sep = "\n")
+    }
+    else
+    {
+        file.copy(tmpfile, filename, overwrite = TRUE)
+        msg <- paste("QScript created locally with name", filename,
+                     "In the directory",
+                     getwd(),
+                     sep = "\n")
+    }
+    message(msg)
+    invisible()
+}
+
+checkUploadPossible <- function(api.root, company.secret, client.id)
+{
+    stopifnot("api.root argument required to upload" = !is.null(api.root),
+              "company.secret argument required to upload" = !is.null(company.secret),
+              "client.id argument required to upload" = !is.null(client.id))
+}
