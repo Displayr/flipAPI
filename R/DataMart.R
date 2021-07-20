@@ -501,7 +501,7 @@ uploadRScript <- function(r.code,
         checkUploadPossible(api.root = api.root, company.secret = company.secret, client.id = client.id)
     tmpfile <- tempfile()
     file <- file(tmpfile, "wb")
-    r.filenames <- if (is.list(r.code)) unlist(list(r.code)) else r.code
+    r.filenames <- if (is.list(r.code)) unlist(r.code) else r.code
     for (current.file in r.filenames)
     {
         cat("# R code below\n", file = tmpfile, append = TRUE)
@@ -510,7 +510,7 @@ uploadRScript <- function(r.code,
     if (!is.null(js.code))
     {
         cat("\n\n// JS Code below\n\n", file = tmpfile, append = TRUE)
-        js.filenames <- if (is.list(js.code)) unlist(list(js.code)) else js.code
+        js.filenames <- if (is.list(js.code)) unlist(js.code) else js.code
         for (current.file in js.filenames)
             file.append(tmpfile, current.file)
     }
