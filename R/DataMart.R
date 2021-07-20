@@ -541,25 +541,45 @@ uploadRScript <- function(r.code,
                      getwd(),
                      sep = "\n")
     }
-
     message(msg)
     invisible()
 }
 
-uploadStandardR <- function(directory = ".", filename = NULL, upload = TRUE)
+extractRandJSFilesAtDirectory <- function(directory)
 {
+
+}
+
+#' @title Upload a Standard R file from the Q-Wiki-Scripts repo
+#' @description Take either a directory or Standard R page basename from the
+#'   Q-Wiki-Scripts repo and upload it to the users custom rscript via Displayr Drive.
+#' @param standard.r.input A string containing the file path to use. This needs to be either
+#' \itemize{
+#' \item A path to a directory containing two files, a single R and JS source file respectively.
+#'   E.g. the Calculation features.
+#' \item A path containing the basename of the Standard R page. Suitable for standard R pages
+#'   where a directory contains multiple R and JS files.
+#' }
+#' @param upload A logical whether to upload the script or not (useful to check the script is good before upload).
+#' @param filename A string containing the desired name of the output script.
+#'   Defaults to \code{NULL} and will deduce the name based off the directory structure.
+#' @importFrom tools file_path_as_absolute list_files_with_exts file_path_sans_ext
+uploadStandardR <- function(standard.r.input = ".", filename = NULL, upload = TRUE)
+{
+    stopifnot("Specify charater string pointing to a file or directory path in the 'standard.r.page' argument'" = is.character(standard.r.input),
+              "Specify a single string for the 'standard.r.page' argument pointing to a file or directory" = length(standard.r.input) == 1L)
+
+    is.dir <- file.exists(standard.r.input) && file.info(standard.r.input)[["isdir"]]
+    files.found <- if (is.dir) list_files_with_exts(standard.r.input, exts = c("js", "R")) else Sys.glob(paste0(standard.r.input, "*"))
+    r.and.js.files <- Filter(function(x) file_ext(x) %in% c("R", "js"), files.found)
+    standard.r.files.found <- length(r.and.js.files) == 2L && all(file_ext(r.and.js.files) %in% c("js", "R"))
+    stopifnot("standard.r.input must point to a directory or the basename of the standard R files" = standard.r.files.found)
+    r.and.js.files <- vapply(r.and.js.files, file_path_as_absolute, character(1L))
+    directory <- dirname(r.and.js.files[1L])
     od <- setwd(directory)
     on.exit(setwd(od))
-    js.file <- list.files(pattern = ".js")
-     r.file <- list.files(pattern = ".R")
-    if (length(r.file) > 1)
-        stop("Only 1 R source file expected but the following were found: ", r.file,
-             " in the directory ", directory)
-    if (length(js.file) > 1)
-        stop("Only 1 JS source file expected but the following were found: ", js.file,
-              " in the directory ", directory)
-    if (length(r.file) + length(js.file) < 1L)
-        stop("At least one valid file is required to create a Standard R but none were found.")
+    r.file <- r.and.js.files[endsWith(r.and.js.files, ".R")]
+    js.file <- r.and.js.files[endsWith(r.and.js.files, ".js")]
     if (is.null(filename))
     {
         git.path <- git2r::discover_repository()
@@ -567,6 +587,8 @@ uploadStandardR <- function(directory = ".", filename = NULL, upload = TRUE)
             stop("Current provided path is not part of a git repo")
         git.path <- gsub(".git", "", git.path)
         standard.r.page <- gsub(git.path, "", getwd())
+        if (!is.dir)
+            standard.r.page <- file.path(standard.r.page, file_path_sans_ext(r.and.js.files[1L]))
         filename <- paste0(paste0(splitPath(standard.r.page), collapse = " - "),
                            ".rscript")
     }
@@ -582,6 +604,19 @@ uploadStandardR <- function(directory = ".", filename = NULL, upload = TRUE)
 splitPath <- function(path)
     strsplit(path, "^(?=/)(?!//)|(?<!^)(?<!^/)/", perl = TRUE)[[1L]]
 
+#' @title Upload a QScript file to Displayr drive or collate many JS files.
+#' @description Take an arbitrary number of js files and either upload them as
+#'   a custom qscript via Displayr Drive or save them locally as a single file.
+#' @param ... An arbitrary number of strings that contain the paths to js files
+#'   to construct the QScript.
+#' @param filename Name of the output file QScript.
+#'   If only a single file is provided then it is deduced by the input file name by default.
+#'   Otherwise the filename argument must be provided.
+#' @param check.include.web A logical to remove any includeWeb calls if the input files
+#'   are used in the construction. E.g. if testing a Calculation feature the script might use
+#'   a custom QScript Functions for Calculations.js and then call one of those functions with
+#'   includeWeb. If any matches are found like this, then the line with the includeWeb is omitted.
+#' @param upload A logical whether to upload the script or not (useful to check the script is good before upload).
 uploadQScript <- function(..., filename = NULL,
                           check.include.web = TRUE,
                           upload = TRUE,
