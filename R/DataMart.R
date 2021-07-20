@@ -572,7 +572,7 @@ uploadStandardR <- function(directory = ".", filename = NULL, upload = TRUE)
     }
     type <- file_ext(filename)
     stopifnot("rscript filename extension required" = type == "rscript",
-              "javascript soruce file not found at specified directory" = !is.null(js.file),
+              "javascript source file not found at specified directory" = !is.null(js.file),
               "R source file not found at specified directory" = !is.null(r.file))
     if (!upload)
         filename <- file.path(od, filename)
