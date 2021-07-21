@@ -1,13 +1,14 @@
 Package: flipAPI
 Type: Package
 Title: Web APIs tools
-Version: 1.2.3
+Version: 1.2.4
 Author: Displayr <opensource@displayr.com>
 Maintainer: Displayr <opensource@displayr.com>
 Description: Functions to extract data and interact with web APIs.
 Encoding: UTF-8
 License: GPL-3
 LazyData: TRUE
+Depends: R (>= 3.5.0)
 Imports:
     curl,
     tools,
@@ -21,9 +22,11 @@ Imports:
     rgeolocate,
     utils,
     flipTransformations,
-    haven
+    haven,
+    git2r
 Remotes: Displayr/flipTransformations,
          Tatvic/RGoogleAnalytics
-Suggests: testthat,
+Suggests: 
+    testthat,
     httptest
 RoxygenNote: 7.1.1
