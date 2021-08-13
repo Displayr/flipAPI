@@ -17,5 +17,6 @@ QLoadData(filename, company.token = NA, ...)
 An R object
 }
 \description{
-Loads an *.rds file from the Displayr Cloud Drive and converts this to an R object.
+Loads an *.csv, *.rds or *.sav file from the Displayr Cloud Drive and
+converts this to an R object.
 }

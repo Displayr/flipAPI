@@ -168,7 +168,8 @@ close.qpostcon = function(con, ...)
 
 #' Loads an object
 #'
-#' Loads an *.rds file from the Displayr Cloud Drive and converts this to an R object.
+#' Loads an *.csv, *.rds or *.sav file from the Displayr Cloud Drive and
+#' converts this to an R object.
 #'
 #' @param filename character string. Name of the file to be opened from the Displayr Cloud Drive.
 #' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
@@ -233,11 +234,11 @@ QLoadData <- function(filename, company.token = NA, ...)
 #' Save an object
 #'
 #' Saves an object to the Displayr Cloud Drive without any transformation.
-#' Filename string must have a .csv or .rds extension.
+#' Filename string must have a .csv, .rds or .sav extension.
 #'
 #' @param object object. The object to be uploaded.
 #' @param filename character string. Name of the file to be written to.
-#' @param ... Other parameters to pass to write.csv or saveRDS.
+#' @param ... Other parameters to pass to write.csv, saveRDS or write_sav.
 #'
 #' @importFrom haven write_sav
 #' @importFrom httr POST add_headers upload_file
