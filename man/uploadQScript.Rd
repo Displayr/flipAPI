@@ -11,7 +11,8 @@ uploadQScript(
   upload = TRUE,
   api.root = Sys.getenv("API_ROOT"),
   company.secret = Sys.getenv("COMPANY_SECRET"),
-  client.id = Sys.getenv("CLIENT_ID")
+  client.id = Sys.getenv("CLIENT_ID"),
+  send.to = ""
 )
 }
 \arguments{
@@ -28,8 +29,26 @@ a custom QScript Functions for Calculations.js and then call one of those functi
 includeWeb. If any matches are found like this, then the line with the includeWeb is omitted.}
 
 \item{upload}{A logical whether to upload the script or not (useful to check the script is good before upload).}
+
+\item{api.root}{API root URL obtained by running \code{flipAPI:::getApiRoot()} in a
+Calculation in Displayr}
+
+\item{send.to}{Character string the can be used to more conveniently specify
+an alternative company (i.e. \code{api.root}, \code{company.secret}, and
+\code{client.id}) to upload the QScript to. See the Details.}
+
+\item{clientId}{Client ID obtained by running \code{flipAPI:::getApiRoot()} in a
+Calculation in Displayr}
 }
 \description{
 Take an arbitrary number of js files and either upload them as
   a custom qscript via Displayr Drive or save them locally as a single file.
+}
+\details{
+If the \code{send.to} argument is provided, the inputs for \code{api.root},
+\code{company.secret}, and \code{client.id} are ignored and it is assumed that
+the user has additional environment variables setup that are used instead. For
+example, if \code{send.to = "JANE"}, then the function uses
+\code{Sys.getenv("COMPANY_SECRET_JANE")} for \code{company.secret}
+(and similarly for \code{client.id} and \code{api.root}).
 }

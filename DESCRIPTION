@@ -1,7 +1,7 @@
 Package: flipAPI
 Type: Package
 Title: Web APIs tools
-Version: 1.2.4
+Version: 1.2.5
 Author: Displayr <opensource@displayr.com>
 Maintainer: Displayr <opensource@displayr.com>
 Description: Functions to extract data and interact with web APIs.
@@ -29,4 +29,4 @@ Remotes: Displayr/flipTransformations,
 Suggests: 
     testthat,
     httptest
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2

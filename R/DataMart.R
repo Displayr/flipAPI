@@ -491,8 +491,15 @@ uploadRScript <- function(r.code,
                           upload = TRUE,
                           api.root = Sys.getenv("API_ROOT"),
                           company.secret = Sys.getenv("COMPANY_SECRET"),
-                          client.id = Sys.getenv("CLIENT_ID"))
+                          client.id = Sys.getenv("CLIENT_ID"),
+                          send.to = "")
 {
+    if (nzchar(send.to))
+    {
+        api.root = Sys.getenv(paste0("API_ROOT_", send.to))
+        company.secret = Sys.getenv(paste0("COMPANY_SECRET_", send.to))
+        client.id = Sys.getenv(paste0("CLIENT_ID_  ", send.to))
+    }
     if (missing(filename))
         stop(substitute(filename), " argument required as ",
              "filename to write in Displayr Drive is required.")
@@ -618,13 +625,33 @@ splitPath <- function(path)
 #'   a custom QScript Functions for Calculations.js and then call one of those functions with
 #'   includeWeb. If any matches are found like this, then the line with the includeWeb is omitted.
 #' @param upload A logical whether to upload the script or not (useful to check the script is good before upload).
+#' @param api.root API root URL obtained by running \code{flipAPI:::getApiRoot()} in a
+#' Calculation in Displayr
+#' @param clientId Client ID obtained by running \code{flipAPI:::getApiRoot()} in a
+#' Calculation in Displayr
+#' @param send.to Character string the can be used to more conveniently specify
+#' an alternative company (i.e. \code{api.root}, \code{company.secret}, and
+#' \code{client.id}) to upload the QScript to. See the Details.
+#' @details If the \code{send.to} argument is provided, the inputs for \code{api.root},
+#' \code{company.secret}, and \code{client.id} are ignored and it is assumed that
+#' the user has additional environment variables setup that are used instead. For
+#' example, if \code{send.to = "JANE"}, then the function uses
+#' \code{Sys.getenv("COMPANY_SECRET_JANE")} for \code{company.secret}
+#' (and similarly for \code{client.id} and \code{api.root}).
 uploadQScript <- function(..., filename = NULL,
                           check.include.web = TRUE,
                           upload = TRUE,
                           api.root = Sys.getenv("API_ROOT"),
                           company.secret = Sys.getenv("COMPANY_SECRET"),
-                          client.id = Sys.getenv("CLIENT_ID"))
+                          client.id = Sys.getenv("CLIENT_ID"),
+                          send.to = "")
 {
+    if (nzchar(send.to))
+    {
+        api.root = Sys.getenv(paste0("API_ROOT_", send.to))
+        company.secret = Sys.getenv(paste0("COMPANY_SECRET_", send.to))
+        client.id = Sys.getenv(paste0("CLIENT_ID_  ", send.to))
+    }
     script.files <- pairlist(...)
     stopifnot("One or more paths to files are required to create a .qscript output file" = !is.null(script.files))
     all.character <- all(vapply(script.files, is.character, logical(1L)))
