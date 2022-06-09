@@ -33,12 +33,14 @@ includeWeb. If any matches are found like this, then the line with the includeWe
 \item{api.root}{API root URL obtained by running \code{flipAPI:::getApiRoot()} in a
 Calculation in Displayr}
 
+\item{company.secret}{A string containing the appropriate company secret to access the required Displayr drive}
+
+\item{client.id}{Client ID obtained by running \code{flipAPI:::getApiRoot()} in a
+Calculation in Displayr}
+
 \item{send.to}{Character string the can be used to more conveniently specify
 an alternative company (i.e. \code{api.root}, \code{company.secret}, and
 \code{client.id}) to upload the QScript to. See the Details.}
-
-\item{clientId}{Client ID obtained by running \code{flipAPI:::getApiRoot()} in a
-Calculation in Displayr}
 }
 \description{
 Take an arbitrary number of js files and either upload them as

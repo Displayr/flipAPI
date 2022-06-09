@@ -1,3 +1,5 @@
+MAX.FILENAME.LENGTH <- 100L
+
 #' Check if a file exists
 #'
 #' Check whether a file of a given name exists in the Displayr Cloud Drive.
@@ -507,6 +509,9 @@ uploadRScript <- function(r.code,
     stopifnot("rscript filename extension required" = type == "rscript")
     if (upload)
         checkUploadPossible(api.root = api.root, company.secret = company.secret, client.id = client.id)
+    if (upload && nchar(filename) > MAX.FILENAME.LENGTH) {
+        filename <- shortenFilename(filename)
+    }
     tmpfile <- tempfile()
     file <- file(tmpfile, "wb")
     r.filenames <- if (is.list(r.code)) unlist(r.code) else r.code
@@ -627,7 +632,8 @@ splitPath <- function(path)
 #' @param upload A logical whether to upload the script or not (useful to check the script is good before upload).
 #' @param api.root API root URL obtained by running \code{flipAPI:::getApiRoot()} in a
 #' Calculation in Displayr
-#' @param clientId Client ID obtained by running \code{flipAPI:::getApiRoot()} in a
+#' @param company.secret A string containing the appropriate company secret to access the required Displayr drive
+#' @param client.id Client ID obtained by running \code{flipAPI:::getApiRoot()} in a
 #' Calculation in Displayr
 #' @param send.to Character string the can be used to more conveniently specify
 #' an alternative company (i.e. \code{api.root}, \code{company.secret}, and
@@ -648,9 +654,9 @@ uploadQScript <- function(..., filename = NULL,
 {
     if (nzchar(send.to))
     {
-        api.root = Sys.getenv(paste0("API_ROOT_", send.to))
-        company.secret = Sys.getenv(paste0("COMPANY_SECRET_", send.to))
-        client.id = Sys.getenv(paste0("CLIENT_ID_  ", send.to))
+        api.root <- Sys.getenv(paste0("API_ROOT_", send.to))
+        company.secret <- Sys.getenv(paste0("COMPANY_SECRET_", send.to))
+        client.id <- Sys.getenv(paste0("CLIENT_ID_  ", send.to))
     }
     script.files <- pairlist(...)
     stopifnot("One or more paths to files are required to create a .qscript output file" = !is.null(script.files))
@@ -678,6 +684,9 @@ uploadQScript <- function(..., filename = NULL,
         qscript.page <- sub(leading.qscript, "", qscript.page.candidates)
         feature <- gsub(".js$", "", qscript.page)
         filename <- paste0(paste0(splitPath(feature), collapse = " - "), ".qscript")
+    }
+    if (upload && nchar(filename) > MAX.FILENAME.LENGTH) {
+        filename <- shortenFilename(filename, MAX.FILENAME.LENGTH)
     }
     type <- file_ext(filename)
     stopifnot("qscript filename extension required" = type == "qscript")
@@ -763,4 +772,17 @@ checkUploadPossible <- function(api.root, company.secret, client.id)
     stopifnot("api.root argument required to upload" = !is.null(api.root),
               "company.secret argument required to upload" = !is.null(company.secret),
               "client.id argument required to upload" = !is.null(client.id))
+}
+
+
+shortenFilename <- function(filename, max.filename.length) {
+    if (!any(grepl(" - ", filename)))
+        stop("Cannot reduce filename length automatically since no ' - '",
+             "characters appear in the filename. Please manually specify a shorter filename.")
+    split.name <- strsplit(filename, " - ")[[1L]]
+    while (nchar(filename) > max.filename.length) {
+        split.name <- split.name[-1L]
+        filename <- paste0(split.name, collapse = " - ")
+    }
+    filename
 }
