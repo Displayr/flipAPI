@@ -245,7 +245,6 @@ QLoadData <- function(filename, company.token = NA, ...)
 #' @importFrom haven write_sav
 #' @importFrom httr POST add_headers upload_file
 #' @importFrom utils URLencode
-#'
 #' @return NULL invisibly. Called for the purpose of uploading data
 #' and assumed to succeed if no errors are thrown.
 #'
@@ -256,13 +255,18 @@ QSaveData <- function(object, filename, ...)
     if (is.null(type) || type == "rda")
         stop("Invalid file type specified. Please name an '.rds' or '.csv' file.")
 
-    tmpfile <- tempfile()
+    tmpfile <- tempfile(fileext = paste0(".", type))
     if (type == "csv")
         write.csv(object, tmpfile, ...)
     else if (type == "rds")
         saveRDS(object, tmpfile, ...)
     else if (type == "sav")
         write_sav(object, tmpfile, ...)
+    else if (type == "pptx" && inherits(object, "rpptx") && requireNamespace("officer"))
+        officer:::print.rpptx(object, tmpfile)
+    else if (type == "pptx")
+        stop("To save as a Powerpoint pptx file, the input must be created with ",
+             "officer::read_pptx()")
 
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
@@ -433,6 +437,9 @@ getFileType <- function(filename)
 
     if (file_ext(filename) == "rda")
         return ("rda")
+
+    if (file_ext(filename) == "pptx")
+        return("pptx")
 
     return (NULL)
 }
