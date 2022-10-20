@@ -425,22 +425,11 @@ getClientId <- function()
 #' @noRd
 getFileType <- function(filename)
 {
-    if (tolower(file_ext(filename)) == "rds")
-        return("rds")
-
-    if (tolower(file_ext(filename)) == "sav")
-        return("sav")
-
-    # probably redundant
-    if (tolower(file_ext(filename)) == "csv" || guess_type(filename) == "text/csv")
+    file.ext <- tolower(file_ext(filename))
+    if (file.ext %in% c("rds", "sav", "rda", "csv", "pptx"))
+        return(file.ext)
+    if (guess_type(filename) == "text/csv")
         return("csv")
-
-    if (tolower(file_ext(filename)) == "rda")
-        return("rda")
-
-    if (tolower(file_ext(filename)) == "pptx")
-        return("pptx")
-
     return(NULL)
 }
 
