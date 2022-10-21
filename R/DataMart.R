@@ -425,23 +425,12 @@ getClientId <- function()
 #' @noRd
 getFileType <- function(filename)
 {
-    if (file_ext(filename) == "rds")
-        return ("rds")
-
-    if (file_ext(filename) == "sav")
-        return ("sav")
-
-    # probably redundant
-    if (file_ext(filename) == "csv" || guess_type(filename) == "text/csv")
-        return ("csv")
-
-    if (file_ext(filename) == "rda")
-        return ("rda")
-
-    if (file_ext(filename) == "pptx")
-        return("pptx")
-
-    return (NULL)
+    file.ext <- tolower(file_ext(filename))
+    if (file.ext %in% c("rds", "sav", "rda", "csv", "pptx"))
+        return(file.ext)
+    if (guess_type(filename) == "text/csv")
+        return("csv")
+    return(NULL)
 }
 
 #' Gets the file type of a response based on Content-Type. Used for QSaveData/QLoadData
