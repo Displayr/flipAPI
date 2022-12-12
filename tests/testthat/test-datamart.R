@@ -28,6 +28,7 @@ test_that("SaveData/LoadData", {
   library(gganimate)
   p <- ggplot(iris, aes(x = Petal.Width, y = Petal.Length)) + geom_point()
   anim <- p + transition_states(Species, transition_length = 2, state_length = 1)
+  anim <- animate(anim, renderer = gifski_renderer())
 
   expect_invisible(QSaveData(anim, "anim.gif"))
   expect_true(QFileExists("anim.gif"))
