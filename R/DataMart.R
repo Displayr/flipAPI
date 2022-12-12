@@ -279,7 +279,7 @@ QSaveData <- function(object, filename, ...)
              "officer::read_pptx()")
     else if (type == "xlsx")
         openxlsx::write.xlsx(object, tmpfile, ...)
-    else if (type == "gif" && inherits(object, "gganim"))
+    else if (type == "gif" && inherits(object, c("gganim", "gif_image")))
         anim_save(tmpfile, object, ...)
     else if (type == "gif")
         stop("Sorry, current gif files can only be saved to the Cloud Drive for ",
