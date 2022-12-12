@@ -18,6 +18,11 @@ test_that("SaveData/LoadData", {
   expect_invisible(QSaveData(mtcars, "mtcars.sav"))
   expect_true(QFileExists("mtcars.sav"))
   expect_error(QLoadData("mtcars.sav"), NA)
+
+  # XLSX
+  expect_invisible(QSaveData(mtcars, "mtcars.xlsx"))
+  expect_true(QFileExists("mtcars.xlsx"))
+  expect_error(QLoadData("mtcars.xlsx"), NA)  
 })
 
 test_that("Save/Load Data: bad cases", {

@@ -170,7 +170,7 @@ close.qpostcon = function(con, ...)
 
 #' Loads an object
 #'
-#' Loads an *.csv, *.rds or *.sav file from the Displayr Cloud Drive and
+#' Loads an *.csv, *.rds, *.xlsx, or *.sav file from the Displayr Cloud Drive and
 #' converts this to an R object.
 #'
 #' @param filename character string. Name of the file to be opened from the Displayr Cloud Drive.
@@ -180,6 +180,7 @@ close.qpostcon = function(con, ...)
 #' @return An R object
 #'
 #' @importFrom haven read_sav
+#' @importFrom readxl read_excel
 #' @importFrom httr GET add_headers write_disk
 #' @importFrom utils URLencode
 #'
@@ -216,7 +217,7 @@ QLoadData <- function(filename, company.token = NA, ...)
         type <- getFileType(filename)
 
     if (is.null(type))
-        stop("Invalid file type specified. Only 'rds', 'csv' or 'sav' files ",
+        stop("Invalid file type specified. Only 'rds', 'csv', 'xlsx', or 'sav' files ",
              "are supported.")
 
 
@@ -228,6 +229,8 @@ QLoadData <- function(filename, company.token = NA, ...)
             obj <- readRDS(tmpfile, ...)
         else if (type == "sav")
             obj <- read_sav(tmpfile, ...)
+        else if (type == "xlsx")
+            obj <- readxl::read_excel(tmpfile, ...)
         return (obj)
     }
     stop("Could not read from file.")
@@ -236,18 +239,21 @@ QLoadData <- function(filename, company.token = NA, ...)
 #' Save an object
 #'
 #' Saves an object to the Displayr Cloud Drive without any transformation.
-#' Filename string must have a .csv, .rds or .sav extension.
+#' Filename string must have a .csv, .rds, .xlsx, pptx, gif, or .sav extension.
 #'
 #' @param object object. The object to be uploaded.
 #' @param filename character string. Name of the file to be written to.
-#' @param ... Other parameters to pass to write.csv, saveRDS or write_sav.
+#' @param ... Other parameters to pass to \code{\link{write.csv}}, \code{\link{saveRDS}},
+#' \code{\link{write.xlsx}}, or \code{\link{write_sav}}.
 #'
 #' @importFrom haven write_sav
 #' @importFrom httr POST add_headers upload_file
 #' @importFrom utils URLencode
+#' @importFrom openxlsx write.xlsx
 #' @return NULL invisibly. Called for the purpose of uploading data
 #' and assumed to succeed if no errors are thrown.
-#'
+#' @note Saving to Powerpoint .pptx files is only possible for rpptx objects created using
+#' the \code{officer} package.
 #' @export
 QSaveData <- function(object, filename, ...)
 {
@@ -267,6 +273,8 @@ QSaveData <- function(object, filename, ...)
     else if (type == "pptx")
         stop("To save as a Powerpoint pptx file, the input must be created with ",
              "officer::read_pptx()")
+    else if (type == "xlsx")
+        openxlsx::write.xlsx(object, tmpfile, ...)
 
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
@@ -426,7 +434,7 @@ getClientId <- function()
 getFileType <- function(filename)
 {
     file.ext <- tolower(file_ext(filename))
-    if (file.ext %in% c("rds", "sav", "rda", "csv", "pptx"))
+    if (file.ext %in% c("rds", "sav", "rda", "csv", "pptx", "xlsx"))
         return(file.ext)
     if (guess_type(filename) == "text/csv")
         return("csv")

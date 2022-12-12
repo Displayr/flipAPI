@@ -11,7 +11,8 @@ QSaveData(object, filename, ...)
 
 \item{filename}{character string. Name of the file to be written to.}
 
-\item{...}{Other parameters to pass to write.csv, saveRDS or write_sav.}
+\item{...}{Other parameters to pass to \code{\link{write.csv}}, \code{\link{saveRDS}},
+\code{\link{write.xlsx}}, or \code{\link{write_sav}}.}
 }
 \value{
 NULL invisibly. Called for the purpose of uploading data
@@ -19,5 +20,9 @@ and assumed to succeed if no errors are thrown.
 }
 \description{
 Saves an object to the Displayr Cloud Drive without any transformation.
-Filename string must have a .csv, .rds or .sav extension.
+Filename string must have a .csv, .rds, .xlsx, pptx, gif, or .sav extension.
+}
+\note{
+Saving to Powerpoint .pptx files is only possible for rpptx objects created using
+the \code{officer} package.
 }
