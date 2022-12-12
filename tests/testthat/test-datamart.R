@@ -22,7 +22,16 @@ test_that("SaveData/LoadData", {
   # XLSX
   expect_invisible(QSaveData(mtcars, "mtcars.xlsx"))
   expect_true(QFileExists("mtcars.xlsx"))
-  expect_error(QLoadData("mtcars.xlsx"), NA)  
+  expect_error(QLoadData("mtcars.xlsx"), NA)
+
+  # GIF
+  library(gganimate)
+  p <- ggplot(iris, aes(x = Petal.Width, y = Petal.Length)) + geom_point()
+  anim <- p + transition_states(Species, transition_length = 2, state_length = 1)
+
+  expect_invisible(QSaveData(anim, "anim.gif"))
+  expect_true(QFileExists("anim.gif"))
+  expect_error(QLoadData("anim.gif"), "Invalid file type specified.")
 })
 
 test_that("Save/Load Data: bad cases", {

@@ -25,4 +25,7 @@ Filename string must have a .csv, .rds, .xlsx, pptx, gif, or .sav extension.
 \note{
 Saving to Powerpoint .pptx files is only possible for rpptx objects created using
 the \code{officer} package.
+
+Saving to .gif file is only supported for \code{"gganim"} objects created using
+\code{gganimate}.
 }

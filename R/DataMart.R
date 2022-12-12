@@ -216,7 +216,7 @@ QLoadData <- function(filename, company.token = NA, ...)
     if (is.null(type))
         type <- getFileType(filename)
 
-    if (is.null(type))
+    if (is.null(type) || type == "gif")
         stop("Invalid file type specified. Only 'rds', 'csv', 'xlsx', or 'sav' files ",
              "are supported.")
 
@@ -250,10 +250,14 @@ QLoadData <- function(filename, company.token = NA, ...)
 #' @importFrom httr POST add_headers upload_file
 #' @importFrom utils URLencode
 #' @importFrom openxlsx write.xlsx
+#' @importFrom gganimate anim_save
 #' @return NULL invisibly. Called for the purpose of uploading data
 #' and assumed to succeed if no errors are thrown.
 #' @note Saving to Powerpoint .pptx files is only possible for rpptx objects created using
 #' the \code{officer} package.
+#'
+#' Saving to .gif file is only supported for \code{"gganim"} objects created using
+#' \code{gganimate}.
 #' @export
 QSaveData <- function(object, filename, ...)
 {
@@ -275,6 +279,11 @@ QSaveData <- function(object, filename, ...)
              "officer::read_pptx()")
     else if (type == "xlsx")
         openxlsx::write.xlsx(object, tmpfile, ...)
+    else if (type == "gif" && inherits(object, "gganim"))
+        anim_save(tmpfile, object, ...)
+    else if (type == "gif")
+        stop("Sorry, current gif files can only be saved to the Cloud Drive for ",
+             "outputs from the gganimate package.")
 
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
@@ -296,10 +305,14 @@ QSaveData <- function(object, filename, ...)
         stopBadRequest(res, "Could not save file.")
     }
 
-    msg <- paste("Object uploaded to Displayr Cloud Drive To re-import object use:",
-                  "   > library(flipAPI)",
-           paste0("   > QLoadData('", filename, "')"),
-           sep = "\n")
+    if (type != "gif")
+        msg <- paste("Object uploaded to Displayr Cloud Drive To re-import object use:",
+                     "   > library(flipAPI)",
+                     paste0("   > QLoadData('", filename, "')"),
+                     sep = "\n")
+    else
+        msg <- paste0("Object uploaded to Displayr Cloud Drive. To re-import select ",
+                      "Image > Displayr Cloud Drive.")
     message(msg)
     invisible()
 }
@@ -434,7 +447,7 @@ getClientId <- function()
 getFileType <- function(filename)
 {
     file.ext <- tolower(file_ext(filename))
-    if (file.ext %in% c("rds", "sav", "rda", "csv", "pptx", "xlsx"))
+    if (file.ext %in% c("rds", "sav", "rda", "csv", "pptx", "xlsx", "gif"))
         return(file.ext)
     if (guess_type(filename) == "text/csv")
         return("csv")
