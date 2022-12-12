@@ -258,6 +258,9 @@ QLoadData <- function(filename, company.token = NA, ...)
 #'
 #' Saving to .gif file is only supported for \code{"gganim"} objects created using
 #' \code{gganimate}.
+#'
+#' When saving to .xlsx file, \code{object} is first coerced to a data.frame using
+#' \code{\link{as.data.frame}}.
 #' @export
 QSaveData <- function(object, filename, ...)
 {
@@ -278,7 +281,7 @@ QSaveData <- function(object, filename, ...)
         stop("To save as a Powerpoint pptx file, the input must be created with ",
              "officer::read_pptx()")
     else if (type == "xlsx")
-        openxlsx::write.xlsx(object, tmpfile, ...)
+        openxlsx::write.xlsx(as.data.frame(object, check.names = FALSE), tmpfile, ...)
     else if (type == "gif" && inherits(object, c("gganim", "gif_image")))
         anim_save(tmpfile, object, ...)
     else if (type == "gif")
@@ -311,10 +314,11 @@ QSaveData <- function(object, filename, ...)
                      paste0("   > QLoadData('", filename, "')"),
                      sep = "\n")
     else
-        msg <- paste0("Object uploaded to Displayr Cloud Drive. To re-import select ",
-                      "Image > Displayr Cloud Drive.")
+        msg <- paste0("Object uploaded to Displayr Cloud Drive. To re-import select:\n ",
+                      "    Image > Displayr Cloud Drive\n",
+                      "then select ", sQuote(filename), " from the dropdown menu.")
     message(msg)
-    invisible()
+    invisible(msg)
 }
 
 qSaveImage <- function(filename)

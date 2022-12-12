@@ -22,7 +22,7 @@ test_that("SaveData/LoadData", {
   # XLSX
   expect_invisible(QSaveData(mtcars, "mtcars.xlsx"))
   expect_true(QFileExists("mtcars.xlsx"))
-  expect_error(QLoadData("mtcars.xlsx"), NA)
+  expect_equal(dim(QLoadData("mtcars.xlsx")), dim(mtcars))
 
   # GIF
   library(gganimate)

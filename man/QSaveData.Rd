@@ -28,4 +28,7 @@ the \code{officer} package.
 
 Saving to .gif file is only supported for \code{"gganim"} objects created using
 \code{gganimate}.
+
+When saving to .xlsx file, \code{object} is first coerced to a data.frame using
+\code{\link{as.data.frame}}.
 }
