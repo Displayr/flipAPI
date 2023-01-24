@@ -25,7 +25,8 @@ Imports:
     haven,
     openxlsx,
     gganimate,
-    git2r
+    git2r,
+    RJSONIO
 Remotes: Displayr/flipTransformations,
          Tatvic/RGoogleAnalytics
 Suggests:

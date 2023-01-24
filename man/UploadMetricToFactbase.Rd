@@ -14,8 +14,8 @@ UploadMetricToFactbase(
 )
 }
 \arguments{
-\item{data}{A data.frame with at least three columns, being (in order) for 
-* measurements (must be numeric).  The column name will name the metric. 
+\item{data}{A data.frame with at least three columns, being (in order) for
+* measurements (must be numeric).  The column name will name the metric.
 * date/time (Data Science to specify the formats that normal users would expect to be supported
   in where there will be a lot of data; supply automatic conversion if you think that is
   reasonable).  The column name is unimportant.

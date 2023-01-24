@@ -1,7 +1,7 @@
 #' Upload a metric to Factbase.
 #'
-#' @param data A data.frame with at least three columns, being (in order) for 
-#'   * measurements (must be numeric).  The column name will name the metric. 
+#' @param data A data.frame with at least three columns, being (in order) for
+#'   * measurements (must be numeric).  The column name will name the metric.
 #'   * date/time (Data Science to specify the formats that normal users would expect to be supported
 #'     in where there will be a lot of data; supply automatic conversion if you think that is
 #'     reasonable).  The column name is unimportant.
@@ -18,6 +18,7 @@
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code
 #'
+#' @importFrom RJSONIO toJSON
 #' @export
 UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation="sum",
         definition=NULL, hyperlink=NULL) {
@@ -50,7 +51,7 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
             data[[2]] <- as.POSIXct(data[[2]])
         if (!inherits(data[[2]], "POSIXct"))
             stop("The _When column must be of class POSIXct")
-        data[[2]] <- as.numeric(data[[2]]) * 1000  # convert from POSIXct (seconds since 1970) 
+        data[[2]] <- as.numeric(data[[2]]) * 1000  # convert from POSIXct (seconds since 1970)
                                                   # to JavaScript (ms since 1970)
     } else {
         dimension_columns <- 2:length(n)
@@ -83,7 +84,7 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
         metric$definition <- definition
     if (!is.null(hyperlink))
         metric$hyperlink <- hyperlink
-    body <- RJSONIO::toJSON(list(
+    body <- toJSON(list(
         metric=metric,
         update=mode,
         dimensions=dimensions,
@@ -94,13 +95,14 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
     original_data
 }
 
+#' @importFrom httr POST timeout add_headers content
 post_to_factbase <- function(body, token) {
     message(paste0("POSTing ", nchar(body), " characters from ", Sys.info()["nodename"]))
     url <- "https://factbase.azurewebsites.net/fact"
-    r <- httr::POST(url, body = body, encode = "json",
-        httr::add_headers(`x-facttoken` = token), httr::timeout(3600))
+    r <- POST(url, body = body, encode = "json",
+        add_headers(`x-facttoken` = token), timeout(3600))
     if (r$status_code != 200)
-        stop(paste0(r$status_code, ": ", httr::content(r, "text")))
+        stop(paste0(r$status_code, ": ", content(r, "text")))
 }
 
 #' Upload a relationship to Factbase.
@@ -111,15 +113,15 @@ post_to_factbase <- function(body, token) {
 #'   names of these dimensions.
 #' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
 #'   one of these.
+#' @param mode One of "replace_all", "append" or "append_or_update" See comments for
+#'   FactPostUpdateType.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code
 #'
+#' @importFrom RJSONIO toJSON
 #' @export
 UploadRelationshipToFactbase <- function(data, token, mode="replace_all") {
-    library(RJSONIO)
-    library(httr)
-
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -148,7 +150,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all") {
     observations <- do.call("mapply", mapply_args)
 
     # Make HTTP request
-    body <- RJSONIO::toJSON(list(
+    body <- toJSON(list(
         relationship=list(
             type="many_to_one"
         ),

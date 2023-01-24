@@ -14,6 +14,9 @@ names of these dimensions.}
 
 \item{token}{A guid that identifies and authenticates the request.  Talk to Oliver if you need
 one of these.}
+
+\item{mode}{One of "replace_all", "append" or "append_or_update" See comments for
+FactPostUpdateType.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the
