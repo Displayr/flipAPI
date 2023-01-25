@@ -8,6 +8,9 @@
 #'   * dimension 1 (coerced to character).  The column name will be used for the dimension name.
 #'   * …
 #'   * dimension n
+#' 
+#'   Hint: construct using data.frame(..., check.names=F) to avoid spaces being replaced with
+#'   periods.
 #' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
 #'   one of these.
 #' @param mode One of "replace_all", "append" or "append_or_update" See comments for
@@ -111,6 +114,9 @@ post_to_factbase <- function(body, token) {
 #'   vectors.  The first column is the dimension we are mapping from.  Subsequent columns contain
 #'   labels in dimensions that we are mapping to.  The names of these columns to be used as the
 #'   names of these dimensions.
+#' 
+#'   Hint: construct using data.frame(..., check.names=F) to avoid spaces being replaced with
+#'   periods.
 #' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
 #'   one of these.
 #' @param mode One of "replace_all", "append" or "append_or_update" See comments for
