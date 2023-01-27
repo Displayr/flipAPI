@@ -28,7 +28,8 @@ Imports:
     git2r,
     RJSONIO
 Remotes: Displayr/flipTransformations,
-         Tatvic/RGoogleAnalytics
+    Tatvic/RGoogleAnalytics,
+    cran/rgeolocate
 Suggests:
     testthat,
     httptest,
