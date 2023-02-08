@@ -15,16 +15,16 @@
 #' @param aggregation One of "none", "minimum", "maximum", "sum", "average", "first", "last".
 #' @param definition A detailed explanation of the meaning and derivation of the metric.
 #' @param hyperlink A link to a web page where more can be read about the metric.
-#' @param return_json If TRUE then the JSON sent to Factbase will be returned.  This is helpful when
-#'   trying to reproduce a problem for debugging.
+#' @param save_failed_json_to If set then the JSON for this request will be saved to the named file
+#'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
 #' 
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
-#'   last call in R code.  (Unless return_json is TRUE).
+#'   last call in R code.
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
 UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation="sum",
-        definition=NULL, hyperlink=NULL, return_json=FALSE) {
+        definition=NULL, hyperlink=NULL, save_failed_json_to=NULL) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -93,22 +93,25 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
         dimensions=dimensions,
         data=observations
     ), digits=15, .na="null")  # May need in future: .inf="null"
-    post_to_factbase(body, token)
+    post_to_factbase(body, token, save_failed_json_to)
 
-    if (return_json)
-        body
-    else
-        original_data
+     original_data
 }
 
 #' @importFrom httr POST timeout add_headers content
-post_to_factbase <- function(body, token) {
+post_to_factbase <- function(body, token, save_failed_json_to) {
     message(paste0("POSTing ", nchar(body), " characters from ", Sys.info()["nodename"]))
     url <- "https://factbase.azurewebsites.net/fact"
-    r <- POST(url, body = body, encode = "json",
-        add_headers(`x-facttoken` = token), timeout(3600))
-    if (r$status_code != 200)
+    r <- POST(url, body = body, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
+    if (r$status_code != 200) {
+        if (!is.null(save_failed_json_to)) {
+            connection <- QFileOpen("problem-factbase-upload.json", "w",
+                mime.type="application/json")
+            writeLines(body, connection)
+            close(connection)
+        }
         stop(paste0(r$status_code, ": ", content(r, "text")))
+    }
 }
 
 #' Upload a relationship to Factbase.
@@ -121,15 +124,15 @@ post_to_factbase <- function(body, token) {
 #'   one of these.
 #' @param mode One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
-#' @param return_json If TRUE then the JSON sent to Factbase will be returned.  This is helpful when
-#'   trying to reproduce a problem for debugging.
+#' @param save_failed_json_to If set then the JSON for this request will be saved to the named file
+#'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
-#'   last call in R code.  (Unless return_json is TRUE).
+#'   last call in R code.
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
-UploadRelationshipToFactbase <- function(data, token, mode="replace_all", return_json=FALSE) {
+UploadRelationshipToFactbase <- function(data, token, mode="replace_all", save_failed_json_to=NULL) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -168,10 +171,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all", return
     ), digits=15, .na="null")
     message(paste("Dimensions:", paste(vapply(dimensions, function(d) {d$name}, ""),
         collapse=", ")))
-    post_to_factbase(body, token)
+    post_to_factbase(body, token, save_failed_json_to)
 
-    if (return_json)
-        body
-    else
-        original_data
+    original_data
 }
