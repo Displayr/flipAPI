@@ -95,7 +95,7 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
     ), digits=15, .na="null")  # May need in future: .inf="null"
     post_to_factbase(body, token, save_failed_json_to)
 
-     original_data
+    original_data
 }
 
 #' @importFrom httr POST timeout add_headers content
