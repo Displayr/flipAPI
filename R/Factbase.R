@@ -15,13 +15,16 @@
 #' @param aggregation One of "none", "minimum", "maximum", "sum", "average", "first", "last".
 #' @param definition A detailed explanation of the meaning and derivation of the metric.
 #' @param hyperlink A link to a web page where more can be read about the metric.
+#' @param return_json If TRUE then the JSON sent to Factbase will be returned.  This is helpful when
+#'   trying to reproduce a problem for debugging.
+#' 
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
-#'   last call in R code
+#'   last call in R code.  (Unless return_json is TRUE).
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
 UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation="sum",
-        definition=NULL, hyperlink=NULL) {
+        definition=NULL, hyperlink=NULL, return_json=FALSE) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -92,7 +95,10 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
     ), digits=15, .na="null")  # May need in future: .inf="null"
     post_to_factbase(body, token)
 
-    original_data
+    if (return_json)
+        body
+    else
+        original_data
 }
 
 #' @importFrom httr POST timeout add_headers content
@@ -115,13 +121,15 @@ post_to_factbase <- function(body, token) {
 #'   one of these.
 #' @param mode One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
+#' @param return_json If TRUE then the JSON sent to Factbase will be returned.  This is helpful when
+#'   trying to reproduce a problem for debugging.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
-#'   last call in R code
+#'   last call in R code.  (Unless return_json is TRUE).
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
-UploadRelationshipToFactbase <- function(data, token, mode="replace_all") {
+UploadRelationshipToFactbase <- function(data, token, mode="replace_all", return_json=FALSE) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -162,5 +170,8 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all") {
         collapse=", ")))
     post_to_factbase(body, token)
 
-    original_data  # so caller can see data uploaded if this is the last call in R code
+    if (return_json)
+        body
+    else
+        original_data
 }
