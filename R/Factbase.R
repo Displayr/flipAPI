@@ -105,7 +105,7 @@ post_to_factbase <- function(body, token, save_failed_json_to) {
     r <- POST(url, body = body, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
     if (r$status_code != 200) {
         if (!is.null(save_failed_json_to)) {
-            connection <- QFileOpen("problem-factbase-upload.json", "w",
+            connection <- QFileOpen(save_failed_json_to, "w",
                 mime.type="application/json")
             writeLines(body, connection)
             close(connection)
