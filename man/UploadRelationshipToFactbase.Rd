@@ -4,7 +4,12 @@
 \alias{UploadRelationshipToFactbase}
 \title{Upload a relationship to Factbase.}
 \usage{
-UploadRelationshipToFactbase(data, token, mode = "replace_all")
+UploadRelationshipToFactbase(
+  data,
+  token,
+  mode = "replace_all",
+  save_failed_json_to = NULL
+)
 }
 \arguments{
 \item{data}{A data.frame with at least two columns, each of which should be coerced to character
@@ -17,10 +22,13 @@ one of these.}
 
 \item{mode}{One of "replace_all", "append" or "append_or_update" See comments for
 FactPostUpdateType.}
+
+\item{save_failed_json_to}{If set then the JSON for this request will be saved to the named file
+in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the
-  last call in R code
+  last call in R code.
 }
 \description{
 Upload a relationship to Factbase.

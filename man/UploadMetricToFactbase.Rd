@@ -10,7 +10,8 @@ UploadMetricToFactbase(
   mode = "replace_all",
   aggregation = "sum",
   definition = NULL,
-  hyperlink = NULL
+  hyperlink = NULL,
+  save_failed_json_to = NULL
 )
 }
 \arguments{
@@ -34,10 +35,13 @@ FactPostUpdateType.}
 \item{definition}{A detailed explanation of the meaning and derivation of the metric.}
 
 \item{hyperlink}{A link to a web page where more can be read about the metric.}
+
+\item{save_failed_json_to}{If set then the JSON for this request will be saved to the named file
+in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the
-  last call in R code
+  last call in R code.
 }
 \description{
 Upload a metric to Factbase.
