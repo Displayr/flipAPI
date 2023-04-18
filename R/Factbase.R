@@ -4,7 +4,7 @@
 #'   * measurements (must be numeric).  The column name will name the metric.
 #'   * date/time (Data Science to specify the formats that normal users would expect to be supported
 #'     in where there will be a lot of data; supply automatic conversion if you think that is
-#'     reasonable).  The column name is unimportant.
+#'     reasonable).  This column will be identified using its name, which must be `_When`.
 #'   * dimension 1 (coerced to character).  The column name will be used for the dimension name.
 #'   * …
 #'   * dimension n
@@ -15,8 +15,14 @@
 #' @param aggregation One of "none", "minimum", "maximum", "sum", "average", "first", "last".
 #' @param definition A detailed explanation of the meaning and derivation of the metric.
 #' @param hyperlink A link to a web page where more can be read about the metric.
+#' @param update_key The name of a column that can be used to update the data, when `mode` is
+#'   "append_or_update".  Data in this column must be unique, which implies some sort of aggregation
+#'   for date/time data.
 #' @param save_failed_json_to If set then the JSON for this request will be saved to the named file
 #'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
+#' @param test_expected_json Character vector of length 1. If non-NULL then this method will _not_
+#'   contact the Factbase server, and will instead just verify that the JSON it would have sent 
+#'   matches the JSON provided.  This is to support unit tests.
 #' 
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -24,7 +30,7 @@
 #' @importFrom RJSONIO toJSON
 #' @export
 UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation="sum",
-        definition=NULL, hyperlink=NULL, save_failed_json_to=NULL) {
+        definition=NULL, hyperlink=NULL, update_key=NULL, save_failed_json_to=NULL) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -47,7 +53,8 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
             list(
                 name="_When",
                 dimensionType="in_data",
-                valueType="datetime"
+                valueType="datetime",
+                unique=update_key == "_When"
             )
         )
         if (inherits(data[[2]], "Date"))
@@ -66,7 +73,8 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
         list(
             name=name,
             dimensionType="in_data",
-            valueType="text")
+            valueType="text",
+            unique=update_key == name)
     }, dimension_data, dimension_names, SIMPLIFY=FALSE, USE.NAMES=FALSE)
     dimensions <- c(time_dimension, text_dimensions)
 
@@ -93,15 +101,18 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
         dimensions=dimensions,
         data=observations
     ), digits=15, .na="null")  # May need in future: .inf="null"
-    post_to_factbase(body, token, save_failed_json_to)
+    post_to_factbase(body, token, save_failed_json_to, test_expected_json)
 
     original_data
 }
 
 #' @importFrom httr POST timeout add_headers content
-post_to_factbase <- function(body, token, save_failed_json_to) {
+post_to_factbase <- function(body, token, save_failed_json_to, test_expected_json=NULL) {
     message(paste0("POSTing ", nchar(body), " characters from ", Sys.info()["nodename"]))
     url <- "https://factbase.azurewebsites.net/fact"
+    if (!is.null(test_expected_json) && test_expected_json != body) {
+        stop(paste("Unit test failure: got JSON", test_expected_json))
+    }
     r <- POST(url, body = body, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
     if (r$status_code != 200) {
         if (!is.null(save_failed_json_to)) {
@@ -126,6 +137,9 @@ post_to_factbase <- function(body, token, save_failed_json_to) {
 #'   FactPostUpdateType.
 #' @param save_failed_json_to If set then the JSON for this request will be saved to the named file
 #'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
+#' @param test_expected_json Character vector of length 1. If non-NULL then this method will _not_
+#'   contact the Factbase server, and will instead just verify that the JSON it would have sent 
+#'   matches the JSON provided.  This is to support unit tests.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -171,7 +185,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all", save_f
     ), digits=15, .na="null")
     message(paste("Dimensions:", paste(vapply(dimensions, function(d) {d$name}, ""),
         collapse=", ")))
-    post_to_factbase(body, token, save_failed_json_to)
+    post_to_factbase(body, token, save_failed_json_to, test_expected_json)
 
     original_data
 }
