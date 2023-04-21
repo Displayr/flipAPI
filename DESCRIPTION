@@ -33,5 +33,6 @@ Remotes: Displayr/flipTransformations,
 Suggests:
     testthat,
     httptest,
-    officer
+    officer,
+    gifski
 RoxygenNote: 7.2.3
