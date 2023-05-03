@@ -52,7 +52,7 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
                 name="_When",
                 dimensionType="in_data",
                 valueType="datetime",
-                unique=update_key == n[2]
+                unique=!is.null(update_key) && update_key == n[2]
             )
         )
         data[[2]] <- AsDateTime(data[[2]])
@@ -69,7 +69,7 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
             name=name,
             dimensionType="in_data",
             valueType="text",
-            unique=update_key == name)
+            unique=!is.null(update_key) && update_key == name)
     }, dimension_data, dimension_names, SIMPLIFY=FALSE, USE.NAMES=FALSE)
     dimensions <- c(time_dimension, text_dimensions)
 
