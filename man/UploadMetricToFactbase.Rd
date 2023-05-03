@@ -12,7 +12,8 @@ UploadMetricToFactbase(
   definition = NULL,
   hyperlink = NULL,
   update_key = NULL,
-  save_failed_json_to = NULL
+  save_failed_json_to = NULL,
+  test_return_json = F
 )
 }
 \arguments{
@@ -20,7 +21,7 @@ UploadMetricToFactbase(
 * measurements (must be numeric).  The column name will name the metric.
 * date/time (Data Science to specify the formats that normal users would expect to be supported
   in where there will be a lot of data; supply automatic conversion if you think that is
-  reasonable).  This column will be identified using its name, which must be `_When`.
+  reasonable).  This column will be identified using its name, which must be `When`.
 * dimension 1 (coerced to character).  The column name will be used for the dimension name.
 * …
 * dimension n}
@@ -43,10 +44,6 @@ for date/time data.}
 
 \item{save_failed_json_to}{If set then the JSON for this request will be saved to the named file
 in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.}
-
-\item{test_expected_json}{Character vector of length 1. If non-NULL then this method will _not_
-contact the Factbase server, and will instead just verify that the JSON it would have sent 
-matches the JSON provided.  This is to support unit tests.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the

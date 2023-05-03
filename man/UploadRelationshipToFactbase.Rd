@@ -8,7 +8,8 @@ UploadRelationshipToFactbase(
   data,
   token,
   mode = "replace_all",
-  save_failed_json_to = NULL
+  save_failed_json_to = NULL,
+  test_return_json = F
 )
 }
 \arguments{
@@ -25,10 +26,6 @@ FactPostUpdateType.}
 
 \item{save_failed_json_to}{If set then the JSON for this request will be saved to the named file
 in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.}
-
-\item{test_expected_json}{Character vector of length 1. If non-NULL then this method will _not_
-contact the Factbase server, and will instead just verify that the JSON it would have sent 
-matches the JSON provided.  This is to support unit tests.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the
