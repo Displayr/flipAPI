@@ -1,7 +1,7 @@
 #' Upload a metric to Factbase.
 #'
-#' @param data A data.frame with at least three columns, being (in order) for
-#'   * measurements (must be numeric).  The column name will name the metric.
+#' @param data A data.frame with at least two columns, being (in order) for
+#'   * measurements (must be numeric).  Optional.  The column name will name the metric.
 #'   * date/time (Data Science to specify the formats that normal users would expect to be supported
 #'     in where there will be a lot of data; supply automatic conversion if you think that is
 #'     reasonable).  This column will be identified using its name, which must be `When`.
@@ -10,6 +10,8 @@
 #'   * dimension n
 #' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
 #'   one of these.
+#' @param name A name for the metric.  If NULL then the name of the first column in `data` will
+#'   be used.
 #' @param mode One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
 #' @param aggregation One of "none", "minimum", "maximum", "sum", "average", "first", "last".
@@ -33,9 +35,9 @@
 #' @importFrom RJSONIO toJSON
 #' @importFrom flipTime AsDateTime
 #' @export
-UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation="sum",
+UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", aggregation="sum",
         definition=NULL, hyperlink=NULL, period_type = NULL, update_key=NULL,
-        save_failed_json_to=NULL, test_return_json=F) {
+        save_failed_json_to=NULL, test_return_json=FALSE) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -52,29 +54,25 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
     # Build dimensions.
     original_data <- data
     data <- c(data)  # avoid modifying caller's data.frame
-    n <- names(data)
-    metric_name <- n[1]
-    if (tolower(n[2]) %in% c("_when", "when")) {  # _when retained for backwards compatibility with old scripts
-        dimension_columns <- 3:length(n)
-        time_dimension <- list(
-            list(
-                name="_When",
-                dimensionType=if(is.null(period_type)) "in_data" else "period_type_in_table_name",
-                valueType="datetime",
-                unique=!is.null(update_key) && update_key == n[2] || !is.null(period_type)
-            )
+    column_names <- names(data)
+    metric_name <- if (is.null(name)) column_names[1] else name
+    when_column <- find_when_column(column_names)
+    dimension_columns <- (when_column+1):length(column_names)
+    time_dimension <- list(
+        list(
+            name="_When",
+            dimensionType=if (is.null(period_type)) "in_data" else "period_type_in_table_name",
+            valueType="datetime",
+            unique=!is.null(update_key) && update_key == column_names[when_column] || !is.null(period_type)
         )
-        if (!is.null(period_type))
-            time_dimension[[1]]$valueForTheseObservations <- period_type
-        data[[2]] <- AsDateTime(data[[2]])
-        data[[2]] <- as.numeric(data[[2]]) * 1000  # convert from POSIXct (seconds since 1970)
-                                                  # to JavaScript (ms since 1970)
-    } else {
-        dimension_columns <- 2:length(n)
-        time_dimension <- list()
-    }
+    )
+    if (!is.null(period_type))
+        time_dimension[[1]]$valueForTheseObservations <- period_type
+    data[[when_column]] <- AsDateTime(data[[when_column]])
+    data[[when_column]] <- as.numeric(data[[when_column]]) * 1000  # convert from POSIXct (seconds since 1970)
+                                                                   # to JavaScript (ms since 1970)
     dimension_data <- lapply(data[dimension_columns], function(column) { as.character(column)})
-    dimension_names <- n[dimension_columns]
+    dimension_names <- column_names[dimension_columns]
     text_dimensions <- mapply(function(v, name) {
         list(
             name=name,
@@ -115,6 +113,23 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
     original_data
 }
 
+is_when_column <- function(column_name) {
+    tolower(column_name) %in% c("_when", "when")  # `_when` retained for compatiblity with old callers
+}
+
+find_when_column <- function(column_names) {
+    if (is_when_column(column_names[1]))
+        1
+    else
+        if (is_when_column(column_names[2]))
+            2
+        else
+            # The HTTP API was designed to handle datetime-less data, but this hasn't 
+            # been tested and probably does not work.  This error has the benefit that
+            # it helps people get their input right, when they miss the need for the
+            # `When`` column.
+            stop("You must include date/time data in a column called 'When'.  Talk to support if you want this constraint relaxed.")  # nolint
+}
 
 #' @importFrom httr POST timeout add_headers content
 post_to_factbase <- function(body, token, save_failed_json_to) {
@@ -153,7 +168,8 @@ post_to_factbase <- function(body, token, save_failed_json_to) {
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
-UploadRelationshipToFactbase <- function(data, token, mode="replace_all", save_failed_json_to=NULL, test_return_json=F) {
+UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
+        save_failed_json_to=NULL, test_return_json=FALSE) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
