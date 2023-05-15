@@ -21,6 +21,7 @@ Imports:
     readxl,
     rgeolocate,
     utils,
+    flipTime,
     flipTransformations,
     haven,
     openxlsx,
