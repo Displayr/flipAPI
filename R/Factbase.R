@@ -15,6 +15,11 @@
 #' @param aggregation One of "none", "minimum", "maximum", "sum", "average", "first", "last".
 #' @param definition A detailed explanation of the meaning and derivation of the metric.
 #' @param hyperlink A link to a web page where more can be read about the metric.
+#' @param period_type (Optional) One of "day", "week", "month", "quarter" or "year".
+#'   This indicates that the data has been pre-aggregated into periods of that duration.
+#'   Then When column should contain date/times for the _start_ of each period.
+#'   There may be no duplicate values, and the When column will be used to match data
+#'   (see update_key).
 #' @param update_key The name of a column that can be used to update the data, when `mode` is
 #'   "append_or_update".  Data in this column must be unique, which implies some sort of aggregation
 #'   for date/time data.
@@ -29,7 +34,8 @@
 #' @importFrom flipTime AsDateTime
 #' @export
 UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation="sum",
-        definition=NULL, hyperlink=NULL, update_key=NULL, save_failed_json_to=NULL, test_return_json=F) {
+        definition=NULL, hyperlink=NULL, period_type = NULL, update_key=NULL,
+        save_failed_json_to=NULL, test_return_json=F) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -40,22 +46,26 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
         stop("The first column in 'data' must contain the metric, and be numeric")
     if (!(aggregation %in% c("none", "minimum", "maximum", "sum", "average", "first", "last")))
         stop(paste("Unknown 'aggregation':", aggregation))
+    if (!is.null(period_type) && !(period_type %in% c("day", "week", "month", "quarter", "year")))
+        stop(paste("Unknown 'period_type:'", period_type))
 
     # Build dimensions.
     original_data <- data
     data <- c(data)  # avoid modifying caller's data.frame
     n <- names(data)
     metric_name <- n[1]
-    if (tolower(n[2]) %in% c('_when', 'when')) {  # _when retained for backwards compatibility with old scripts
+    if (tolower(n[2]) %in% c("_when", "when")) {  # _when retained for backwards compatibility with old scripts
         dimension_columns <- 3:length(n)
         time_dimension <- list(
             list(
                 name="_When",
-                dimensionType="in_data",
+                dimensionType=if(is.null(period_type)) "in_data" else "period_type_in_table_name",
                 valueType="datetime",
-                unique=!is.null(update_key) && update_key == n[2]
+                unique=!is.null(update_key) && update_key == n[2] || !is.null(period_type)
             )
         )
+        if (!is.null(period_type))
+            time_dimension[[1]]$valueForTheseObservations <- period_type
         data[[2]] <- AsDateTime(data[[2]])
         data[[2]] <- as.numeric(data[[2]]) * 1000  # convert from POSIXct (seconds since 1970)
                                                   # to JavaScript (ms since 1970)
