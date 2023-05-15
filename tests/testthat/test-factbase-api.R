@@ -4,12 +4,12 @@ library(RJSONIO)
 expect_json_equal <- function(a, b) {
     if (a != b) {
         # expect_equal()'s output on failure with large strings is very hard to use.
-        stop(paste('Mismatched JSON, paste this into the expected json and use git to diff:', a))
+        stop(paste("Mismatched JSON, paste this into the expected json and use git to diff:", a))
     }
 }
 
 test_that("UploadMetricToFactbase() produces correct JSON", {
-    expected_json = '{
+    expected_json <- '{
  "metric": {
  "name": "Metric.name",
 "valueType": "real",
@@ -58,7 +58,58 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
                 definition="Our definition",
                 hyperlink="https://example.com/",
                 update_key="When",
-                test_return_json=T
+                test_return_json=TRUE
+            ),
+            expected_json
+        ), NA
+    )
+})
+
+test_that("UploadMetricToFactbase() can handle pre-aggregated data and use the `name` argument", {
+    expected_json <- '{
+ "metric": {
+ "name": "Explicit metric name",
+"valueType": "real",
+"aggregation": "sum" 
+},
+"update": "replace_all",
+"dimensions": [
+ {
+ "name": "_When",
+"dimensionType": "period_type_in_table_name",
+"valueType": "datetime",
+"unique": true,
+"valueForTheseObservations": "day" 
+},
+{
+ "name": "Dimension1",
+"dimensionType": "in_data",
+"valueType": "text",
+"unique": false 
+} 
+],
+"data": [
+ [
+    1681776000000,
+"Dog" 
+],
+[
+    1681862400000,
+"Car" 
+] 
+] 
+}'
+    expect_error(
+        expect_json_equal(
+            UploadMetricToFactbase(
+                data=data.frame(
+                    When= as.POSIXct(c("2023-04-18", "2023-04-19"), "%Y-%m-%d", tz="UTC"),
+                    Dimension1=c("Dog", "Car")),
+                token="fake",
+                name="Explicit metric name",
+                period_type="day",
+                aggregation="sum",
+                test_return_json=TRUE
             ),
             expected_json
         ), NA
@@ -66,7 +117,7 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
 })
 
 test_that("UploadRelationshipToFactbase() produces correct JSON", {
-    expected_json = '{
+    expected_json <- '{
  "relationship": {
  "type": "many_to_one" 
 },
@@ -107,7 +158,7 @@ test_that("UploadRelationshipToFactbase() produces correct JSON", {
                     Dimension2=c("Canine", "Feline", "Feline")),
                 token="fake",
                 mode="append_or_update",
-                test_return_json=T
+                test_return_json=TRUE
             ),
             expected_json
         ), NA

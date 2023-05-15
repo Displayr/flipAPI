@@ -7,18 +7,20 @@
 UploadMetricToFactbase(
   data,
   token,
+  name = NULL,
   mode = "replace_all",
   aggregation = "sum",
   definition = NULL,
   hyperlink = NULL,
+  period_type = NULL,
   update_key = NULL,
   save_failed_json_to = NULL,
-  test_return_json = F
+  test_return_json = FALSE
 )
 }
 \arguments{
-\item{data}{A data.frame with at least three columns, being (in order) for
-* measurements (must be numeric).  The column name will name the metric.
+\item{data}{A data.frame with at least two columns, being (in order) for
+* measurements (must be numeric).  Optional.  The column name will name the metric.
 * date/time (Data Science to specify the formats that normal users would expect to be supported
   in where there will be a lot of data; supply automatic conversion if you think that is
   reasonable).  This column will be identified using its name, which must be `When`.
@@ -29,6 +31,9 @@ UploadMetricToFactbase(
 \item{token}{A guid that identifies and authenticates the request.  Talk to Oliver if you need
 one of these.}
 
+\item{name}{A name for the metric.  If NULL then the name of the first column in `data` will
+be used.}
+
 \item{mode}{One of "replace_all", "append" or "append_or_update" See comments for
 FactPostUpdateType.}
 
@@ -37,6 +42,12 @@ FactPostUpdateType.}
 \item{definition}{A detailed explanation of the meaning and derivation of the metric.}
 
 \item{hyperlink}{A link to a web page where more can be read about the metric.}
+
+\item{period_type}{(Optional) One of "day", "week", "month", "quarter" or "year".
+This indicates that the data has been pre-aggregated into periods of that duration.
+Then When column should contain date/times for the _start_ of each period.
+There may be no duplicate values, and the When column will be used to match data
+(see update_key).}
 
 \item{update_key}{The name of a column that can be used to update the data, when `mode` is
 "append_or_update".  Data in this column must be unique, which implies some sort of aggregation

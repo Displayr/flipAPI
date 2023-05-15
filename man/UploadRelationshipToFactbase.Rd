@@ -9,7 +9,7 @@ UploadRelationshipToFactbase(
   token,
   mode = "replace_all",
   save_failed_json_to = NULL,
-  test_return_json = F
+  test_return_json = FALSE
 )
 }
 \arguments{
