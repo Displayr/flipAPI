@@ -20,6 +20,7 @@
 #'   for date/time data.
 #' @param save_failed_json_to If set then the JSON for this request will be saved to the named file
 #'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
+#' @param test_return_json For testing only.  Ignore.
 #' 
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -135,6 +136,7 @@ post_to_factbase <- function(body, token, save_failed_json_to) {
 #'   FactPostUpdateType.
 #' @param save_failed_json_to If set then the JSON for this request will be saved to the named file
 #'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
+#' @param test_return_json For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
