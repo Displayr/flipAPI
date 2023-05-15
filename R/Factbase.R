@@ -4,7 +4,7 @@
 #'   * measurements (must be numeric).  The column name will name the metric.
 #'   * date/time (Data Science to specify the formats that normal users would expect to be supported
 #'     in where there will be a lot of data; supply automatic conversion if you think that is
-#'     reasonable).  The column name is unimportant.
+#'     reasonable).  This column will be identified using its name, which must be `When`.
 #'   * dimension 1 (coerced to character).  The column name will be used for the dimension name.
 #'   * …
 #'   * dimension n
@@ -15,16 +15,21 @@
 #' @param aggregation One of "none", "minimum", "maximum", "sum", "average", "first", "last".
 #' @param definition A detailed explanation of the meaning and derivation of the metric.
 #' @param hyperlink A link to a web page where more can be read about the metric.
+#' @param update_key The name of a column that can be used to update the data, when `mode` is
+#'   "append_or_update".  Data in this column must be unique, which implies some sort of aggregation
+#'   for date/time data.
 #' @param save_failed_json_to If set then the JSON for this request will be saved to the named file
 #'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
+#' @param test_return_json For testing only.  Ignore.
 #' 
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
 #'
 #' @importFrom RJSONIO toJSON
+#' @importFrom flipTime AsDateTime
 #' @export
 UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation="sum",
-        definition=NULL, hyperlink=NULL, save_failed_json_to=NULL) {
+        definition=NULL, hyperlink=NULL, update_key=NULL, save_failed_json_to=NULL, test_return_json=F) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -41,19 +46,17 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
     data <- c(data)  # avoid modifying caller's data.frame
     n <- names(data)
     metric_name <- n[1]
-    if (n[2] == "_When") {
+    if (tolower(n[2]) %in% c('_when', 'when')) {  # _when retained for backwards compatibility with old scripts
         dimension_columns <- 3:length(n)
         time_dimension <- list(
             list(
                 name="_When",
                 dimensionType="in_data",
-                valueType="datetime"
+                valueType="datetime",
+                unique=!is.null(update_key) && update_key == n[2]
             )
         )
-        if (inherits(data[[2]], "Date"))
-            data[[2]] <- as.POSIXct(data[[2]])
-        if (!inherits(data[[2]], "POSIXct"))
-            stop("The _When column must be of class POSIXct")
+        data[[2]] <- AsDateTime(data[[2]])
         data[[2]] <- as.numeric(data[[2]]) * 1000  # convert from POSIXct (seconds since 1970)
                                                   # to JavaScript (ms since 1970)
     } else {
@@ -66,7 +69,8 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
         list(
             name=name,
             dimensionType="in_data",
-            valueType="text")
+            valueType="text",
+            unique=!is.null(update_key) && update_key == name)
     }, dimension_data, dimension_names, SIMPLIFY=FALSE, USE.NAMES=FALSE)
     dimensions <- c(time_dimension, text_dimensions)
 
@@ -93,10 +97,14 @@ UploadMetricToFactbase <- function(data, token, mode="replace_all", aggregation=
         dimensions=dimensions,
         data=observations
     ), digits=15, .na="null")  # May need in future: .inf="null"
+    if (test_return_json) {
+        return(body)
+    }
     post_to_factbase(body, token, save_failed_json_to)
 
     original_data
 }
+
 
 #' @importFrom httr POST timeout add_headers content
 post_to_factbase <- function(body, token, save_failed_json_to) {
@@ -114,6 +122,8 @@ post_to_factbase <- function(body, token, save_failed_json_to) {
     }
 }
 
+
+
 #' Upload a relationship to Factbase.
 #'
 #' @param data A data.frame with at least two columns, each of which should be coerced to character
@@ -126,13 +136,14 @@ post_to_factbase <- function(body, token, save_failed_json_to) {
 #'   FactPostUpdateType.
 #' @param save_failed_json_to If set then the JSON for this request will be saved to the named file
 #'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
+#' @param test_return_json For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
-UploadRelationshipToFactbase <- function(data, token, mode="replace_all", save_failed_json_to=NULL) {
+UploadRelationshipToFactbase <- function(data, token, mode="replace_all", save_failed_json_to=NULL, test_return_json=F) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -171,6 +182,9 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all", save_f
     ), digits=15, .na="null")
     message(paste("Dimensions:", paste(vapply(dimensions, function(d) {d$name}, ""),
         collapse=", ")))
+    if (test_return_json) {
+        return(body)
+    }
     post_to_factbase(body, token, save_failed_json_to)
 
     original_data
