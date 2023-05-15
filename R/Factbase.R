@@ -44,8 +44,6 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         stop(paste("'data' must be a data.frame, but got", format(data)))
     if (length(is.data.frame) == 0)
         stop("There must be at least one column in 'data'")
-    if (!is.numeric(data[[1]]))
-        stop("The first column in 'data' must contain the metric, and be numeric")
     if (!(aggregation %in% c("none", "minimum", "maximum", "sum", "average", "first", "last")))
         stop(paste("Unknown 'aggregation':", aggregation))
     if (!is.null(period_type) && !(period_type %in% c("day", "week", "month", "quarter", "year")))
@@ -55,8 +53,15 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
     original_data <- data
     data <- c(data)  # avoid modifying caller's data.frame
     column_names <- names(data)
-    metric_name <- if (is.null(name)) column_names[1] else name
     when_column <- find_when_column(column_names)
+    if (when_column == 1) {
+        if (is.null(name))
+           stop("You have not included a column for the metric so you must supply the metric name in the `name` argument")  #nolint
+    } else {
+        if (!is.numeric(data[[1]]))
+            stop("The first column in 'data' must contain the metric and be numeric, or if there is no metric then the first column must be called `When` and contain date/time data")  #nolint
+    }
+    metric_name <- if (is.null(name)) column_names[1] else name
     dimension_columns <- (when_column+1):length(column_names)
     time_dimension <- list(
         list(

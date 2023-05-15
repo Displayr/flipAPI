@@ -65,10 +65,10 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
     )
 })
 
-test_that("UploadMetricToFactbase() can handle pre-aggregated data", {
+test_that("UploadMetricToFactbase() can handle pre-aggregated data and use the `name` argument", {
     expected_json <- '{
  "metric": {
- "name": "Metric.name",
+ "name": "Explicit metric name",
 "valueType": "real",
 "aggregation": "sum" 
 },
@@ -90,13 +90,11 @@ test_that("UploadMetricToFactbase() can handle pre-aggregated data", {
 ],
 "data": [
  [
-                1,
-   1681776000000,
+    1681776000000,
 "Dog" 
 ],
 [
-                2,
-   1681862400000,
+    1681862400000,
 "Car" 
 ] 
 ] 
@@ -105,10 +103,10 @@ test_that("UploadMetricToFactbase() can handle pre-aggregated data", {
         expect_json_equal(
             UploadMetricToFactbase(
                 data=data.frame(
-                    `Metric name`=c(1, 2),
                     When= as.POSIXct(c("2023-04-18", "2023-04-19"), "%Y-%m-%d", tz="UTC"),
                     Dimension1=c("Dog", "Car")),
                 token="fake",
+                name="Explicit metric name",
                 period_type="day",
                 aggregation="sum",
                 test_return_json=TRUE
