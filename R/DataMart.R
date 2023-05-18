@@ -519,10 +519,16 @@ uploadRScript <- function(r.code,
 {
     if (nzchar(send.to))
     {
-        api.root = Sys.getenv(paste0("API_ROOT_", send.to))
-        company.secret = Sys.getenv(paste0("COMPANY_SECRET_", send.to))
-        client.id = Sys.getenv(paste0("CLIENT_ID_  ", send.to))
+        api.root <- Sys.getenv(paste0("API_ROOT_", send.to))
+        company.secret <- Sys.getenv(paste0("COMPANY_SECRET_", send.to))
+        client.id <- Sys.getenv(paste0("CLIENT_ID_  ", send.to))
     }
+    credentials <- setNames(c(api.root, company.secret, client.id),
+                            c("api.root", "company.secret", "client.id"))
+    missing.credentials <- which(!nzchar(credentials))
+    if (length(missing.credentials) > 0)
+        stop("Some of your API credentials are missing: ", paste0(names(credentials[missing.credentials]), collapse = ","))
+
     if (missing(filename))
         stop(substitute(filename), " argument required as ",
              "filename to write in Displayr Drive is required.")
