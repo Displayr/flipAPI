@@ -301,7 +301,7 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
         new.tmpfile <- paste0(dirname(tmpfile), "/", filename)
         file.rename(tmpfile, new.tmpfile)
         zipfile <- tempfile(fileext = ".zip")
-        zip(zipfile, new.tmpfile, include_directories = FALSE)
+        zip(basename(zipfile), basename(new.tmpfile), root = getwd())
         file.remove(new.tmpfile)
         filename <- paste0(file_path_sans_ext(filename), ".zip")
         tmpfile <- zipfile
