@@ -33,6 +33,12 @@ test_that("SaveData/LoadData", {
   expect_invisible(QSaveData(anim, "anim.gif"))
   expect_true(QFileExists("anim.gif"))
   expect_error(QLoadData("anim.gif"), "Invalid file type specified.")
+
+  # Compressed SAV
+  expect_warning(QSaveData(mtcars, "mtcars.xlsx",
+                             compression.file.size.threshold = 1),
+                 "Object compressed into a zip file and uploaded to Displayr Cloud Drive.")
+  expect_true(QFileExists("mtcars.zip"))
 })
 
 test_that("Save/Load Data: bad cases", {
