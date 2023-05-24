@@ -243,14 +243,18 @@ QLoadData <- function(filename, company.token = NA, ...)
 #'
 #' @param object object. The object to be uploaded.
 #' @param filename character string. Name of the file to be written to.
+#' @param compression.file.size.threshold numeric scalar. Files of size
+#' (in bytes) larger than this value will be compressed into a zip file.
+#' Defaults to NULL, in which case no compression occurs.
 #' @param ... Other parameters to pass to \code{\link{write.csv}}, \code{\link{saveRDS}},
 #' \code{\link{write.xlsx}}, or \code{\link{write_sav}}.
 #'
 #' @importFrom haven write_sav
 #' @importFrom httr POST add_headers upload_file
-#' @importFrom utils URLencode
+#' @importFrom utils URLencode zip
 #' @importFrom openxlsx write.xlsx
 #' @importFrom gganimate anim_save
+#' @importFrom tools file_path_sans_ext
 #' @return NULL invisibly. Called for the purpose of uploading data
 #' and assumed to succeed if no errors are thrown.
 #' @note Saving to Powerpoint .pptx files is only possible for rpptx objects created using
@@ -262,7 +266,8 @@ QLoadData <- function(filename, company.token = NA, ...)
 #' When saving to .xlsx file, \code{object} is first coerced to a data.frame using
 #' \code{\link{as.data.frame}}.
 #' @export
-QSaveData <- function(object, filename, ...)
+QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
+                      ...)
 {
     type <- getFileType(filename)
     if (is.null(type) || type == "rda")
@@ -288,6 +293,17 @@ QSaveData <- function(object, filename, ...)
         stop("Sorry, current gif files can only be saved to the Cloud Drive for ",
              "outputs from the gganimate package.")
 
+    is.compressed <- !is.null(compression.file.size.threshold) &&
+                     file.size(tmpfile) > compression.file.size.threshold
+    if (is.compressed) {
+        file.rename(tmpfile, paste0(dirname(tmpfile), "/", filename))
+        zipfile <- tempfile(fileext = ".zip")
+        zip(zipfile, tmpfile)
+        file.remove(tmpfile)
+        filename <- paste0(file_path_sans_ext(filename), ".zip")
+        tmpfile <- zipfile
+    }
+
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
     company.secret <- getCompanySecret()
@@ -308,17 +324,23 @@ QSaveData <- function(object, filename, ...)
         stopBadRequest(res, "Could not save file.")
     }
 
-    if (type != "gif")
-        msg <- paste("Object uploaded to Displayr Cloud Drive To re-import object use:",
-                     "   > library(flipAPI)",
-                     paste0("   > QLoadData('", filename, "')"),
-                     sep = "\n")
-    else
-        msg <- paste0("Object uploaded to Displayr Cloud Drive. To re-import select:\n ",
-                      "    Image > Displayr Cloud Drive\n",
-                      "then select ", sQuote(filename), " from the dropdown menu.")
-    message(msg)
-    invisible(msg)
+    if (!is.compressed) {
+        if (type != "gif")
+            msg <- paste("Object uploaded to Displayr Cloud Drive To re-import object use:",
+                         "   > library(flipAPI)",
+                         paste0("   > QLoadData('", filename, "')"),
+                         sep = "\n")
+        else
+            msg <- paste0("Object uploaded to Displayr Cloud Drive. To re-import select:\n ",
+                          "    Image > Displayr Cloud Drive\n",
+                          "then select ", sQuote(filename), " from the dropdown menu.")
+        message(msg)
+        invisible(msg)
+    } else {
+        msg <- "Object compressed into a zip file and uploaded to Displayr Cloud Drive."
+        warning(msg)
+        invisible(msg)
+    }
 }
 
 qSaveImage <- function(filename)

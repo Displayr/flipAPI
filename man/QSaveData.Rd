@@ -4,12 +4,16 @@
 \alias{QSaveData}
 \title{Save an object}
 \usage{
-QSaveData(object, filename, ...)
+QSaveData(object, filename, compression.file.size.threshold = NULL, ...)
 }
 \arguments{
 \item{object}{object. The object to be uploaded.}
 
 \item{filename}{character string. Name of the file to be written to.}
+
+\item{compression.file.size.threshold}{numeric scalar. Files of size
+(in bytes) larger than this value will be compressed into a zip file.
+Defaults to NULL, in which case no compression occurs.}
 
 \item{...}{Other parameters to pass to \code{\link{write.csv}}, \code{\link{saveRDS}},
 \code{\link{write.xlsx}}, or \code{\link{write_sav}}.}
