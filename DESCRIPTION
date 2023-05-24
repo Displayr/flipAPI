@@ -27,7 +27,8 @@ Imports:
     openxlsx,
     gganimate,
     git2r,
-    RJSONIO
+    RJSONIO,
+    zip
 Remotes: Displayr/flipTransformations,
     Tatvic/RGoogleAnalytics,
     cran/rgeolocate

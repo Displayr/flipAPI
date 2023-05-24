@@ -251,10 +251,11 @@ QLoadData <- function(filename, company.token = NA, ...)
 #'
 #' @importFrom haven write_sav
 #' @importFrom httr POST add_headers upload_file
-#' @importFrom utils URLencode zip
+#' @importFrom utils URLencode
 #' @importFrom openxlsx write.xlsx
 #' @importFrom gganimate anim_save
 #' @importFrom tools file_path_sans_ext
+#' @importFrom zip zip
 #' @return NULL invisibly. Called for the purpose of uploading data
 #' and assumed to succeed if no errors are thrown.
 #' @note Saving to Powerpoint .pptx files is only possible for rpptx objects created using
