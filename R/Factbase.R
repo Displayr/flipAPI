@@ -76,7 +76,9 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
     data[[when_column]] <- as.POSIXct(AsDateTime(data[[when_column]]))   # as.POSIXct won't be necessary when DS-4683 is fixed
     data[[when_column]] <- as.numeric(data[[when_column]]) * 1000  # convert from POSIXct (seconds since 1970)
                                                                    # to JavaScript (ms since 1970)
-    dimension_data <- lapply(data[dimension_columns], function(column) { as.character(column)})
+    for (dimension_i in dimension_columns) { 
+        data[[dimension_i]] <- as.character(data[[dimension_i]])
+    }
     dimension_names <- column_names[dimension_columns]
     text_dimensions <- mapply(function(v, name) {
         list(
@@ -84,7 +86,7 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
             dimensionType="in_data",
             valueType="text",
             unique=!is.null(update_key) && update_key == name)
-    }, dimension_data, dimension_names, SIMPLIFY=FALSE, USE.NAMES=FALSE)
+    }, dimension_names, dimension_names, SIMPLIFY=FALSE, USE.NAMES=FALSE)
     dimensions <- c(time_dimension, text_dimensions)
 
     # Structure observations as a list of lists for toJSON.

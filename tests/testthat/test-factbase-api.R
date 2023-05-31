@@ -30,18 +30,26 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
 "dimensionType": "in_data",
 "valueType": "text",
 "unique": false 
+},
+{
+ "name": "DimensionWillBeConvertedToText",
+"dimensionType": "in_data",
+"valueType": "text",
+"unique": false 
 } 
 ],
 "data": [
  [
                 1,
    1681776000000,
-"Dog" 
+"Dog",
+"11" 
 ],
 [
                 2,
    1681862400000,
-"Car" 
+"Car",
+"22" 
 ] 
 ] 
 }'
@@ -51,7 +59,8 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
                 data=data.frame(
                     `Metric name`=c(1, 2),
                     When= as.POSIXct(c("2023-04-18", "2023-04-19"), "%Y-%m-%d", tz="UTC"),
-                    Dimension1=c("Dog", "Car")),
+                    Dimension1=c("Dog", "Car"),
+                    DimensionWillBeConvertedToText=c(11, 22)),
                 token="fake",
                 mode="append_or_update",
                 aggregation="sum",
