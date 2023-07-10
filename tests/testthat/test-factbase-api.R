@@ -14,6 +14,7 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
  "name": "Metric.name",
 "valueType": "real",
 "aggregation": "sum",
+"timeAggregation": "last",
 "definition": "Our definition",
 "hyperlink": "https://example.com/" 
 },
@@ -64,6 +65,7 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
                 token="fake",
                 mode="append_or_update",
                 aggregation="sum",
+                time_aggregation="last",
                 definition="Our definition",
                 hyperlink="https://example.com/",
                 update_key="When",
@@ -79,7 +81,8 @@ test_that("UploadMetricToFactbase() can handle pre-aggregated data and use the `
  "metric": {
  "name": "Explicit metric name",
 "valueType": "real",
-"aggregation": "sum" 
+"aggregation": "sum",
+"timeAggregation": null 
 },
 "update": "replace_all",
 "dimensions": [

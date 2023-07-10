@@ -15,6 +15,9 @@
 #' @param mode One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
 #' @param aggregation One of "none", "minimum", "maximum", "sum", "average", "first", "last".
+#' @param time_aggregation One of "none", "minimum", "maximum", "sum", "average", "first", "last".
+#'   If supplied then this operation will be used when aggregating data in different periods,
+#'   and `aggregation` will only be used to aggregate data in different label dimensions.
 #' @param definition A detailed explanation of the meaning and derivation of the metric.
 #' @param hyperlink A link to a web page where more can be read about the metric.
 #' @param period_type (Optional) One of "day", "week", "month", "quarter" or "year".
@@ -36,7 +39,7 @@
 #' @importFrom flipTime AsDateTime
 #' @export
 UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", aggregation="sum",
-        definition=NULL, hyperlink=NULL, period_type = NULL, update_key=NULL,
+        time_aggregation=NULL, definition=NULL, hyperlink=NULL, period_type = NULL, update_key=NULL,
         save_failed_json_to=NULL, test_return_json=FALSE) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
@@ -46,6 +49,8 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         stop("There must be at least one column in 'data'")
     if (!(aggregation %in% c("none", "minimum", "maximum", "sum", "average", "first", "last")))
         stop(paste("Unknown 'aggregation':", aggregation))
+    if (!is.null(time_aggregation) && !(time_aggregation %in% c("none", "minimum", "maximum", "sum", "average", "first", "last")))
+        stop(paste("Unknown 'time_aggregation':", time_aggregation))
     if (!is.null(period_type) && !(period_type %in% c("day", "week", "month", "quarter", "year")))
         stop(paste("Unknown 'period_type:'", period_type))
 
@@ -100,7 +105,8 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
     metric <- list(
         name=metric_name,
         valueType="real",
-        aggregation=aggregation
+        aggregation=aggregation,
+        timeAggregation=time_aggregation
     )
     if (!is.null(definition))
         metric$definition <- definition
