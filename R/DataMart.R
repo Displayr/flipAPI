@@ -533,6 +533,7 @@ IsDisplayrCloudDriveAvailable <- function()
     !is.null(company.secret) && company.secret != "UNKNOWN"
 }
 
+#' @importFrom stats setNames
 uploadRScript <- function(r.code,
                           js.code = NULL,
                           filename,
