@@ -10,6 +10,7 @@ UploadMetricToFactbase(
   name = NULL,
   mode = "replace_all",
   aggregation = "sum",
+  time_aggregation = NULL,
   definition = NULL,
   hyperlink = NULL,
   period_type = NULL,
@@ -38,6 +39,10 @@ be used.}
 FactPostUpdateType.}
 
 \item{aggregation}{One of "none", "minimum", "maximum", "sum", "average", "first", "last".}
+
+\item{time_aggregation}{One of "none", "minimum", "maximum", "sum", "average", "first", "last".
+If supplied then this operation will be used when aggregating data in different periods,
+and `aggregation` will only be used to aggregate data in different label dimensions.}
 
 \item{definition}{A detailed explanation of the meaning and derivation of the metric.}
 
