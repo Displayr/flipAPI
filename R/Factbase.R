@@ -47,7 +47,7 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
     if (!(aggregation %in% c("none", "minimum", "maximum", "sum", "average", "first", "last")))
         stop(paste("Unknown 'aggregation':", aggregation))
     if (!is.null(period_type) && !(period_type %in% c("day", "week", "month", "quarter", "year")))
-        stop(paste("Unknown 'period_type:'", period_type))
+        stop(paste("Unknown 'period_type':", period_type))
 
     # Build dimensions.
     original_data <- data
@@ -222,3 +222,118 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 
     original_data
 }
+
+#' Creates or updates a metric described by a formula over other metrics.
+#' See https://factbase.azurewebsites.net/static/pages/help.html#penetration
+#'
+#' @param metric_name The name that will appear for selection by Factbase users.
+#' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
+#'   one of these.
+#' @param numerator The name of an existing metric.  See the documentation reference above.
+#' @param denominator The name of an existing metric.  See the documentation reference above.
+#' @param dimensions_to_count A character vector or label dimension names.  See the documentation
+#'  reference above.
+#' @param definition A detailed explanation of the meaning and derivation of the metric.
+#' @param hyperlink A link to a web page where more can be read about the metric.
+#' @param test_return_json For testing only.  Ignore.
+#'
+#' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
+#'   last call in R code.
+#'
+#' @importFrom RJSONIO toJSON
+#' @export
+UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, denominator, dimensions_to_count, definition, hyperlink=NULL, test_return_json=F) {
+    if (!is.character(metric_name) || length(metric_name) != 1)
+        stop("metric_name must be a character vector of length 1")
+    if (!is.character(token) || length(token) != 1)
+        stop("token must be a character vector of length 1")
+    if (!is.character(numerator) || length(numerator) != 1)
+        stop("numerator must be a character vector of length 1")
+    if (!is.character(denominator) || length(denominator) != 1)
+        stop("denominator must be a character vector of length 1")
+    if (!is.character(dimensions_to_count) || length(metric_name) < 1)
+        stop("dimensions_to_count must contain a character vector with a length of at least 1")
+    if (!is.character(definition) || length(metric_name) != 1)
+        stop("definition must be a character vector of length 1, or null")
+    if (!is.null(hyperlink) && (!is.character(hyperlink) || length(hyperlink) != 1))
+        stop("hyperlink must be a character vector of length 1, or null")
+    
+    body <- toJSON(list(
+        type="penetration",
+        numeratorMetricName=numerator,
+        denominatorMetricName=denominator,
+        dimensionsToCount=list(dimensions_to_count)
+    ))
+    if (test_return_json)
+        return(body)
+    
+    url <- paste0("https://factbase.azurewebsites.net/formula?metric=", URLencode(metric_name), "&definition=", URLencode(definition))
+    if (!is.null(hyperlink))
+        url <- paste0(url, '&hyperlink=', hyperlink)
+    r <- POST(url, body = body, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
+    if (r$status_code != 200)
+        stop(paste0(r$status_code, ": ", content(r, "text")))
+}
+
+#' Creates or updates a metric described by a formula over other metrics.
+#' See https://factbase.azurewebsites.net/static/pages/help.html#ratio
+#'
+#' @param metric_name The name that will appear for selection by Factbase users.
+#' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
+#'   one of these.
+#' @param numerator The name of an existing metric.  See the documentation reference above.
+#' @param denominator The name of an existing metric.  See the documentation reference above.
+#' @param smoothing.window The period over which to smooth the data.  One of "day", "week",
+#'   "month", "quarter" or "year".  See the documentation reference above.
+#' @param smoothing.sum TRUE to smooth using a rolling sum.  If not specified then a rolling
+#'   average will be used.  See the documentation reference above.
+#' @param definition A detailed explanation of the meaning and derivation of the metric.
+#' @param hyperlink A link to a web page where more can be read about the metric.
+#' @param test_return_json For testing only.  Ignore.
+#'
+#' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
+#'   last call in R code.
+#'
+#' @importFrom RJSONIO toJSON
+#' @export
+UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominator, smoothing.window=NULL, smoothing.sum=F, definition, hyperlink=NULL, test_return_json=F) {
+    if (!is.character(metric_name) || length(metric_name) != 1)
+        stop("metric_name must be a character vector of length 1")
+    if (!is.character(token) || length(token) != 1)
+        stop("token must be a character vector of length 1")
+    if (!is.character(numerator) || length(numerator) != 1)
+        stop("numerator must be a character vector of length 1")
+    if (!is.character(denominator) || length(denominator) != 1)
+        stop("denominator must be a character vector of length 1")
+    if (!is.null(smoothing.window) && !(smoothing.window %in% c("day", "week", "month", "quarter", "year")))
+        stop(paste("Unknown 'smoothing.window':", smoothing.window))
+    if (!is.logical(smoothing.sum) || length(smoothing.sum) != 1)
+        stop("smoothing.sum must be a logical vector of length 1")
+    if (!is.character(definition) || length(metric_name) != 1)
+        stop("definition must be a character vector of length 1, or null")
+    if (!is.null(hyperlink) && (!is.character(hyperlink) || length(hyperlink) != 1))
+        stop("hyperlink must be a character vector of length 1, or null")
+    
+    body <- list(
+        type="ratio",
+        numeratorMetricName=numerator,
+        denominatorMetricName=denominator
+    )
+    if (!is.null(smoothing.window))
+        body$smoothing <- list(
+            window=smoothing.window,
+            sum=smoothing.sum
+        )
+    
+    json <- toJSON(body)
+    if (test_return_json)
+        return(json)
+    
+    url <- paste0("https://factbase.azurewebsites.net/formula?metric=", URLencode(metric_name), "&definition=", URLencode(definition))
+    if (!is.null(hyperlink))
+        url <- paste0(url, '&hyperlink=', hyperlink)
+    r <- POST(url, body = json, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
+    if (r$status_code != 200)
+        stop(paste0(r$status_code, ": ", content(r, "text")))
+}
+
