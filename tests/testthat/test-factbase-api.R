@@ -176,3 +176,58 @@ test_that("UploadRelationshipToFactbase() produces correct JSON", {
         ), NA
     )
 })
+
+test_that("UpdateFactbasePenetrationFormula() produces correct JSON", {
+    expected_json <- '{
+ "type": "penetration",
+"numeratorMetricName": "query.test.ts Barks",
+"denominatorMetricName": "query.test.ts Number of dogs in office",
+"dimensionsToCount": [
+ "Office dog name" 
+] 
+}'
+    expect_error(
+        expect_json_equal(
+            UpdateFactbasePenetrationFormula(
+                metric_name="query.test.ts Barks penetration vs Number of dogs in office",
+                token="fake",
+                numerator="query.test.ts Barks",
+                denominator="query.test.ts Number of dogs in office",
+                dimensions_to_count=c("Office dog name"),
+                definition="definition of the new metric",
+                hyperlink=NULL,
+                test_return_json=TRUE
+            ),
+            expected_json
+        ), NA
+    )
+})
+
+
+test_that("UpdateFactbaseRatioFormula() produces correct JSON", {
+    expected_json <- '{
+ "type": "ratio",
+"numeratorMetricName": "HR: Employee Attrition By Team",
+"denominatorMetricName": "HR: Employees - Headcount By Team",
+"smoothing": {
+ "window": "year",
+"sum": true 
+} 
+}'
+    expect_error(
+        expect_json_equal(
+            UpdateFactbaseRatioFormula(
+                metric_name="HR: Employee turnover",
+                token="fake",
+                numerator="HR: Employee Attrition By Team",
+                denominator="HR: Employees - Headcount By Team",
+                smoothing.window="year",
+                smoothing.sum=T,
+                definition="definition of the new metric",
+                hyperlink=NULL,
+                test_return_json=TRUE
+            ),
+            expected_json
+        ), NA
+    )
+})
