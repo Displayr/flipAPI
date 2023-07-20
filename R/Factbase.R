@@ -53,6 +53,12 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         stop(paste("Unknown 'time_aggregation':", time_aggregation))
     if (!is.null(period_type) && !(period_type %in% c("day", "week", "month", "quarter", "year")))
         stop(paste("Unknown 'period_type':", period_type))
+    if (!is.null(update_key)) {
+        if (!is.character(update_key))
+            stop("'update_key' must be character data")
+        if (length(update_key) != 1)
+            stop("'update_key' currently only supports a single column name.  Complain to us if this is causing you trouble")
+    }
 
     # Build dimensions.
     original_data <- data
@@ -73,7 +79,7 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
             name="_When",
             dimensionType=if (is.null(period_type)) "in_data" else "period_type_in_table_name",
             valueType="datetime",
-            unique=!is.null(update_key) && update_key == column_names[when_column] || !is.null(period_type)
+            unique=!is.null(update_key) && update_key == column_names[when_column]
         )
     )
     if (!is.null(period_type))
@@ -237,7 +243,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #'   one of these.
 #' @param numerator The name of an existing metric.  See the documentation reference above.
 #' @param denominator The name of an existing metric.  See the documentation reference above.
-#' @param dimensions_to_count A character vector or label dimension names.  See the documentation
+#' @param dimensions_to_count A character vector of label dimension names.  See the documentation
 #'  reference above.
 #' @param definition A detailed explanation of the meaning and derivation of the metric.
 #' @param hyperlink A link to a web page where more can be read about the metric.
