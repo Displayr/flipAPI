@@ -82,8 +82,10 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
             unique=!is.null(update_key) && update_key == column_names[when_column]
         )
     )
-    if (!is.null(period_type))
+    if (!is.null(period_type)) {
         time_dimension[[1]]$valueForTheseObservations <- list(day='Day',week='Week',month='Month',quarter='Quarter',year='Year')[[period_type]]
+        time_dimension[[1]]$periodType <- period_type
+    }
     data[[when_column]] <- as.POSIXct(AsDateTime(data[[when_column]]))   # as.POSIXct won't be necessary when DS-4683 is fixed
     data[[when_column]] <- as.numeric(data[[when_column]]) * 1000  # convert from POSIXct (seconds since 1970)
                                                                    # to JavaScript (ms since 1970)
