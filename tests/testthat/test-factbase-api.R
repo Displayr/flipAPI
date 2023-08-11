@@ -91,11 +91,7 @@ test_that("UploadMetricToFactbase() can handle pre-aggregated data and use the `
 "dimensionType": "period_type_in_table_name",
 "valueType": "datetime",
 "unique": false,
-<<<<<<< HEAD
-"valueForTheseObservations": "Day" 
-=======
 "valueForTheseObservations": "Day",
->>>>>>> 6f66735 (untracked: Not sure how this got through)
 "periodType": "day" 
 },
 {
