@@ -10,27 +10,27 @@
 #'   * dimension n
 #' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
 #'   one of these.
-#' @param name A name for the metric.  If NULL then the name of the first column in `data` will
+#' @param name (Optional) A name for the metric.  If NULL then the name of the first column in `data` will
 #'   be used.
-#' @param mode One of "replace_all", "append" or "append_or_update" See comments for
+#' @param mode (Optional) One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
-#' @param aggregation One of "none", "minimum", "maximum", "sum", "average", "first", "last".
-#' @param time_aggregation One of "none", "minimum", "maximum", "sum", "average", "first", "last".
+#' @param aggregation (Optional) One of "none", "minimum", "maximum", "sum", "average", "first", "last".
+#' @param time_aggregation (Optional) One of "none", "minimum", "maximum", "sum", "average", "first", "last".
 #'   If supplied then this operation will be used when aggregating data in different periods,
 #'   and `aggregation` will only be used to aggregate data in different label dimensions.
-#' @param definition A detailed explanation of the meaning and derivation of the metric.
-#' @param hyperlink A link to a web page where more can be read about the metric.
+#' @param definition (Optional) A detailed explanation of the meaning and derivation of the metric.
+#' @param hyperlink (Optional) A link to a web page where more can be read about the metric.
 #' @param period_type (Optional) One of "day", "week", "month", "quarter" or "year".
 #'   This indicates that the data has been pre-aggregated into periods of that duration.
 #'   The When column should contain date/times for the _start_ of each period.
 #'   There may be no duplicate values, and the When column will be used to match data
 #'   (see update_key).
-#' @param update_key The name of a column that can be used to update the data, when `mode` is
+#' @param update_key (Optional) The name of a column that can be used to update the data, when `mode` is
 #'   "append_or_update".  Data in this column must be unique, which implies some sort of aggregation
 #'   for date/time data.
-#' @param save_failed_json_to If set then the JSON for this request will be saved to the named file
+#' @param save_failed_json_to (Optional) If set then the JSON for this request will be saved to the named file
 #'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
-#' @param test_return_json For testing only.  Ignore.
+#' @param test_return_json (Optional) For testing only.  Ignore.
 #' 
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -176,11 +176,11 @@ post_to_factbase <- function(body, token, save_failed_json_to) {
 #'   names of these dimensions.
 #' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
 #'   one of these.
-#' @param mode One of "replace_all", "append" or "append_or_update" See comments for
+#' @param mode (Optional) One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
-#' @param save_failed_json_to If set then the JSON for this request will be saved to the named file
+#' @param (Optional) save_failed_json_to If set then the JSON for this request will be saved to the named file
 #'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
-#' @param test_return_json For testing only.  Ignore.
+#' @param (Optional) test_return_json For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -246,8 +246,8 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #' @param dimensions_to_count A character vector of label dimension names.  See the documentation
 #'  reference above.
 #' @param definition A detailed explanation of the meaning and derivation of the metric.
-#' @param hyperlink A link to a web page where more can be read about the metric.
-#' @param test_return_json For testing only.  Ignore.
+#' @param (Optional) hyperlink A link to a web page where more can be read about the metric.
+#' @param (Optional) test_return_json For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -295,13 +295,13 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
 #'   one of these.
 #' @param numerator The name of an existing metric.  See the documentation reference above.
 #' @param denominator The name of an existing metric.  See the documentation reference above.
-#' @param smoothing.window The period over which to smooth the data.  One of "day", "week",
+#' @param smoothing.window (Optional) The period over which to smooth the data.  One of "day", "week",
 #'   "month", "quarter" or "year".  See the documentation reference above.
-#' @param smoothing.sum TRUE to smooth using a rolling sum.  If not specified then a rolling
+#' @param smoothing.sum (Optional) TRUE to smooth using a rolling sum.  If not specified then a rolling
 #'   average will be used.  See the documentation reference above.
-#' @param definition A detailed explanation of the meaning and derivation of the metric.
-#' @param hyperlink A link to a web page where more can be read about the metric.
-#' @param test_return_json For testing only.  Ignore.
+#' @param definition (Optional) A detailed explanation of the meaning and derivation of the metric.
+#' @param hyperlink (Optional) A link to a web page where more can be read about the metric.
+#' @param test_return_json (Optional) For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
