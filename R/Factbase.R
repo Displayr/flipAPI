@@ -15,7 +15,7 @@
 #' @param mode (Optional) One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
 #' @param aggregation (Optional) One of "none", "minimum", "maximum", "sum", "average", "first", "last".
-#' @param time_aggregation (Optional) One of "none", "minimum", "maximum", "sum", "average", "first", "last".
+#' @param time_aggregation (Optional) One of "minimum", "maximum", "sum", "average", "first", "last".
 #'   If supplied then this operation will be used when aggregating data in different periods,
 #'   and `aggregation` will only be used to aggregate data in different label dimensions.
 #' @param definition (Optional) A detailed explanation of the meaning and derivation of the metric.
@@ -84,9 +84,8 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
     )
     if (!is.null(period_type))
         time_dimension[[1]]$valueForTheseObservations <- list(day='Day',week='Week',month='Month',quarter='Quarter',year='Year')[[period_type]]
-    data[[when_column]] <- as.POSIXct(AsDateTime(data[[when_column]]))   # as.POSIXct won't be necessary when DS-4683 is fixed
-    data[[when_column]] <- as.numeric(data[[when_column]]) * 1000  # convert from POSIXct (seconds since 1970)
-                                                                   # to JavaScript (ms since 1970)
+    data[[when_column]] <- datetimes_for_factbase(data[[when_column]])
+    
     for (dimension_i in dimension_columns) { 
         data[[dimension_i]] <- as.character(data[[dimension_i]])
     }
@@ -100,13 +99,8 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
     }, dimension_names, dimension_names, SIMPLIFY=FALSE, USE.NAMES=FALSE)
     dimensions <- c(time_dimension, text_dimensions)
 
-    # Structure observations as a list of lists for toJSON.
-    list_for_observation <- function(...) {
-        list(...)
-    }
-    mapply_args <- c(list_for_observation, unname(data), list(SIMPLIFY=FALSE, USE.NAMES=FALSE))
-    observations <- do.call("mapply", mapply_args)
-
+    observations <- dataframe_to_json_ready_observations(data)
+    
     # Make HTTP request
     metric <- list(
         name=metric_name,
@@ -133,7 +127,7 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
 }
 
 is_when_column <- function(column_name) {
-    tolower(column_name) %in% c("_when", "when")  # `_when` retained for compatiblity with old callers
+    tolower(column_name) %in% c("_when", "when")  # `_when` retained for compatibility with old callers
 }
 
 find_when_column <- function(column_names) {
@@ -150,11 +144,28 @@ find_when_column <- function(column_names) {
             stop("You must include date/time data in a column called 'When'.  Talk to support if you want this constraint relaxed.")  # nolint
 }
 
+dataframe_to_json_ready_observations <- function(data) {
+    # Structure observations as a list of lists for toJSON.
+    list_for_observation <- function(...) {
+        list(...)
+    }
+    mapply_args <- c(list_for_observation, unname(data), list(SIMPLIFY=FALSE, USE.NAMES=FALSE))
+    do.call("mapply", mapply_args)
+}
+
+datetimes_for_factbase <- function(v) {
+    posixct <- AsDateTime(v)
+    as.numeric(posixct) * 1000  # from POSIXct (seconds since 1970) to JavaScript (ms since 1970)
+}
+
 #' @importFrom httr POST timeout add_headers content
 post_to_factbase <- function(body, token, save_failed_json_to) {
     message(paste0("POSTing ", nchar(body), " characters from ", Sys.info()["nodename"]))
     url <- "https://factbase.azurewebsites.net/fact"
-    r <- POST(url, body = body, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
+    headers <- add_headers(
+        `x-facttoken` = token,
+        `content-type` = 'application/json')
+    r <- POST(url, body = body, encode = "json", headers, timeout(3600))
     if (r$status_code != 200) {
         if (!is.null(save_failed_json_to)) {
             connection <- QFileOpen(save_failed_json_to, "w",
@@ -234,6 +245,84 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 
     original_data
 }
+
+
+#' Upload a table of raw data to Factbase.
+#'
+#' @param table_name The name to use to refer to this data in Factbase.
+#' @param data A data.frame containing columns of data.  Character, factor (converted to character),
+#'   numeric, boolean (converted to character) and date/time columns are acceptable.
+#' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
+#'   one of these.
+#' @param mode (Optional) One of "replace_all", "append" or "append_or_update" See comments for
+#'   FactPostUpdateType.
+#' @param (Optional) nullable_columns If set then this should be a character vector naming the
+#'   columns that may contain null values.
+#' @param (Optional) test_return_json For testing only.  Ignore.
+#'
+#' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
+#'   last call in R code.
+#'
+#' @importFrom flipTime AsDateTime
+#' @importFrom RJSONIO toJSON
+#' @export
+UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", nullable_columns=NULL, test_return_json=FALSE) {
+    if (!is.character(table_name))
+        stop('table_name must be a unitary character vector')
+    if (!is.data.frame(data))
+        # Include the data in the error message because often this will be an SQL error,
+        # returned instead of a data.frame.  This makes it easier for users to spot the problem.
+        stop(paste("'data' must be a data.frame, but got", format(data)))
+    if (length(data) < 1)
+        stop("There must be at least one column in 'data'")
+    if (!is.null(nullable_columns)) {
+        if (!is.character(nullable_columns))
+            stop("'nullable_columns' must be character data")
+    }
+    
+    columns <- mapply(function(v, name, i) {
+        list(
+            name=name,
+            valueType=value_type_for_vector(v),
+            mayContainNulls=if(is.null(nullable_columns)){F}else{name %in% nullable_columns})
+    }, data, names(data), SIMPLIFY=FALSE, USE.NAMES=FALSE)
+    
+    data <- data.frame(lapply(data, function(v) {
+        if (value_type_for_vector(v) == "datetime")
+            datetimes_for_factbase(v)
+        else
+            v
+    }))
+    
+    observations <- dataframe_to_json_ready_observations(data)
+       
+    request_body <- toJSON(list(
+        tableName=table_name,
+        update=mode,
+        columnDefinitions=columns,
+        rows=observations
+    ), digits=15, .na="null")
+    if (test_return_json) {
+        return(request_body)
+    }
+    post_to_factbase(body, token, save_failed_json_to)
+    
+    data
+}
+
+value_type_for_vector <- function(v) {
+    if (is.null(v))
+        stop('Columns in `data` may not by NULL')
+    else if (inherits(v, c("Date", "POSIXt")))
+        "datetime"
+    else if (is.character(v) || is.factor(v))
+        "text"
+    else if (is.numeric(v))
+        "real"
+    else
+        stop(paste('Cannot work out which data type to use for column containing', format(v)))
+}
+
 
 #' Creates or updates a metric described by a formula over other metrics.
 #' See https://factbase.azurewebsites.net/static/pages/help.html#penetration

@@ -177,6 +177,71 @@ test_that("UploadRelationshipToFactbase() produces correct JSON", {
     )
 })
 
+test_that("UploadTableToFactbase() produces correct JSON", {
+    expected_json <- '{
+ "tableName": "My Table",
+"update": "replace_all",
+"columnDefinitions": [
+ {
+ "name": "text",
+"valueType": "text",
+"mayContainNulls": false 
+},
+{
+ "name": "numbers",
+"valueType": "real",
+"mayContainNulls": true 
+},
+{
+ "name": "factor",
+"valueType": "text",
+"mayContainNulls": false 
+},
+{
+ "name": "dates",
+"valueType": "datetime",
+"mayContainNulls": true 
+} 
+],
+"rows": [
+ [
+ "Dog",
+               1,
+"big",
+   1693404000000 
+],
+[
+ "Cat",
+null,
+"big",
+null 
+],
+[
+ "Lion",
+               3,
+"small",
+   1693490400000 
+] 
+] 
+}'
+    expect_error(
+        expect_json_equal(
+            UploadTableToFactbase(
+                table_name="My Table",
+                data=data.frame(
+                    text=c("Dog", "Cat", "Lion"),
+                    numbers=c(1, NA, 3),
+                    factor=factor(c("big", "big", "small")),
+                    dates=as.POSIXct(c("2023-08-31", NA, "2023-09-01"))),
+                token="fake",
+                nullable_columns=c("numbers", "dates"),
+                test_return_json=TRUE
+            ),
+            expected_json
+        ), NA
+    )
+})
+
 test_that("UpdateFactbasePenetrationFormula() produces correct JSON", {
     expected_json <- '{
  "type": "penetration",
