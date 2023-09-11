@@ -32,36 +32,36 @@ UploadMetricToFactbase(
 \item{token}{A guid that identifies and authenticates the request.  Talk to Oliver if you need
 one of these.}
 
-\item{name}{A name for the metric.  If NULL then the name of the first column in `data` will
+\item{name}{(Optional) A name for the metric.  If NULL then the name of the first column in `data` will
 be used.}
 
-\item{mode}{One of "replace_all", "append" or "append_or_update" See comments for
+\item{mode}{(Optional) One of "replace_all", "append" or "append_or_update" See comments for
 FactPostUpdateType.}
 
-\item{aggregation}{One of "none", "minimum", "maximum", "sum", "average", "first", "last".}
+\item{aggregation}{(Optional) One of "none", "minimum", "maximum", "sum", "average", "first", "last".}
 
-\item{time_aggregation}{One of "none", "minimum", "maximum", "sum", "average", "first", "last".
+\item{time_aggregation}{(Optional) One of "minimum", "maximum", "sum", "average", "first", "last".
 If supplied then this operation will be used when aggregating data in different periods,
 and `aggregation` will only be used to aggregate data in different label dimensions.}
 
-\item{definition}{A detailed explanation of the meaning and derivation of the metric.}
+\item{definition}{(Optional) A detailed explanation of the meaning and derivation of the metric.}
 
-\item{hyperlink}{A link to a web page where more can be read about the metric.}
+\item{hyperlink}{(Optional) A link to a web page where more can be read about the metric.}
 
 \item{period_type}{(Optional) One of "day", "week", "month", "quarter" or "year".
 This indicates that the data has been pre-aggregated into periods of that duration.
-Then When column should contain date/times for the _start_ of each period.
+The When column should contain date/times for the _start_ of each period.
 There may be no duplicate values, and the When column will be used to match data
 (see update_key).}
 
-\item{update_key}{The name of a column that can be used to update the data, when `mode` is
+\item{update_key}{(Optional) The name of a column that can be used to update the data, when `mode` is
 "append_or_update".  Data in this column must be unique, which implies some sort of aggregation
 for date/time data.}
 
-\item{save_failed_json_to}{If set then the JSON for this request will be saved to the named file
+\item{save_failed_json_to}{(Optional) If set then the JSON for this request will be saved to the named file
 in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.}
 
-\item{test_return_json}{For testing only.  Ignore.}
+\item{test_return_json}{(Optional) For testing only.  Ignore.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the
