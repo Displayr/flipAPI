@@ -305,7 +305,7 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", n
     if (test_return_json) {
         return(request_body)
     }
-    post_to_factbase(body, token, save_failed_json_to)
+    post_to_factbase(request_body, token, save_failed_json_to)
     
     data
 }
