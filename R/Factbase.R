@@ -121,7 +121,7 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
     if (test_return_json) {
         return(body)
     }
-    post_to_factbase(body, token, save_failed_json_to)
+    post_to_factbase("fact", body, token, save_failed_json_to)
 
     original_data
 }
@@ -159,9 +159,9 @@ datetimes_for_factbase <- function(v) {
 }
 
 #' @importFrom httr POST timeout add_headers content
-post_to_factbase <- function(body, token, save_failed_json_to) {
+post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
     message(paste0("POSTing ", nchar(body), " characters from ", Sys.info()["nodename"]))
-    url <- "https://factbase.azurewebsites.net/fact"
+    url <- paste0("https://factbase.azurewebsites.net/", endpoint)
     headers <- add_headers(
         `x-facttoken` = token,
         `content-type` = 'application/json')
@@ -241,7 +241,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
     if (test_return_json) {
         return(body)
     }
-    post_to_factbase(body, token, save_failed_json_to)
+    post_to_factbase("fact", body, token, save_failed_json_to)
 
     original_data
 }
@@ -305,7 +305,7 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", n
     if (test_return_json) {
         return(request_body)
     }
-    post_to_factbase(body, token, save_failed_json_to)
+    post_to_factbase("table", request_body, token, NULL)
     
     data
 }
