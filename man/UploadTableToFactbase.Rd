@@ -9,7 +9,7 @@ UploadTableToFactbase(
   data,
   token,
   mode = "replace_all",
-  nullable_columns = NULL,
+  na_columns = NULL,
   test_return_json = FALSE
 )
 }

@@ -256,8 +256,8 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #'   one of these.
 #' @param mode (Optional) One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
-#' @param (Optional) nullable_columns If set then this should be a character vector naming the
-#'   columns that may contain null values.
+#' @param (Optional) na_columns If set then this should be a character vector naming the
+#'   columns that may contain NAs, which will be converted into nulls int the resultant table.
 #' @param (Optional) test_return_json For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
@@ -266,7 +266,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #' @importFrom flipTime AsDateTime
 #' @importFrom RJSONIO toJSON
 #' @export
-UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", nullable_columns=NULL, test_return_json=FALSE) {
+UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", na_columns=NULL, test_return_json=FALSE) {
     if (!is.character(table_name))
         stop('table_name must be a unitary character vector')
     if (!is.data.frame(data))
@@ -275,16 +275,19 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", n
         stop(paste("'data' must be a data.frame, but got", format(data)))
     if (length(data) < 1)
         stop("There must be at least one column in 'data'")
-    if (!is.null(nullable_columns)) {
-        if (!is.character(nullable_columns))
-            stop("'nullable_columns' must be character data")
+    if (!is.null(na_columns)) {
+        if (!is.character(na_columns))
+            stop("'na_columns' must be character data")
     }
     
     columns <- mapply(function(v, name, i) {
+        nullable <- if(is.null(na_columns)){F}else{name %in% na_columns}
+        if (!nullable && any(is.na(v)))
+            stop(paste0('data[["', name, '"]] contains NAs.  Factbase will accept these and convert them into nulls if you supply this column name in the na_columns parameter'))
         list(
             name=name,
             valueType=value_type_for_vector(v),
-            mayContainNulls=if(is.null(nullable_columns)){F}else{name %in% nullable_columns})
+            mayContainNulls=nullable)
     }, data, names(data), SIMPLIFY=FALSE, USE.NAMES=FALSE)
     
     data <- data.frame(lapply(data, function(v) {

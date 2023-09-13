@@ -234,12 +234,17 @@ null
                     factor=factor(c("big", "big", "small")),
                     dates=as.POSIXct(c("2023-08-31", NA, "2023-09-01"))),
                 token="fake",
-                nullable_columns=c("numbers", "dates"),
+                na_columns=c("numbers", "dates"),
                 test_return_json=TRUE
             ),
             expected_json
         ), NA
     )
+})
+
+test_that("UploadTableToFactbase() rejects NAs", {
+    expect_error(UploadTableToFactbase("Blah", data.frame(n=c(42, NA)), "fake_token"),
+                 regexp="contains NAs")
 })
 
 test_that("UpdateFactbasePenetrationFormula() produces correct JSON", {
