@@ -279,6 +279,7 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", n
         if (!is.character(na_columns))
             stop("'na_columns' must be character data")
     }
+    original_data <- data
     
     columns <- mapply(function(v, name, i) {
         nullable <- if(is.null(na_columns)){F}else{name %in% na_columns}
@@ -310,7 +311,7 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", n
     }
     post_to_factbase("table", request_body, token, NULL)
     
-    data
+    original_data
 }
 
 value_type_for_vector <- function(v) {
