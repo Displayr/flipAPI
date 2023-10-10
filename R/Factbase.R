@@ -165,7 +165,10 @@ post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
     headers <- add_headers(
         `x-facttoken` = token,
         `content-type` = 'application/json')
-    r <- POST(url, body = body, encode = "json", headers, timeout(3600))
+    MAX_BODY_SIZE <- 500000000  # matches FUNCTIONS_REQUEST_BODY_SIZE_LIMIT in portal > Factbase > Configuration
+    if (nchar(body) > MAX_BODY_SIZE)
+        stop(paste0("Your data uses ", nchar(body), "bytes, but the limit is ", MAX_BODY_SIZE), ".  Reduce the quantity of data you are sending.")
+    r <- POST(url, body = body, headers, timeout(3600))
     if (r$status_code != 200) {
         if (!is.null(save_failed_json_to)) {
             connection <- QFileOpen(save_failed_json_to, "w",
@@ -251,7 +254,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #'
 #' @param table_name The name to use to refer to this data in Factbase.
 #' @param data A data.frame containing columns of data.  Character, factor (converted to character),
-#'   numeric, boolean (converted to character) and date/time columns are acceptable.
+#'   numeric, boolean (converted to character) and date/time (`Date` or `POSIXt`) columns are acceptable.
 #' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
 #'   one of these.
 #' @param mode (optional) One of "replace_all", "append" or "append_or_update" See comments for
@@ -304,7 +307,8 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", n
         tableName=table_name,
         update=mode,
         columnDefinitions=columns,
-        rows=observations
+        rows=observations,
+        collapse=""
     ), digits=15, .na="null")
     if (test_return_json) {
         return(request_body)
