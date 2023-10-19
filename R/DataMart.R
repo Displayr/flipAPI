@@ -18,8 +18,8 @@ QFileExists <- function(filename, show.warning = TRUE)
 {
     company.secret <- getCompanySecret()
     client.id <- getClientId()
-    api.root <- getApiRoot()
-    res <- try(HEAD(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
+    api.root <- getApiRoot("DataMartFileExists")
+    res <- try(GET(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                     config=add_headers("X-Q-Company-Secret" = company.secret,
                                        "X-Q-Project-ID" = client.id)))
 
@@ -440,13 +440,13 @@ getCompanySecret <- function()
 #' @return Region-specific api root as a string.
 #'
 #' @noRd
-getApiRoot <- function()
+getApiRoot <- function(endpoint = "DataMart")
 {
     region <- URLencode(get0("region", ifnotfound = ""), TRUE)
     if (region == "") stopNotDisplayr("region")
     if (region == "app")
         region <- "displayr-app"  # to avoid Dynamic Site Acceleration CDN, which limits uploads to 100MB
-    api.root <- paste0("https://", region, ".displayr.com/api/DataMart/")
+    api.root <- paste0("https://", region, ".displayr.com/api/", endpoint, "/")
     return (api.root)
 }
 
