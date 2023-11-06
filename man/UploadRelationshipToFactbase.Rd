@@ -21,10 +21,13 @@ names of these dimensions.}
 \item{token}{A guid that identifies and authenticates the request.  Talk to Oliver if you need
 one of these.}
 
-\item{mode}{(Optional) One of "replace_all", "append" or "append_or_update" See comments for
+\item{mode}{(optional) One of "replace_all", "append" or "append_or_update" See comments for
 FactPostUpdateType.}
 
-\item{(Optional)}{test_return_json For testing only.  Ignore.}
+\item{save_failed_json_to}{(optional) If set then the JSON for this request will be saved to the named file
+in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.}
+
+\item{test_return_json}{(optional) For testing only.  Ignore.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the

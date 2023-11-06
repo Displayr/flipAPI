@@ -187,11 +187,11 @@ post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
 #'   names of these dimensions.
 #' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
 #'   one of these.
-#' @param mode (Optional) One of "replace_all", "append" or "append_or_update" See comments for
+#' @param mode (optional) One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
-#' @param (Optional) save_failed_json_to If set then the JSON for this request will be saved to the named file
+#' @param save_failed_json_to (optional) If set then the JSON for this request will be saved to the named file
 #'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
-#' @param (Optional) test_return_json For testing only.  Ignore.
+#' @param test_return_json (optional) For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -254,11 +254,11 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #'   numeric, boolean (converted to character) and date/time columns are acceptable.
 #' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
 #'   one of these.
-#' @param mode (Optional) One of "replace_all", "append" or "append_or_update" See comments for
+#' @param mode (optional) One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
-#' @param (Optional) na_columns If set then this should be a character vector naming the
+#' @param na_columns (optional) If set then this should be a character vector naming the
 #'   columns that may contain NAs, which will be converted into nulls int the resultant table.
-#' @param (Optional) test_return_json For testing only.  Ignore.
+#' @param test_return_json (optional) For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -339,8 +339,8 @@ value_type_for_vector <- function(v) {
 #' @param dimensions_to_count A character vector of label dimension names.  See the documentation
 #'  reference above.
 #' @param definition A detailed explanation of the meaning and derivation of the metric.
-#' @param (Optional) hyperlink A link to a web page where more can be read about the metric.
-#' @param (Optional) test_return_json For testing only.  Ignore.
+#' @param hyperlink (optional) A link to a web page where more can be read about the metric.
+#' @param test_return_json (optional) For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
