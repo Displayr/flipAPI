@@ -31,7 +31,9 @@ reference above.}
 
 \item{definition}{A detailed explanation of the meaning and derivation of the metric.}
 
-\item{(Optional)}{test_return_json For testing only.  Ignore.}
+\item{hyperlink}{(optional) A link to a web page where more can be read about the metric.}
+
+\item{test_return_json}{(optional) For testing only.  Ignore.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the
