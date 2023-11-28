@@ -178,7 +178,6 @@ test_that("UploadRelationshipToFactbase() produces correct JSON", {
 })
 
 test_that("UploadTableToFactbase() produces correct JSON", {
-    skip('failing, fix in PR #35')
     expected_json <- '{
  "tableName": "My Table",
 "update": "replace_all",

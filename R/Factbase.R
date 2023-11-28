@@ -307,8 +307,7 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", n
         tableName=table_name,
         update=mode,
         columnDefinitions=columns,
-        rows=observations,
-        collapse=""
+        rows=observations
     ), digits=15, .na="null")
     if (test_return_json) {
         return(request_body)
