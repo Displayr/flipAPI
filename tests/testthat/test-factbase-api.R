@@ -178,7 +178,6 @@ test_that("UploadRelationshipToFactbase() produces correct JSON", {
 })
 
 test_that("UploadTableToFactbase() produces correct JSON", {
-    skip('failing, fix in PR #35')
     expected_json <- '{
  "tableName": "My Table",
 "update": "replace_all",
@@ -209,7 +208,7 @@ test_that("UploadTableToFactbase() produces correct JSON", {
  "Dog",
                1,
 "big",
-   1693404000000 
+   1693440000000 
 ],
 [
  "Cat",
@@ -221,7 +220,7 @@ null
  "Lion",
                3,
 "small",
-   1693490400000 
+   1693526400000 
 ] 
 ] 
 }'
@@ -233,7 +232,7 @@ null
                     text=c("Dog", "Cat", "Lion"),
                     numbers=c(1, NA, 3),
                     factor=factor(c("big", "big", "small")),
-                    dates=as.POSIXct(c("2023-08-31", NA, "2023-09-01"))),
+                    dates=as.POSIXct(c("2023-08-31", NA, "2023-09-01"), tz="UTC")),
                 token="fake",
                 na_columns=c("numbers", "dates"),
                 test_return_json=TRUE

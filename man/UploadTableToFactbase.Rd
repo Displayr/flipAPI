@@ -17,7 +17,7 @@ UploadTableToFactbase(
 \item{table_name}{The name to use to refer to this data in Factbase.}
 
 \item{data}{A data.frame containing columns of data.  Character, factor (converted to character),
-numeric, boolean (converted to character) and date/time columns are acceptable.}
+numeric, boolean (converted to character) and date/time (`Date` or `POSIXt`) columns are acceptable.}
 
 \item{token}{A guid that identifies and authenticates the request.  Talk to Oliver if you need
 one of these.}
