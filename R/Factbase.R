@@ -327,7 +327,7 @@ value_type_for_vector <- function(v, column_name) {
     else if (is.numeric(v))
         "real"
     else
-        stop(paste('Cannot work out which data type to use for column', column_name, 'containing a', typeof(v), 'vector'))
+        stop(paste('Cannot work out which data type to use for column', column_name, 'containing a', typeof(v), 'vector.  Only Date, POSIXt, text or real are accepted'))
 }
 
 
