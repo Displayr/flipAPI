@@ -247,6 +247,11 @@ test_that("UploadTableToFactbase() rejects NAs", {
                  regexp="contains NAs")
 })
 
+test_that("UploadTableToFactbase() rejects unexpected types with a useful error message", {
+    expect_error(UploadTableToFactbase("Blah", data.frame(n=c(T, F)), "fake_token"),
+                 regexp="Cannot work out which data type to use for column n containing a logical vector.  Only Date, POSIXt, text or real are accepted")
+})
+
 test_that("UpdateFactbasePenetrationFormula() produces correct JSON", {
     expected_json <- '{
  "type": "penetration",
