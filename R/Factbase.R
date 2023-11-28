@@ -294,15 +294,12 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", n
             mayContainNulls=nullable)
     }, data, names(data), SIMPLIFY=FALSE, USE.NAMES=FALSE)
     
-    for (i in seq_along(data))
-        data[[i]] <- 
-    value.types = sapply(data, value_type_for_vector)
     data <- data.frame(mapply(function(v, name) {
         if (value_type_for_vector(v, name) == "datetime")
             datetimes_for_factbase(v)
         else
             v
-    }, data, names(data)));
+    }, data, names(data), SIMPLIFY=FALSE));
     
     observations <- dataframe_to_json_ready_observations(data)
        
