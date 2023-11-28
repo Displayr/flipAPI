@@ -25,10 +25,10 @@ one of these.}
 \item{mode}{(optional) One of "replace_all", "append" or "append_or_update" See comments for
 FactPostUpdateType.}
 
-\item{na_columns}{(Optional) If set then this should be a character vector naming the
+\item{na_columns}{(optional) If set then this should be a character vector naming the
 columns that may contain NAs, which will be converted into nulls int the resultant table.}
 
-\item{test_return_json}{(Optional) For testing only.  Ignore.}
+\item{test_return_json}{(optional) For testing only.  Ignore.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the
