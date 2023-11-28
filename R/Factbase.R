@@ -290,16 +290,19 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", n
             stop(paste0('data[["', name, '"]] contains NAs.  Factbase will accept these and convert them into nulls if you supply this column name in the na_columns parameter'))
         list(
             name=name,
-            valueType=value_type_for_vector(v),
+            valueType=value_type_for_vector(v, name),
             mayContainNulls=nullable)
     }, data, names(data), SIMPLIFY=FALSE, USE.NAMES=FALSE)
     
-    data <- data.frame(lapply(data, function(v) {
-        if (value_type_for_vector(v) == "datetime")
+    for (i in seq_along(data))
+        data[[i]] <- 
+    value.types = sapply(data, value_type_for_vector)
+    data <- data.frame(mapply(function(v, name) {
+        if (value_type_for_vector(v, name) == "datetime")
             datetimes_for_factbase(v)
         else
             v
-    }))
+    }, data, names(data)));
     
     observations <- dataframe_to_json_ready_observations(data)
        
@@ -317,7 +320,7 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", n
     original_data
 }
 
-value_type_for_vector <- function(v) {
+value_type_for_vector <- function(v, column_name) {
     if (is.null(v))
         stop('Columns in `data` may not by NULL')
     else if (inherits(v, c("Date", "POSIXt")))
@@ -327,7 +330,7 @@ value_type_for_vector <- function(v) {
     else if (is.numeric(v))
         "real"
     else
-        stop(paste('Cannot work out which data type to use for column containing', format(v)))
+        stop(paste('Cannot work out which data type to use for column', column_name, 'containing a', typeof(v), 'vector'))
 }
 
 
