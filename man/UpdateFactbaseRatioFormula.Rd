@@ -27,17 +27,17 @@ one of these.}
 
 \item{denominator}{The name of an existing metric.  See the documentation reference above.}
 
-\item{smoothing.window}{(Optional) The period over which to smooth the data.  One of "day", "week",
+\item{smoothing.window}{(optional) The period over which to smooth the data.  One of "day", "week",
 "month", "quarter" or "year".  See the documentation reference above.}
 
-\item{smoothing.sum}{(Optional) TRUE to smooth using a rolling sum.  If not specified then a rolling
+\item{smoothing.sum}{(optional) TRUE to smooth using a rolling sum.  If not specified then a rolling
 average will be used.  See the documentation reference above.}
 
-\item{definition}{(Optional) A detailed explanation of the meaning and derivation of the metric.}
+\item{definition}{(optional) A detailed explanation of the meaning and derivation of the metric.}
 
-\item{hyperlink}{(Optional) A link to a web page where more can be read about the metric.}
+\item{hyperlink}{(optional) A link to a web page where more can be read about the metric.}
 
-\item{test_return_json}{(Optional) For testing only.  Ignore.}
+\item{test_return_json}{(optional) For testing only.  Ignore.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the

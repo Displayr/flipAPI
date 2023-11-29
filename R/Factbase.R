@@ -10,27 +10,29 @@
 #'   * dimension n
 #' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
 #'   one of these.
-#' @param name (Optional) A name for the metric.  If NULL then the name of the first column in `data` will
+#' @param name (optional) A name for the metric.  If NULL then the name of the first column in `data` will
 #'   be used.
-#' @param mode (Optional) One of "replace_all", "append" or "append_or_update" See comments for
+#' @param mode (optional) One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
-#' @param aggregation (Optional) One of "none", "minimum", "maximum", "sum", "average", "first", "last".
-#' @param time_aggregation (Optional) One of "minimum", "maximum", "sum", "average", "first", "last".
+#' @param aggregation (optional) One of "none", "minimum", "maximum", "sum", "average", "first", "last".
+#' @param time_aggregation (optional) One of "minimum", "maximum", "sum", "average", "first", "last".
 #'   If supplied then this operation will be used when aggregating data in different periods,
 #'   and `aggregation` will only be used to aggregate data in different label dimensions.
-#' @param definition (Optional) A detailed explanation of the meaning and derivation of the metric.
-#' @param hyperlink (Optional) A link to a web page where more can be read about the metric.
-#' @param period_type (Optional) One of "day", "week", "month", "quarter" or "year".
+#' @param definition (optional) A detailed explanation of the meaning and derivation of the metric.
+#' @param hyperlink (optional) A link to a web page where more can be read about the metric.
+#' @param period_type (optional) One of "day", "week", "month", "quarter" or "year".
 #'   This indicates that the data has been pre-aggregated into periods of that duration.
 #'   The When column should contain date/times for the _start_ of each period.
 #'   There may be no duplicate values, and the When column will be used to match data
-#'   (see update_key).
-#' @param update_key (Optional) The name of a column that can be used to update the data, when `mode` is
+#'   (see update_key).  In this situation you will typically have multiple calls to this function:
+#'   one for each period type that your data is aggregated to.  To the user they will appear as a single
+#'   metric, but Factbase will automatically choose the correct data according to the query.
+#' @param update_key (optional) The name of a column that can be used to update the data, when `mode` is
 #'   "append_or_update".  Data in this column must be unique, which implies some sort of aggregation
 #'   for date/time data.
-#' @param save_failed_json_to (Optional) If set then the JSON for this request will be saved to the named file
+#' @param save_failed_json_to (optional) If set then the JSON for this request will be saved to the named file
 #'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
-#' @param test_return_json (Optional) For testing only.  Ignore.
+#' @param test_return_json (optional) For testing only.  Ignore.
 #' 
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -391,13 +393,13 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
 #'   one of these.
 #' @param numerator The name of an existing metric.  See the documentation reference above.
 #' @param denominator The name of an existing metric.  See the documentation reference above.
-#' @param smoothing.window (Optional) The period over which to smooth the data.  One of "day", "week",
+#' @param smoothing.window (optional) The period over which to smooth the data.  One of "day", "week",
 #'   "month", "quarter" or "year".  See the documentation reference above.
-#' @param smoothing.sum (Optional) TRUE to smooth using a rolling sum.  If not specified then a rolling
+#' @param smoothing.sum (optional) TRUE to smooth using a rolling sum.  If not specified then a rolling
 #'   average will be used.  See the documentation reference above.
-#' @param definition (Optional) A detailed explanation of the meaning and derivation of the metric.
-#' @param hyperlink (Optional) A link to a web page where more can be read about the metric.
-#' @param test_return_json (Optional) For testing only.  Ignore.
+#' @param definition (optional) A detailed explanation of the meaning and derivation of the metric.
+#' @param hyperlink (optional) A link to a web page where more can be read about the metric.
+#' @param test_return_json (optional) For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
