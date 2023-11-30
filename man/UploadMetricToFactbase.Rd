@@ -13,6 +13,7 @@ UploadMetricToFactbase(
   time_aggregation = NULL,
   definition = NULL,
   hyperlink = NULL,
+  owner = NULL,
   period_type = NULL,
   update_key = NULL,
   save_failed_json_to = NULL,
@@ -44,9 +45,13 @@ FactPostUpdateType.}
 If supplied then this operation will be used when aggregating data in different periods,
 and `aggregation` will only be used to aggregate data in different label dimensions.}
 
-\item{definition}{(optional) A detailed explanation of the meaning and derivation of the metric.}
+\item{definition}{(optional) A detailed explanation of the meaning and derivation of the data.}
 
-\item{hyperlink}{(optional) A link to a web page where more can be read about the metric.}
+\item{hyperlink}{(optional) A link to a web page where more can be read about the data.
+Preferably this is a link into the system that calls this function.}
+
+\item{owner}{The name (usually an email address) of whoever should be contacted to deal with problems
+or questions about this data.}
 
 \item{period_type}{(optional) One of "day", "week", "month", "quarter" or "year".
 This indicates that the data has been pre-aggregated into periods of that duration.

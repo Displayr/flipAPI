@@ -18,8 +18,11 @@
 #' @param time_aggregation (optional) One of "minimum", "maximum", "sum", "average", "first", "last".
 #'   If supplied then this operation will be used when aggregating data in different periods,
 #'   and `aggregation` will only be used to aggregate data in different label dimensions.
-#' @param definition (optional) A detailed explanation of the meaning and derivation of the metric.
-#' @param hyperlink (optional) A link to a web page where more can be read about the metric.
+#' @param definition (optional) A detailed explanation of the meaning and derivation of the data.
+#' @param hyperlink (optional) A link to a web page where more can be read about the data.
+#'   Preferably this is a link into the system that calls this function.
+#' @param owner The name (usually an email address) of whoever should be contacted to deal with problems
+#'   or questions about this data.
 #' @param period_type (optional) One of "day", "week", "month", "quarter" or "year".
 #'   This indicates that the data has been pre-aggregated into periods of that duration.
 #'   The When column should contain date/times for the _start_ of each period.
@@ -41,7 +44,8 @@
 #' @importFrom flipTime AsDateTime
 #' @export
 UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", aggregation="sum",
-        time_aggregation=NULL, definition=NULL, hyperlink=NULL, period_type = NULL, update_key=NULL,
+        time_aggregation=NULL, definition=NULL, hyperlink=NULL, owner=NULL,
+        period_type=NULL, update_key=NULL,
         save_failed_json_to=NULL, test_return_json=FALSE) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
@@ -114,6 +118,8 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         metric$definition <- definition
     if (!is.null(hyperlink))
         metric$hyperlink <- hyperlink
+    if (!is.null(owner))
+        metric$owner <- owner
     body <- toJSON(list(
         metric=metric,
         update=mode,
@@ -186,17 +192,13 @@ post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
 
 #' Upload a relationship to Factbase.
 #'
+#' @inheritParams UploadMetricToFactbase
 #' @param data A data.frame with at least two columns, each of which should be coerced to character
 #'   vectors.  The first column is the dimension we are mapping from.  Subsequent columns contain
 #'   labels in dimensions that we are mapping to.  The names of these columns to be used as the
 #'   names of these dimensions.
 #' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
 #'   one of these.
-#' @param mode (optional) One of "replace_all", "append" or "append_or_update" See comments for
-#'   FactPostUpdateType.
-#' @param save_failed_json_to (optional) If set then the JSON for this request will be saved to the named file
-#'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
-#' @param test_return_json (optional) For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -204,6 +206,7 @@ post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
 #' @importFrom RJSONIO toJSON
 #' @export
 UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
+        definition=NULL, hyperlink=NULL, owner=NULL,
         save_failed_json_to=NULL, test_return_json=FALSE) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
@@ -233,10 +236,17 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
     observations <- do.call("mapply", mapply_args)
 
     # Make HTTP request
+    relationship <- list(
+        type="many_to_one"
+    )
+    if (!is.null(definition))
+        relationship$definition <- definition
+    if (!is.null(hyperlink))
+        relationship$hyperlink <- hyperlink
+    if (!is.null(owner))
+        relationship$owner <- owner
     body <- toJSON(list(
-        relationship=list(
-            type="many_to_one"
-        ),
+        relationship=relationship,
         update=mode,
         dimensions=dimensions,
         data=observations
@@ -254,13 +264,10 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 
 #' Upload a table of raw data to Factbase.
 #'
+#' @inheritParams UploadMetricToFactbase
 #' @param table_name The name to use to refer to this data in Factbase.
 #' @param data A data.frame containing columns of data.  Character, factor (converted to character),
 #'   numeric, boolean (converted to character) and date/time (`Date` or `POSIXt`) columns are acceptable.
-#' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
-#'   one of these.
-#' @param mode (optional) One of "replace_all", "append" or "append_or_update" See comments for
-#'   FactPostUpdateType.
 #' @param na_columns (optional) If set then this should be a character vector naming the
 #'   columns that may contain NAs, which will be converted into nulls int the resultant table.
 #' @param test_return_json (optional) For testing only.  Ignore.
@@ -336,16 +343,12 @@ value_type_for_vector <- function(v, column_name) {
 #' Creates or updates a metric described by a formula over other metrics.
 #' See https://factbase.azurewebsites.net/static/pages/help.html#penetration
 #'
+#' @inheritParams UploadMetricToFactbase
 #' @param metric_name The name that will appear for selection by Factbase users.
-#' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
-#'   one of these.
 #' @param numerator The name of an existing metric.  See the documentation reference above.
 #' @param denominator The name of an existing metric.  See the documentation reference above.
 #' @param dimensions_to_count A character vector of label dimension names.  See the documentation
 #'  reference above.
-#' @param definition A detailed explanation of the meaning and derivation of the metric.
-#' @param hyperlink (optional) A link to a web page where more can be read about the metric.
-#' @param test_return_json (optional) For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -388,18 +391,11 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
 #' Creates or updates a metric described by a formula over other metrics.
 #' See https://factbase.azurewebsites.net/static/pages/help.html#ratio
 #'
-#' @param metric_name The name that will appear for selection by Factbase users.
-#' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
-#'   one of these.
-#' @param numerator The name of an existing metric.  See the documentation reference above.
-#' @param denominator The name of an existing metric.  See the documentation reference above.
+#' @inheritParams UpdateFactbasePenetrationFormula
 #' @param smoothing.window (optional) The period over which to smooth the data.  One of "day", "week",
 #'   "month", "quarter" or "year".  See the documentation reference above.
 #' @param smoothing.sum (optional) TRUE to smooth using a rolling sum.  If not specified then a rolling
 #'   average will be used.  See the documentation reference above.
-#' @param definition (optional) A detailed explanation of the meaning and derivation of the metric.
-#' @param hyperlink (optional) A link to a web page where more can be read about the metric.
-#' @param test_return_json (optional) For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
