@@ -33,9 +33,10 @@ one of these.}
 \item{smoothing.sum}{(optional) TRUE to smooth using a rolling sum.  If not specified then a rolling
 average will be used.  See the documentation reference above.}
 
-\item{definition}{(optional) A detailed explanation of the meaning and derivation of the metric.}
+\item{definition}{(optional) A detailed explanation of the meaning and derivation of the data.}
 
-\item{hyperlink}{(optional) A link to a web page where more can be read about the metric.}
+\item{hyperlink}{(optional) A link to a web page where more can be read about the data.
+Preferably this is a link into the system that calls this function.}
 
 \item{test_return_json}{(optional) For testing only.  Ignore.}
 }
