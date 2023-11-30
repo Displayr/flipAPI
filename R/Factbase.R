@@ -20,6 +20,9 @@
 #'   and `aggregation` will only be used to aggregate data in different label dimensions.
 #' @param definition (optional) A detailed explanation of the meaning and derivation of the metric.
 #' @param hyperlink (optional) A link to a web page where more can be read about the metric.
+#'   Preferably this is a link into the system that calls this function.
+#' @param owner The name (usually an email address) of whoever should be contacted to deal with problems
+#'   or questions about this data.
 #' @param period_type (optional) One of "day", "week", "month", "quarter" or "year".
 #'   This indicates that the data has been pre-aggregated into periods of that duration.
 #'   The When column should contain date/times for the _start_ of each period.
@@ -41,7 +44,8 @@
 #' @importFrom flipTime AsDateTime
 #' @export
 UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", aggregation="sum",
-        time_aggregation=NULL, definition=NULL, hyperlink=NULL, period_type = NULL, update_key=NULL,
+        time_aggregation=NULL, definition=NULL, hyperlink=NULL, owner=NULL,
+        period_type=NULL, update_key=NULL,
         save_failed_json_to=NULL, test_return_json=FALSE) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
@@ -114,6 +118,8 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         metric$definition <- definition
     if (!is.null(hyperlink))
         metric$hyperlink <- hyperlink
+    if (!is.null(owner))
+        metric$owner <- owner
     body <- toJSON(list(
         metric=metric,
         update=mode,
@@ -194,6 +200,11 @@ post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
 #'   one of these.
 #' @param mode (optional) One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
+#' @param definition (optional) A detailed explanation of the meaning and derivation of the data
+#' @param hyperlink (optional) A link to a web page where more can be read about the metric.
+#'   Preferably this is a link into the system that calls this function.
+#' @param owner The name (usually an email address) of whoever should be contacted to deal with problems
+#'   or questions about this data.
 #' @param save_failed_json_to (optional) If set then the JSON for this request will be saved to the named file
 #'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
 #' @param test_return_json (optional) For testing only.  Ignore.
@@ -204,6 +215,7 @@ post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
 #' @importFrom RJSONIO toJSON
 #' @export
 UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
+        definition=NULL, hyperlink=NULL, owner=NULL,
         save_failed_json_to=NULL, test_return_json=FALSE) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
@@ -233,10 +245,17 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
     observations <- do.call("mapply", mapply_args)
 
     # Make HTTP request
+    relationship <- list(
+        type="many_to_one"
+    )
+    if (!is.null(definition))
+        relationship$definition <- definition
+    if (!is.null(hyperlink))
+        relationship$hyperlink <- hyperlink
+    if (!is.null(owner))
+        relationship$owner <- owner
     body <- toJSON(list(
-        relationship=list(
-            type="many_to_one"
-        ),
+        relationship=relationship,
         update=mode,
         dimensions=dimensions,
         data=observations

@@ -16,7 +16,8 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
 "aggregation": "sum",
 "timeAggregation": "last",
 "definition": "Our definition",
-"hyperlink": "https://example.com/" 
+"hyperlink": "https://example.com/",
+"owner": "bob.jones@example.com" 
 },
 "update": "append_or_update",
 "dimensions": [
@@ -68,6 +69,7 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
                 time_aggregation="last",
                 definition="Our definition",
                 hyperlink="https://example.com/",
+                owner="bob.jones@example.com",
                 update_key="When",
                 test_return_json=TRUE
             ),
@@ -131,7 +133,10 @@ test_that("UploadMetricToFactbase() can handle pre-aggregated data and use the `
 test_that("UploadRelationshipToFactbase() produces correct JSON", {
     expected_json <- '{
  "relationship": {
- "type": "many_to_one" 
+ "type": "many_to_one",
+"definition": "Our definition",
+"hyperlink": "https://example.com/",
+"owner": "bob.jones@example.com" 
 },
 "update": "append_or_update",
 "dimensions": [
@@ -170,6 +175,9 @@ test_that("UploadRelationshipToFactbase() produces correct JSON", {
                     Dimension2=c("Canine", "Feline", "Feline")),
                 token="fake",
                 mode="append_or_update",
+                definition="Our definition",
+                hyperlink="https://example.com/",
+                owner="bob.jones@example.com",
                 test_return_json=TRUE
             ),
             expected_json

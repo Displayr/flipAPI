@@ -8,6 +8,9 @@ UploadRelationshipToFactbase(
   data,
   token,
   mode = "replace_all",
+  definition = NULL,
+  hyperlink = NULL,
+  owner = NULL,
   save_failed_json_to = NULL,
   test_return_json = FALSE
 )
@@ -23,6 +26,14 @@ one of these.}
 
 \item{mode}{(optional) One of "replace_all", "append" or "append_or_update" See comments for
 FactPostUpdateType.}
+
+\item{definition}{(optional) A detailed explanation of the meaning and derivation of the data}
+
+\item{hyperlink}{(optional) A link to a web page where more can be read about the metric.
+Preferably this is a link into the system that calls this function.}
+
+\item{owner}{The name (usually an email address) of whoever should be contacted to deal with problems
+or questions about this data.}
 
 \item{save_failed_json_to}{(optional) If set then the JSON for this request will be saved to the named file
 in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.}
