@@ -230,7 +230,8 @@ null
 "small",
    1693526400000 
 ] 
-] 
+],
+"definition": "My table upload" 
 }'
     expect_error(
         expect_json_equal(
@@ -242,6 +243,7 @@ null
                     factor=factor(c("big", "big", "small")),
                     dates=as.POSIXct(c("2023-08-31", NA, "2023-09-01"), tz="UTC")),
                 token="fake",
+                definition="My table upload",
                 na_columns=c("numbers", "dates"),
                 test_return_json=TRUE
             ),

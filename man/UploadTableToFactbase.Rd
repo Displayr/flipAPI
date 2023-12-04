@@ -9,6 +9,9 @@ UploadTableToFactbase(
   data,
   token,
   mode = "replace_all",
+  definition = NULL,
+  hyperlink = NULL,
+  owner = NULL,
   na_columns = NULL,
   test_return_json = FALSE
 )
@@ -24,6 +27,14 @@ one of these.}
 
 \item{mode}{(optional) One of "replace_all", "append" or "append_or_update" See comments for
 FactPostUpdateType.}
+
+\item{definition}{(optional) A detailed explanation of the meaning and derivation of the data.}
+
+\item{hyperlink}{(optional) A link to a web page where more can be read about the data.
+Preferably this is a link into the system that calls this function.}
+
+\item{owner}{The name (usually an email address) of whoever should be contacted to deal with problems
+or questions about this data.}
 
 \item{na_columns}{(optional) If set then this should be a character vector naming the
 columns that may contain NAs, which will be converted into nulls int the resultant table.}

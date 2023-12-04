@@ -114,12 +114,7 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         aggregation=aggregation,
         timeAggregation=time_aggregation
     )
-    if (!is.null(definition))
-        metric$definition <- definition
-    if (!is.null(hyperlink))
-        metric$hyperlink <- hyperlink
-    if (!is.null(owner))
-        metric$owner <- owner
+    metric <- add_definition_etc(metric, definition, hyperlink, owner)
     body <- toJSON(list(
         metric=metric,
         update=mode,
@@ -164,6 +159,16 @@ dataframe_to_json_ready_observations <- function(data) {
 datetimes_for_factbase <- function(v) {
     posixct <- AsDateTime(v)
     as.numeric(posixct) * 1000  # from POSIXct (seconds since 1970) to JavaScript (ms since 1970)
+}
+
+add_definition_etc <- function(l, definition, hyperlink, owner) {
+    if (!is.null(definition))
+        l$definition <- definition
+    if (!is.null(hyperlink))
+        l$hyperlink <- hyperlink
+    if (!is.null(owner))
+        l$owner <- owner
+    l
 }
 
 #' @importFrom httr POST timeout add_headers content
@@ -239,12 +244,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
     relationship <- list(
         type="many_to_one"
     )
-    if (!is.null(definition))
-        relationship$definition <- definition
-    if (!is.null(hyperlink))
-        relationship$hyperlink <- hyperlink
-    if (!is.null(owner))
-        relationship$owner <- owner
+    relationship <- add_definition_etc(relationship, definition, hyperlink, owner)
     body <- toJSON(list(
         relationship=relationship,
         update=mode,
@@ -278,7 +278,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #' @importFrom flipTime AsDateTime
 #' @importFrom RJSONIO toJSON
 #' @export
-UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", na_columns=NULL, test_return_json=FALSE) {
+UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", definition=NULL, hyperlink=NULL, owner=NULL, na_columns=NULL, test_return_json=FALSE) {
     if (!is.character(table_name))
         stop('table_name must be a unitary character vector')
     if (!is.data.frame(data))
@@ -311,13 +311,16 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", n
     }, data, names(data), SIMPLIFY=FALSE));
     
     observations <- dataframe_to_json_ready_observations(data)
-       
-    request_body <- toJSON(list(
+    
+    body <- list(
         tableName=table_name,
         update=mode,
         columnDefinitions=columns,
         rows=observations
-    ), digits=15, .na="null")
+    )
+    body <- add_definition_etc(body, definition, hyperlink, owner);
+    
+    request_body <- toJSON(body, digits=15, .na="null")
     if (test_return_json) {
         return(request_body)
     }
