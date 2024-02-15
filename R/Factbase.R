@@ -389,8 +389,8 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
         "https://factbase.azurewebsites.net/formula?metric=",
         URLencode(metric_name),
         "&definition=", URLencode(definition),
-        "&definition=", URLencode(hyperlink),
-        "&definition=", URLencode(owner))
+        "&hyperlink=", URLencode(hyperlink),
+        "&owner=", URLencode(owner))
     r <- POST(url, body = body, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
     if (r$status_code != 200)
         stop(paste0(r$status_code, ": ", content(r, "text")))
@@ -449,8 +449,8 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
         "https://factbase.azurewebsites.net/formula?metric=",
         URLencode(metric_name),
         "&definition=", URLencode(definition),
-        "&definition=", URLencode(hyperlink),
-        "&definition=", URLencode(owner))
+        "&hyperlink=", URLencode(hyperlink),
+        "&owner=", URLencode(owner))
     r <- POST(url, body = json, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
     if (r$status_code != 200)
         stop(paste0(r$status_code, ": ", content(r, "text")))
