@@ -2,7 +2,7 @@
 % Please edit documentation in R/Factbase.R
 \name{UpdateFactbaseRatioFormula}
 \alias{UpdateFactbaseRatioFormula}
-\title{Creates or updates a metric described by a formula over other metrics.
+\title{Creates or updates a metric described by a formula over two existing metrics.
 See https://factbase.azurewebsites.net/static/pages/help.html#ratio}
 \usage{
 UpdateFactbaseRatioFormula(
@@ -10,10 +10,11 @@ UpdateFactbaseRatioFormula(
   token,
   numerator,
   denominator,
+  definition,
+  hyperlink,
+  owner,
   smoothing.window = NULL,
   smoothing.sum = F,
-  definition,
-  hyperlink = NULL,
   test_return_json = F
 )
 }
@@ -27,16 +28,19 @@ one of these.}
 
 \item{denominator}{The name of an existing metric.  See the documentation reference above.}
 
+\item{definition}{(optional) A detailed explanation of the meaning and derivation of the data.}
+
+\item{hyperlink}{(optional) A link to a web page where more can be read about the data.
+Preferably this is a link into the system that calls this function.}
+
+\item{owner}{The name (usually an email address) of whoever should be contacted to deal with problems
+or questions about this data.}
+
 \item{smoothing.window}{(optional) The period over which to smooth the data.  One of "day", "week",
 "month", "quarter" or "year".  See the documentation reference above.}
 
 \item{smoothing.sum}{(optional) TRUE to smooth using a rolling sum.  If not specified then a rolling
 average will be used.  See the documentation reference above.}
-
-\item{definition}{(optional) A detailed explanation of the meaning and derivation of the data.}
-
-\item{hyperlink}{(optional) A link to a web page where more can be read about the data.
-Preferably this is a link into the system that calls this function.}
 
 \item{test_return_json}{(optional) For testing only.  Ignore.}
 }
@@ -45,6 +49,6 @@ The value of `data` that was passed in, so caller can see data uploaded if this 
   last call in R code.
 }
 \description{
-Creates or updates a metric described by a formula over other metrics.
+Creates or updates a metric described by a formula over two existing metrics.
 See https://factbase.azurewebsites.net/static/pages/help.html#ratio
 }

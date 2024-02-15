@@ -12,7 +12,8 @@ UpdateFactbasePenetrationFormula(
   denominator,
   dimensions_to_count,
   definition,
-  hyperlink = NULL,
+  hyperlink,
+  owner,
   test_return_json = F
 )
 }
@@ -33,6 +34,9 @@ reference above.}
 
 \item{hyperlink}{(optional) A link to a web page where more can be read about the data.
 Preferably this is a link into the system that calls this function.}
+
+\item{owner}{The name (usually an email address) of whoever should be contacted to deal with problems
+or questions about this data.}
 
 \item{test_return_json}{(optional) For testing only.  Ignore.}
 }
