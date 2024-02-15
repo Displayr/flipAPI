@@ -358,7 +358,7 @@ value_type_for_vector <- function(v, column_name) {
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
-UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, denominator, dimensions_to_count, definition, hyperlink=NULL, test_return_json=F) {
+UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, denominator, dimensions_to_count, definition, hyperlink, owner, test_return_json=F) {
     if (!is.character(metric_name) || length(metric_name) != 1)
         stop("metric_name must be a character vector of length 1")
     if (!is.character(token) || length(token) != 1)
@@ -371,8 +371,10 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
         stop("dimensions_to_count must contain a character vector with a length of at least 1")
     if (!is.character(definition) || length(metric_name) != 1)
         stop("definition must be a character vector of length 1, or null")
-    if (!is.null(hyperlink) && (!is.character(hyperlink) || length(hyperlink) != 1))
-        stop("hyperlink must be a character vector of length 1, or null")
+    if (!is.character(hyperlink) || length(hyperlink) != 1)
+        stop("hyperlink must be a character vector of length 1")
+    if (!is.character(owner) || length(owner) != 1)
+        stop("owner must be a character vector of length 1")
     
     body <- toJSON(list(
         type="penetration",
@@ -383,15 +385,18 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
     if (test_return_json)
         return(body)
     
-    url <- paste0("https://factbase.azurewebsites.net/formula?metric=", URLencode(metric_name), "&definition=", URLencode(definition))
-    if (!is.null(hyperlink))
-        url <- paste0(url, '&hyperlink=', hyperlink)
+    url <- paste0(
+        "https://factbase.azurewebsites.net/formula?metric=",
+        URLencode(metric_name),
+        "&definition=", URLencode(definition),
+        "&definition=", URLencode(hyperlink),
+        "&definition=", URLencode(owner))
     r <- POST(url, body = body, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
     if (r$status_code != 200)
         stop(paste0(r$status_code, ": ", content(r, "text")))
 }
 
-#' Creates or updates a metric described by a formula over other metrics.
+#' Creates or updates a metric described by a formula over two existing metrics.
 #' See https://factbase.azurewebsites.net/static/pages/help.html#ratio
 #'
 #' @inheritParams UpdateFactbasePenetrationFormula
@@ -405,7 +410,7 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
-UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominator, smoothing.window=NULL, smoothing.sum=F, definition, hyperlink=NULL, test_return_json=F) {
+UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominator, definition, hyperlink, owner, smoothing.window=NULL, smoothing.sum=F, test_return_json=F) {
     if (!is.character(metric_name) || length(metric_name) != 1)
         stop("metric_name must be a character vector of length 1")
     if (!is.character(token) || length(token) != 1)
@@ -420,8 +425,10 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
         stop("smoothing.sum must be a logical vector of length 1")
     if (!is.character(definition) || length(metric_name) != 1)
         stop("definition must be a character vector of length 1, or null")
-    if (!is.null(hyperlink) && (!is.character(hyperlink) || length(hyperlink) != 1))
-        stop("hyperlink must be a character vector of length 1, or null")
+    if (!is.character(hyperlink) || length(hyperlink) != 1)
+        stop("hyperlink must be a character vector of length 1")
+    if (!is.character(owner) || length(owner) != 1)
+        stop("owner must be a character vector of length 1")
     
     body <- list(
         type="ratio",
@@ -438,11 +445,49 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
     if (test_return_json)
         return(json)
     
-    url <- paste0("https://factbase.azurewebsites.net/formula?metric=", URLencode(metric_name), "&definition=", URLencode(definition))
-    if (!is.null(hyperlink))
-        url <- paste0(url, '&hyperlink=', hyperlink)
+    url <- paste0(
+        "https://factbase.azurewebsites.net/formula?metric=",
+        URLencode(metric_name),
+        "&definition=", URLencode(definition),
+        "&definition=", URLencode(hyperlink),
+        "&definition=", URLencode(owner))
     r <- POST(url, body = json, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
     if (r$status_code != 200)
         stop(paste0(r$status_code, ": ", content(r, "text")))
 }
 
+#' WARNING: THIS FEATURE IS INCOMPLETE.  DO NOT USE THIS FUNCTION.
+#' 
+#' Adds provenance information to data that will be uploaded to Factbase.  This should be called
+#' in steps prior to the operation that sends the data to Factbase so that chains of calculations
+#' can be shown to the user, and so that Factbase can determine the step at which a chain of
+#' calculations has broken.
+#'
+#' @inheritParams UploadMetricToFactbase
+#' @param x An object containing data that will probably eventually find its way into Factbase.
+#' @param description A description of where `x` came from.
+#'
+#' @return `x` with provenance information added as an attribute.  The new information will be appended
+#'   to any existing provenance.
+#'
+#' @export
+AddFactbaseProvenance <- function (x, description, hyperlink=NA_character_, owner=NA_character_) {
+    if (is.null(x))
+        stop("x may not be NULL")
+    if (!is.character(description) || length(description) != 1)
+        stop("description must be a character vector of length 1")
+    if (!is.character(hyperlink) || length(hyperlink) != 1)
+        stop("hyperlink must be a character vector of length 1")
+    if (!is.character(owner) || length(owner) != 1)
+        stop("owner must be a character vector of length 1")
+    
+    provenance <- data.frame(description=description, hyperlink=hyperlink, owner=owner, when=Sys.time())
+    existing_provenance <- attr(x, "factbase.provenance")
+    if (!is.null(existing_provenance)) {
+        if (!is.data.frame(existing_provenance))
+            stop("factbase.provenance attribute is not a data.frame!")
+        provenance <- rbind(existing_provenance, provenance)
+    }
+    attr(x, "factbase.provenance") <- provenance
+    x
+}

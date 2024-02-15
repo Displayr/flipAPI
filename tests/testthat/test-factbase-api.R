@@ -280,7 +280,8 @@ test_that("UpdateFactbasePenetrationFormula() produces correct JSON", {
                 denominator="query.test.ts Number of dogs in office",
                 dimensions_to_count=c("Office dog name"),
                 definition="definition of the new metric",
-                hyperlink=NULL,
+                hyperlink='https://example.com',
+                owner='bob.jane@tmart.com',
                 test_return_json=TRUE
             ),
             expected_json
@@ -309,10 +310,23 @@ test_that("UpdateFactbaseRatioFormula() produces correct JSON", {
                 smoothing.window="year",
                 smoothing.sum=T,
                 definition="definition of the new metric",
-                hyperlink=NULL,
+                hyperlink='https://example.com',
+                owner='bob.jane@tmart.com',
                 test_return_json=TRUE
             ),
             expected_json
         ), NA
     )
+})
+
+test_that("AddFactbaseProvenance adds provenance to a new object", {
+    x <- AddFactbaseProvenance("dog", "born of two dogs")
+    expect_equal(attr(x, "factbase.provenance")$description, "born of two dogs")
+})
+
+
+test_that("AddFactbaseProvenance adds provenance to a new object", {
+    x1 <- AddFactbaseProvenance("dog", "born of four dogs")
+    x2 <- AddFactbaseProvenance(x1, "born of two dogs")
+    expect_equal(attr(x2, "factbase.provenance")$description, c("born of four dogs", "born of two dogs"))
 })
