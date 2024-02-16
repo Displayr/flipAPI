@@ -346,6 +346,40 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
     }
 }
 
+#' Deletes a set of objects
+#'
+#' Deletes a list of objects by filename from the Displayr cloud drive
+#'
+#' @param filenames collection of character strings. Names of the files to delete.
+#'
+#' @importFrom httr DELETE add_headers
+#' @importFrom utils URLencode
+#' 
+#' @return NULL invisibly. Called for the purpose of deleting data
+#' and assumed to succeed if no errors are thrown.
+#' 
+#' @export
+QDeleteFiles <- function(filenames, company.token = NA)
+{
+    company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+    api.root <- getApiRoot("DataMartBatchDelete")
+    url_param_filenames <- sprintf("filenames=%s", filenames)
+    filenames.string <- paste(filenames, collapse = " ")
+    res <- try(DELETE(paste0(api.root, "?", URLencode(paste(url_param_filenames, collapse="&"))), 
+                config=add_headers("X-Q-Company-Secret" = company.secret)))
+    if (inherits(res, "try-error") || res$status_code != 200)
+    {
+        warning(paste0("Encountered an error deleting the following files: ", filenames.string))
+        stopBadRequest(res, paste0("Could not delete files: ", filenames.string))
+    }
+    else
+    {
+        msg <- paste0("Successfully deleted files: ", filenames.string)
+        message(msg)
+        invisible(msg)
+    }
+}
+
 qSaveImage <- function(filename)
 {
     type <- getFileType(filename)

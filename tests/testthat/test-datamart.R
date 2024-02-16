@@ -135,3 +135,25 @@ test_that("DS-3269: Data Mart unavailable",
                      "issue connecting to your Displayr Cloud Drive")
     })
 })
+
+test_that("Delete Data", 
+{
+  skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
+
+  expect_invisible(QSaveData(mtcars, "mtcars.rds"))
+  expect_true(QFileExists("mtcars.rds"))
+  expect_invisible(QDeleteFiles(c("mtcars.rds")))
+  expect_false(QFileExists("mtcars.rds"))
+
+  expect_invisible(QSaveData(mtcars, "mtcars.csv"))
+  expect_invisible(QSaveData(mtcars, "mtcars.sav"))
+  expect_true("mtcars.csv")
+  expect_true("mtcars.sav")
+
+  expect_invisible(QDeleteFiles(c("mtcars.csv", "mtcars.sav")))
+  expect_false(QFileExists("mtcars.csv"))
+  expect_false(QFileExists("mtcars.sav"))
+
+  # Should still succeed even if files don't exist
+  expect_invisible(QDeleteFiles(c("mtcars.csv", "mtcars.sav")))
+})
