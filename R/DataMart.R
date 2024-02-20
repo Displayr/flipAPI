@@ -359,9 +359,8 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #' and assumed to succeed if no errors are thrown.
 #' 
 #' @export
-QDeleteFiles <- function(filenames, company.token = NA)
+QDeleteFiles <- function(filenames, company.secret = getCompanySecret())
 {
-    company.secret <- if (missing(company.token)) getCompanySecret() else company.token
     api.root <- getApiRoot("DataMartBatchDelete")
     url_param_filenames <- sprintf("filenames=%s", filenames)
     filenames.string <- paste(filenames, collapse = " ")
@@ -372,12 +371,9 @@ QDeleteFiles <- function(filenames, company.token = NA)
         warning(paste0("Encountered an error deleting the following files: ", filenames.string))
         stopBadRequest(res, paste0("Could not delete files: ", filenames.string))
     }
-    else
-    {
-        msg <- paste0("Successfully deleted files: ", filenames.string)
-        message(msg)
-        invisible(msg)
-    }
+    msg <- paste0("Successfully deleted files: ", filenames.string)
+    message(msg)
+    invisible(msg)
 }
 
 qSaveImage <- function(filename)
