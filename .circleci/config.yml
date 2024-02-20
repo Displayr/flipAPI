@@ -20,7 +20,7 @@ parameters:
     default: rocker
 
 workflows:
-  build-and-check-R-package:
+  build-and-check-r-package:
     jobs:
       - r-packages/build-and-check-package:
           executor: << pipeline.parameters.executor >>
