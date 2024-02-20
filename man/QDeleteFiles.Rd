@@ -4,10 +4,12 @@
 \alias{QDeleteFiles}
 \title{Deletes a set of objects}
 \usage{
-QDeleteFiles(filenames, company.token = NA)
+QDeleteFiles(filenames, company.token = getCompanySecret())
 }
 \arguments{
 \item{filenames}{collection of character strings. Names of the files to delete.}
+
+\item{company.token}{Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.}
 }
 \value{
 NULL invisibly. Called for the purpose of deleting data

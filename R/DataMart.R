@@ -351,6 +351,7 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #' Deletes a list of objects by filename from the Displayr cloud drive
 #'
 #' @param filenames collection of character strings. Names of the files to delete.
+#' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
 #'
 #' @importFrom httr DELETE add_headers
 #' @importFrom utils URLencode
@@ -359,8 +360,9 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #' and assumed to succeed if no errors are thrown.
 #' 
 #' @export
-QDeleteFiles <- function(filenames, company.secret = getCompanySecret())
+QDeleteFiles <- function(filenames, company.token = getCompanySecret())
 {
+    company.secret <- company.token
     api.root <- getApiRoot("DataMartBatchDelete")
     url_param_filenames <- sprintf("filenames=%s", filenames)
     filenames.string <- paste(filenames, collapse = " ")
