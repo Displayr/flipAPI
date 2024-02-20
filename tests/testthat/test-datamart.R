@@ -147,8 +147,8 @@ test_that("Delete Data",
 
   expect_invisible(QSaveData(mtcars, "mtcars.csv"))
   expect_invisible(QSaveData(mtcars, "mtcars.sav"))
-  expect_true("mtcars.csv")
-  expect_true("mtcars.sav")
+  expect_true(QFileExists("mtcars.csv"))
+  expect_true(QFileExists("mtcars.sav"))
 
   expect_invisible(QDeleteFiles(c("mtcars.csv", "mtcars.sav")))
   expect_false(QFileExists("mtcars.csv"))
