@@ -370,7 +370,7 @@ QDeleteFiles <- function(filenames, company.token = getCompanySecret())
                 config=add_headers("X-Q-Company-Secret" = company.secret)))
     if (inherits(res, "try-error") || res$status_code != 200)
     {
-        warning(paste0("Encountered an error deleting the following files: ", filenames.string))
+        warning("Encountered an error deleting the following files: ", filenames.string)
         stopBadRequest(res, paste0("Could not delete files: ", filenames.string))
     }
     msg <- paste0("Successfully deleted files: ", filenames.string)

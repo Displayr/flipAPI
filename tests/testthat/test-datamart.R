@@ -140,7 +140,7 @@ test_that("Delete Data",
 {
   skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
 
-  local_mocked_bindings(getApiRoot = function(endpoint) paste0("https://master.displayr.com/api/", endpoint, "/"))
+  local_mocked_bindings(getApiRoot = function(endpoint = "DataMart") paste0("https://master.displayr.com/api/", endpoint, "/"))
   prevClientId <- clientId
   assign("clientId", "-948985", envir = .GlobalEnv)
   on.exit(assign("clientId", prevClientId, envir = .GlobalEnv))
