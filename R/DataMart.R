@@ -476,8 +476,10 @@ getApiRoot <- function(endpoint = "DataMart")
 {
     region <- URLencode(get0("region", ifnotfound = ""), TRUE)
     if (region == "") stopNotDisplayr("region")
+    if (region == "app")
+        region <- "displayr-app"  # to avoid Dynamic Site Acceleration CDN, which limits uploads to 100MB
     if (region == "master")
-        region <- "displayr-master"  # to avoid Dynamic Site Acceleration CDN, which limits uploads to 100MB
+        region <- "displayr-master"
     api.root <- paste0("https://", region, ".displayr.com/api/", endpoint, "/")
     return (api.root)
 }
