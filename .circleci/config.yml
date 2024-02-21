@@ -29,7 +29,7 @@ workflows:
           executor: << pipeline.parameters.executor >>
           name: BuildAndCheckPackage
           context:
-            - rviz_packages
+            - r_packages
           remote_deps: << pipeline.parameters.remote-deps >>
           separate_test_job: false
           save_snapshots: << pipeline.parameters.save-snapshots >>
