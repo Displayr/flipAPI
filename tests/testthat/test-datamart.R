@@ -148,7 +148,7 @@ test_that("Delete Data",
   expect_invisible(QSaveData(mtcars, "mtcars.rds"))
   expect_true(QFileExists("mtcars.rds"))
   expect_invisible(QDeleteFiles(c("mtcars.rds")))
-  expect_false(QFileExists("mtcars.rds"))
+  expect_warning(QFileExists("mtcars.rds"), "File not found")
 
   expect_invisible(QSaveData(mtcars, "mtcars.csv"))
   expect_invisible(QSaveData(mtcars, "mtcars.sav"))
@@ -156,8 +156,8 @@ test_that("Delete Data",
   expect_true(QFileExists("mtcars.sav"))
 
   expect_invisible(QDeleteFiles(c("mtcars.csv", "mtcars.sav")))
-  expect_false(QFileExists("mtcars.csv"))
-  expect_false(QFileExists("mtcars.sav"))
+  expect_warning(QFileExists("mtcars.csv"), "File not found")
+  expect_warning(QFileExists("mtcars.sav"), "File not found")
 
   # Should still succeed even if files don't exist
   expect_invisible(QDeleteFiles(c("mtcars.csv", "mtcars.sav")))
