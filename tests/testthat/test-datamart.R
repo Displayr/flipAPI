@@ -135,3 +135,30 @@ test_that("DS-3269: Data Mart unavailable",
                      "issue connecting to your Displayr Cloud Drive")
     })
 })
+
+test_that("Delete Data", 
+{
+  skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
+
+  local_mocked_bindings(getApiRoot = function(endpoint = "DataMart") paste0("https://master.displayr.com/api/", endpoint, "/"))
+  prevClientId <- clientId
+  assign("clientId", "-948985", envir = .GlobalEnv)
+  on.exit(assign("clientId", prevClientId, envir = .GlobalEnv))
+
+  expect_invisible(QSaveData(mtcars, "mtcars.rds"))
+  expect_true(QFileExists("mtcars.rds"))
+  expect_invisible(QDeleteFiles(c("mtcars.rds")))
+  expect_warning(QFileExists("mtcars.rds"), "File not found")
+
+  expect_invisible(QSaveData(mtcars, "mtcars.csv"))
+  expect_invisible(QSaveData(mtcars, "mtcars.sav"))
+  expect_true(QFileExists("mtcars.csv"))
+  expect_true(QFileExists("mtcars.sav"))
+
+  expect_invisible(QDeleteFiles(c("mtcars.csv", "mtcars.sav")))
+  expect_warning(QFileExists("mtcars.csv"), "File not found")
+  expect_warning(QFileExists("mtcars.sav"), "File not found")
+
+  # Should still succeed even if files don't exist
+  expect_invisible(QDeleteFiles(c("mtcars.csv", "mtcars.sav")))
+})
