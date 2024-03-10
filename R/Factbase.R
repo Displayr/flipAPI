@@ -18,8 +18,8 @@
 #' @param time_aggregation (optional) One of "minimum", "maximum", "sum", "average", "first", "last".
 #'   If supplied then this operation will be used when aggregating data in different periods,
 #'   and `aggregation` will only be used to aggregate data in different label dimensions.
-#' @param definition (optional) A detailed explanation of the meaning and derivation of the data.
-#' @param hyperlink (optional) A link to a web page where more can be read about the data.
+#' @param definition A detailed explanation of the meaning and derivation of the data.
+#' @param hyperlink A link to a web page where more can be read about the data.
 #'   Preferably this is a link into the system that calls this function.
 #' @param owner The name (usually an email address) of whoever should be contacted to deal with problems
 #'   or questions about this data.
@@ -65,7 +65,8 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         if (length(update_key) != 1)
             stop("'update_key' currently only supports a single column name.  Complain to us if this is causing you trouble")
     }
-
+    ensureDefinitionHyperlinkOwnerSupplied(definition, hyperlink, owner)
+    
     # Build dimensions.
     original_data <- data
     data <- c(data)  # avoid modifying caller's data.frame
@@ -219,6 +220,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
         stop(paste("'data' must be a data.frame, but got", format(data)))
     if (length(data) < 2)
         stop("There must be at least two columns in 'data'")
+    ensureDefinitionHyperlinkOwnerSupplied(definition, hyperlink, owner)
     original_data <- data
 
     # Build dimensions.
@@ -287,6 +289,7 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", d
         stop(paste("'data' must be a data.frame, but got", format(data)))
     if (length(data) < 1)
         stop("There must be at least one column in 'data'")
+    ensureDefinitionHyperlinkOwnerSupplied(definition, hyperlink, owner)
     if (!is.null(na_columns)) {
         if (!is.character(na_columns))
             stop("'na_columns' must be character data")
@@ -342,6 +345,20 @@ value_type_for_vector <- function(v, column_name) {
         stop(paste('Cannot work out which data type to use for column', column_name, 'containing a', typeof(v), 'vector.  Only Date, POSIXt, text or real are accepted'))
 }
 
+ensureDefinitionHyperlinkOwnerSupplied <- function(definition, hyperlink, owner) {
+    if (is.null(definition))
+        stop("argument \"definition\" is missing")
+    if (!is.character(definition) || length(definition) != 1)
+        stop("argument \"definition\" must be a character vector of length 1, or null")
+    if (is.null(hyperlink))
+        stop("argument \"hyperlink\" is missing")
+    if (!is.character(hyperlink) || length(hyperlink) != 1)
+        stop("argument \"hyperlink\" must be a character vector of length 1")
+    if (is.null(owner))
+        stop("argument \"owner\" is missing")
+    if (!is.character(owner) || length(owner) != 1)
+        stop("argument \"owner\" must be a character vector of length 1")
+}
 
 #' Creates or updates a metric described by a formula over other metrics.
 #' See https://factbase.azurewebsites.net/static/pages/help.html#penetration
@@ -369,13 +386,8 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
         stop("denominator must be a character vector of length 1")
     if (!is.character(dimensions_to_count) || length(metric_name) < 1)
         stop("dimensions_to_count must contain a character vector with a length of at least 1")
-    if (!is.character(definition) || length(metric_name) != 1)
-        stop("definition must be a character vector of length 1, or null")
-    if (!is.character(hyperlink) || length(hyperlink) != 1)
-        stop("hyperlink must be a character vector of length 1")
-    if (!is.character(owner) || length(owner) != 1)
-        stop("owner must be a character vector of length 1")
-    
+    ensureDefinitionHyperlinkOwnerSupplied(definition, hyperlink, owner)
+
     body <- toJSON(list(
         type="penetration",
         numeratorMetricName=numerator,
@@ -423,12 +435,7 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
         stop(paste("Unknown 'smoothing.window':", smoothing.window))
     if (!is.logical(smoothing.sum) || length(smoothing.sum) != 1)
         stop("smoothing.sum must be a logical vector of length 1")
-    if (!is.character(definition) || length(metric_name) != 1)
-        stop("definition must be a character vector of length 1, or null")
-    if (!is.character(hyperlink) || length(hyperlink) != 1)
-        stop("hyperlink must be a character vector of length 1")
-    if (!is.character(owner) || length(owner) != 1)
-        stop("owner must be a character vector of length 1")
+    ensureDefinitionHyperlinkOwnerSupplied(definition, hyperlink, owner)
     
     body <- list(
         type="ratio",

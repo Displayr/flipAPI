@@ -84,7 +84,10 @@ test_that("UploadMetricToFactbase() can handle pre-aggregated data and use the `
  "name": "Explicit metric name",
 "valueType": "real",
 "aggregation": "sum",
-"timeAggregation": null 
+"timeAggregation": null,
+"definition": "fake definition",
+"hyperlink": "https://fake.example.com",
+"owner": "bob.jones@example.com" 
 },
 "update": "replace_all",
 "dimensions": [
@@ -123,6 +126,9 @@ test_that("UploadMetricToFactbase() can handle pre-aggregated data and use the `
                 name="Explicit metric name",
                 period_type="day",
                 aggregation="sum",
+                definition="fake definition",
+                hyperlink="https://fake.example.com",
+                owner="bob.jones@example.com",
                 test_return_json=TRUE
             ),
             expected_json
@@ -231,7 +237,9 @@ null
    1693526400000 
 ] 
 ],
-"definition": "My table upload" 
+"definition": "My table upload",
+"hyperlink": "https://fake.example.com",
+"owner": "bob.jones@example.com" 
 }'
     expect_error(
         expect_json_equal(
@@ -244,6 +252,8 @@ null
                     dates=as.POSIXct(c("2023-08-31", NA, "2023-09-01"), tz="UTC")),
                 token="fake",
                 definition="My table upload",
+                hyperlink="https://fake.example.com",
+                owner="bob.jones@example.com",
                 na_columns=c("numbers", "dates"),
                 test_return_json=TRUE
             ),
@@ -253,12 +263,18 @@ null
 })
 
 test_that("UploadTableToFactbase() rejects NAs", {
-    expect_error(UploadTableToFactbase("Blah", data.frame(n=c(42, NA)), "fake_token"),
+    expect_error(UploadTableToFactbase("Blah", data.frame(n=c(42, NA)), "fake_token",
+                                       definition="fake definition",
+                                       hyperlink="https://fake.example.com",
+                                       owner="bob.jones@example.com"),
                  regexp="contains NAs")
 })
 
 test_that("UploadTableToFactbase() rejects unexpected types with a useful error message", {
-    expect_error(UploadTableToFactbase("Blah", data.frame(n=c(T, F)), "fake_token"),
+    expect_error(UploadTableToFactbase("Blah", data.frame(n=c(T, F)), "fake_token",
+                                       definition="fake definition",
+                                       hyperlink="https://fake.example.com",
+                                       owner="bob.jones@example.com"),
                  regexp="Cannot work out which data type to use for column n containing a logical vector.  Only Date, POSIXt, text or real are accepted")
 })
 

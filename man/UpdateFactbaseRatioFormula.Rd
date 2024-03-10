@@ -28,9 +28,9 @@ one of these.}
 
 \item{denominator}{The name of an existing metric.  See the documentation reference above.}
 
-\item{definition}{(optional) A detailed explanation of the meaning and derivation of the data.}
+\item{definition}{A detailed explanation of the meaning and derivation of the data.}
 
-\item{hyperlink}{(optional) A link to a web page where more can be read about the data.
+\item{hyperlink}{A link to a web page where more can be read about the data.
 Preferably this is a link into the system that calls this function.}
 
 \item{owner}{The name (usually an email address) of whoever should be contacted to deal with problems
