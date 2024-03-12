@@ -16,7 +16,7 @@ AddFactbaseProvenance(
 
 \item{description}{A description of where `x` came from.}
 
-\item{hyperlink}{(optional) A link to a web page where more can be read about the data.
+\item{hyperlink}{A link to a web page where more can be read about the data.
 Preferably this is a link into the system that calls this function.}
 
 \item{owner}{The name (usually an email address) of whoever should be contacted to deal with problems
