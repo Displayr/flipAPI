@@ -365,7 +365,7 @@ QDeleteFiles <- function(filenames, company.token = getCompanySecret())
     company.secret <- company.token
     api.root <- getApiRoot("DataMartBatchDelete")
     url_param_filenames <- sprintf("filenames=%s", filenames)
-    filenames.string <- paste(filenames, collapse = " ")
+    filenames.string <- paste(filenames, collapse = ", ")
     res <- try(DELETE(paste0(api.root, "?", URLencode(paste(url_param_filenames, collapse="&"))), 
                 config=add_headers("X-Q-Company-Secret" = company.secret)))
     if (inherits(res, "try-error") || res$status_code != 200)
