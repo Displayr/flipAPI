@@ -173,14 +173,17 @@ add_definition_etc <- function(l, definition, hyperlink, owner) {
 
 #' @importFrom httr POST timeout add_headers content
 post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
-    message(paste0("POSTing ", nchar(body), " characters to ", Sys.info()["nodename"], " at ", Sys.time()))
+    if (Encoding(body) == "latin1")
+        stop("'body' must be supplied encoded as 'UTF-8' or 'unknown', but we got 'latin1'")
+    request_body_size <- nchar(body, type="bytes")
+    message(paste0("POSTing ", request_body_size, " bytes to ", Sys.info()["nodename"], " at ", Sys.time()))
     url <- paste0("https://factbase.azurewebsites.net/", endpoint)
     headers <- add_headers(
         `x-facttoken` = token,
-        `content-type` = 'application/json')
+        `content-type` = 'application/json; charset=utf-8')
     MAX_BODY_SIZE <- 500000000  # matches FUNCTIONS_REQUEST_BODY_SIZE_LIMIT in portal > Factbase > Configuration
-    if (nchar(body) > MAX_BODY_SIZE)
-        stop(paste0("Your data uses ", nchar(body), "bytes, but the limit is ", MAX_BODY_SIZE), ".  Reduce the quantity of data you are sending.")
+    if (request_body_size > MAX_BODY_SIZE)
+        stop(paste0("Your data uses ", request_body_size, "bytes, but the limit is ", MAX_BODY_SIZE), ".  Reduce the quantity of data you are sending.")
     r <- POST(url, body = body, headers, timeout(3600))
     if (r$status_code != 200) {
         if (!is.null(save_failed_json_to)) {
