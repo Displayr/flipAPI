@@ -173,7 +173,7 @@ add_definition_etc <- function(l, definition, hyperlink, owner) {
 
 #' @importFrom httr POST timeout add_headers content
 post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
-    message(paste0("POSTing ", nchar(body), " characters from ", Sys.info()["nodename"]))
+    message(paste0("POSTing ", nchar(body), " characters to ", Sys.info()["nodename"], " at ", Sys.time()))
     url <- paste0("https://factbase.azurewebsites.net/", endpoint)
     headers <- add_headers(
         `x-facttoken` = token,
