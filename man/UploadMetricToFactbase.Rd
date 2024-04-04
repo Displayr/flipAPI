@@ -16,8 +16,7 @@ UploadMetricToFactbase(
   owner = NULL,
   period_type = NULL,
   update_key = NULL,
-  save_failed_json_to = NULL,
-  test_return_json = FALSE
+  test = list()
 )
 }
 \arguments{
@@ -65,10 +64,7 @@ metric, but Factbase will automatically choose the correct data according to the
 "append_or_update".  Data in this column must be unique, which implies some sort of aggregation
 for date/time data.}
 
-\item{save_failed_json_to}{(optional) If set then the JSON for this request will be saved to the named file
-in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.}
-
-\item{test_return_json}{(optional) For testing only.  Ignore.}
+\item{test}{(optional) For testing only.  Ignore.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the
