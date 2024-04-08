@@ -185,7 +185,7 @@ post_json_to_factbase <- function(url, body, token, test) {
     if (Encoding(body) == "latin1")
         stop("'body' must be supplied encoded as 'UTF-8' or 'unknown', but we got 'latin1'")
     body_size <- nchar(body, type="bytes")
-    post_to_factbase(url, "application/json", body, body_size, token)
+    post_to_factbase(url, "application/json", body, body_size, token, test)
 }
 
 #' @importFrom httr timeout add_headers content
@@ -326,8 +326,7 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", d
         body_size <- length(body)
         url <- to_url(
             endpoint,
-            "?table=",
-            URLencode(table_name),
+            "?table=", URLencode(table_name),
             "&update=", URLencode(mode),
             "&definition=", URLencode(definition),
             "&hyperlink=", URLencode(hyperlink),
@@ -433,8 +432,7 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
     ))
 
     url <- to_url(
-        "formula?metric=",
-        URLencode(metric_name),
+        "formula?metric=", URLencode(metric_name),
         "&definition=", URLencode(definition),
         "&hyperlink=", URLencode(hyperlink),
         "&owner=", URLencode(owner))
@@ -484,8 +482,7 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
     json <- toJSON(body)
 
     url <- to_url(
-        "formula?metric=",
-        URLencode(metric_name),
+        "formula?metric=", URLencode(metric_name),
         "&definition=", URLencode(definition),
         "&hyperlink=", URLencode(hyperlink),
         "&owner=", URLencode(owner))

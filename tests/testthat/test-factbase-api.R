@@ -17,7 +17,7 @@ expect_json_httrPOST <- function(url_path, expected_json) {
             expect_equal(config$headers[['x-facttoken']], 'fake-token')
             list(status_code=200)
         },
-        .env=parent.env(environment())
+        .env=parent.env(environment())  # lets this call install the mock for our caller
     )
 }
 
