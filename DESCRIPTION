@@ -1,7 +1,7 @@
 Package: flipAPI
 Type: Package
 Title: Web APIs tools
-Version: 1.4.1
+Version: 1.5.0
 Author: Displayr <opensource@displayr.com>
 Maintainer: Displayr <opensource@displayr.com>
 Description: Functions to extract data and interact with web APIs.
@@ -28,6 +28,10 @@ Imports:
     gganimate,
     git2r,
     RJSONIO,
+    DBI,
+    odbc,
+    RMySQL,
+    RPostgres,
     zip
 Remotes: Displayr/flipTransformations,
     Tatvic/RGoogleAnalytics,
