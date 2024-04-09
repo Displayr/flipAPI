@@ -14,7 +14,7 @@ UpdateFactbasePenetrationFormula(
   definition,
   hyperlink,
   owner,
-  test_return_json = F
+  test = list()
 )
 }
 \arguments{
@@ -38,7 +38,7 @@ Preferably this is a link into the system that calls this function.}
 \item{owner}{The name (usually an email address) of whoever should be contacted to deal with problems
 or questions about this data.}
 
-\item{test_return_json}{(optional) For testing only.  Ignore.}
+\item{test}{(optional) For testing only.  Ignore.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the

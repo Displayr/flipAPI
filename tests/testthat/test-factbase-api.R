@@ -8,6 +8,19 @@ expect_json_equal <- function(a, b) {
     }
 }
 
+expect_json_httrPOST <- function(url_path, expected_json) {
+    local_mocked_bindings(
+        httrPOST=function(url=NULL, config=list(), ..., body=NULL, encode=c("multipart", "form", "json", "raw"), handle=NULL) {
+            expect_equal(url, paste0("https://factbase.azurewebsites.net/", url_path))
+            expect_json_equal(body, expected_json)
+            expect_equal(config$headers[['content-type']], 'application/json')
+            expect_equal(config$headers[['x-facttoken']], 'fake-token')
+            list(status_code=200)
+        },
+        .env=parent.env(environment())  # lets this call install the mock for our caller
+    )
+}
+
 test_that("UploadMetricToFactbase() produces correct JSON", {
     expected_json <- '{
  "metric": {
@@ -55,26 +68,21 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
 ] 
 ] 
 }'
-    expect_error(
-        expect_json_equal(
-            UploadMetricToFactbase(
-                data=data.frame(
-                    `Metric name`=c(1, 2),
-                    When= as.POSIXct(c("2023-04-18", "2023-04-19"), "%Y-%m-%d", tz="UTC"),
-                    Dimension1=c("Dog", "Car"),
-                    DimensionWillBeConvertedToText=c(11, 22)),
-                token="fake",
-                mode="append_or_update",
-                aggregation="sum",
-                time_aggregation="last",
-                definition="Our definition",
-                hyperlink="https://example.com/",
-                owner="bob.jones@example.com",
-                update_key="When",
-                test_return_json=TRUE
-            ),
-            expected_json
-        ), NA
+    expect_json_httrPOST(url_path="fact", expected_json)
+    UploadMetricToFactbase(
+        data=data.frame(
+            `Metric name`=c(1, 2),
+            When= as.POSIXct(c("2023-04-18", "2023-04-19"), "%Y-%m-%d", tz="UTC"),
+            Dimension1=c("Dog", "Car"),
+            DimensionWillBeConvertedToText=c(11, 22)),
+        token="fake-token",
+        mode="append_or_update",
+        aggregation="sum",
+        time_aggregation="last",
+        definition="Our definition",
+        hyperlink="https://example.com/",
+        owner="bob.jones@example.com",
+        update_key="When"
     )
 })
 
@@ -116,23 +124,18 @@ test_that("UploadMetricToFactbase() can handle pre-aggregated data and use the `
 ] 
 ] 
 }'
-    expect_error(
-        expect_json_equal(
-            UploadMetricToFactbase(
-                data=data.frame(
-                    When= as.POSIXct(c("2023-04-18", "2023-04-19"), "%Y-%m-%d", tz="UTC"),
-                    Dimension1=c("Dog", "Car")),
-                token="fake",
-                name="Explicit metric name",
-                period_type="day",
-                aggregation="sum",
-                definition="fake definition",
-                hyperlink="https://fake.example.com",
-                owner="bob.jones@example.com",
-                test_return_json=TRUE
-            ),
-            expected_json
-        ), NA
+    expect_json_httrPOST(url_path="fact", expected_json)
+    UploadMetricToFactbase(
+        data=data.frame(
+            When= as.POSIXct(c("2023-04-18", "2023-04-19"), "%Y-%m-%d", tz="UTC"),
+            Dimension1=c("Dog", "Car")),
+        token="fake-token",
+        name="Explicit metric name",
+        period_type="day",
+        aggregation="sum",
+        definition="fake definition",
+        hyperlink="https://fake.example.com",
+        owner="bob.jones@example.com"
     )
 })
 
@@ -173,21 +176,16 @@ test_that("UploadRelationshipToFactbase() produces correct JSON", {
 ] 
 ] 
 }'
-    expect_error(
-        expect_json_equal(
-            UploadRelationshipToFactbase(
-                data=data.frame(
-                    Dimension1=c("Dog", "Cat", "Lion"),
-                    Dimension2=c("Canine", "Feline", "Feline")),
-                token="fake",
-                mode="append_or_update",
-                definition="Our definition",
-                hyperlink="https://example.com/",
-                owner="bob.jones@example.com",
-                test_return_json=TRUE
-            ),
-            expected_json
-        ), NA
+    expect_json_httrPOST(url_path="fact", expected_json)
+    UploadRelationshipToFactbase(
+        data=data.frame(
+            Dimension1=c("Dog", "Cat", "Lion"),
+            Dimension2=c("Canine", "Feline", "Feline")),
+        token="fake-token",
+        mode="append_or_update",
+        definition="Our definition",
+        hyperlink="https://example.com/",
+        owner="bob.jones@example.com"
     )
 })
 
@@ -241,24 +239,46 @@ null
 "hyperlink": "https://fake.example.com",
 "owner": "bob.jones@example.com" 
 }'
-    expect_error(
-        expect_json_equal(
-            UploadTableToFactbase(
-                table_name="My Table",
-                data=data.frame(
-                    text=c("Dog", "Cat", "Lion"),
-                    numbers=c(1, NA, 3),
-                    factor=factor(c("big", "big", "small")),
-                    dates=as.POSIXct(c("2023-08-31", NA, "2023-09-01"), tz="UTC")),
-                token="fake",
-                definition="My table upload",
-                hyperlink="https://fake.example.com",
-                owner="bob.jones@example.com",
-                na_columns=c("numbers", "dates"),
-                test_return_json=TRUE
-            ),
-            expected_json
-        ), NA
+    expect_json_httrPOST(url_path="table", expected_json)
+    UploadTableToFactbase(
+        table_name="My Table",
+        data=data.frame(
+            text=c("Dog", "Cat", "Lion"),
+            numbers=c(1, NA, 3),
+            factor=factor(c("big", "big", "small")),
+            dates=as.POSIXct(c("2023-08-31", NA, "2023-09-01"), tz="UTC")),
+        token="fake-token",
+        definition="My table upload",
+        hyperlink="https://fake.example.com",
+        owner="bob.jones@example.com",
+        na_columns=c("numbers", "dates")
+    )
+})
+
+test_that("UploadTableToFactbase() can use parquet", {
+    local_mocked_bindings(
+        httrPOST=function(url, body, config, timeout_result) {
+            expect_equal(url, "https://factbase.azurewebsites.net/table?table=My%20Table&update=replace_all&definition=My%20table%20upload&hyperlink=https://fake.example.com&owner=bob.jones@example.com")
+            expect_true(is.raw(body))
+            expect_gt(length(body), 0)
+            expect_equal(config$headers[['content-type']], 'application/vnd.apache.parquet')
+            expect_equal(config$headers[['x-facttoken']], 'fake-token')
+            list(status_code=200)
+        }
+    )
+    UploadTableToFactbase(
+        table_name="My Table",
+        data=data.frame(
+            text=c("Dog", "Cat", "Lion"),
+            numbers=c(1, NA, 3),
+            factor=factor(c("big", "big", "small")),
+            dates=as.POSIXct(c("2023-08-31", NA, "2023-09-01"), tz="UTC")),
+        token="fake-token",
+        definition="My table upload",
+        hyperlink="https://fake.example.com",
+        owner="bob.jones@example.com",
+        na_columns=c("numbers", "dates"),
+        test=list(force_parquet=TRUE)
     )
 })
 
@@ -287,21 +307,17 @@ test_that("UpdateFactbasePenetrationFormula() produces correct JSON", {
  "Office dog name" 
 ] 
 }'
-    expect_error(
-        expect_json_equal(
-            UpdateFactbasePenetrationFormula(
-                metric_name="query.test.ts Barks penetration vs Number of dogs in office",
-                token="fake",
-                numerator="query.test.ts Barks",
-                denominator="query.test.ts Number of dogs in office",
-                dimensions_to_count=c("Office dog name"),
-                definition="definition of the new metric",
-                hyperlink='https://example.com',
-                owner='bob.jane@tmart.com',
-                test_return_json=TRUE
-            ),
-            expected_json
-        ), NA
+    expected_path = "formula?metric=query.test.ts%20Barks%20penetration%20vs%20Number%20of%20dogs%20in%20office&definition=definition%20of%20the%20new%20metric&hyperlink=https://example.com&owner=bob.jane@tmart.com"
+    expect_json_httrPOST(url_path=expected_path, expected_json)
+    UpdateFactbasePenetrationFormula(
+        metric_name="query.test.ts Barks penetration vs Number of dogs in office",
+        token="fake-token",
+        numerator="query.test.ts Barks",
+        denominator="query.test.ts Number of dogs in office",
+        dimensions_to_count=c("Office dog name"),
+        definition="definition of the new metric",
+        hyperlink='https://example.com',
+        owner='bob.jane@tmart.com'
     )
 })
 
@@ -316,22 +332,18 @@ test_that("UpdateFactbaseRatioFormula() produces correct JSON", {
 "sum": true 
 } 
 }'
-    expect_error(
-        expect_json_equal(
-            UpdateFactbaseRatioFormula(
-                metric_name="HR: Employee turnover",
-                token="fake",
-                numerator="HR: Employee Attrition By Team",
-                denominator="HR: Employees - Headcount By Team",
-                smoothing.window="year",
-                smoothing.sum=T,
-                definition="definition of the new metric",
-                hyperlink='https://example.com',
-                owner='bob.jane@tmart.com',
-                test_return_json=TRUE
-            ),
-            expected_json
-        ), NA
+    expected_path <- "formula?metric=HR:%20Employee%20turnover&definition=definition%20of%20the%20new%20metric&hyperlink=https://example.com&owner=bob.jane@tmart.com"
+    expect_json_httrPOST(url_path=expected_path, expected_json)
+    UpdateFactbaseRatioFormula(
+        metric_name="HR: Employee turnover",
+        token="fake-token",
+        numerator="HR: Employee Attrition By Team",
+        denominator="HR: Employees - Headcount By Team",
+        smoothing.window="year",
+        smoothing.sum=T,
+        definition="definition of the new metric",
+        hyperlink='https://example.com',
+        owner='bob.jane@tmart.com'
     )
 })
 

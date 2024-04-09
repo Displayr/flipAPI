@@ -1,3 +1,11 @@
+# Many of these routines have a `test` parameter, which is only used during testing or debugging.
+#
+# List entries:
+# $save_failed_json_to  If set then the JSON for this request will be saved to the named file
+#   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
+# $force_parquet  Pushes uploads to use parquet even when they would prefer JSON.
+
+
 #' Upload a metric to Factbase.
 #'
 #' @param data A data.frame with at least two columns, being (in order) for
@@ -33,9 +41,7 @@
 #' @param update_key (optional) The name of a column that can be used to update the data, when `mode` is
 #'   "append_or_update".  Data in this column must be unique, which implies some sort of aggregation
 #'   for date/time data.
-#' @param save_failed_json_to (optional) If set then the JSON for this request will be saved to the named file
-#'   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
-#' @param test_return_json (optional) For testing only.  Ignore.
+#' @param test (optional) For testing only.  Ignore.
 #' 
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -46,7 +52,7 @@
 UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", aggregation="sum",
         time_aggregation=NULL, definition=NULL, hyperlink=NULL, owner=NULL,
         period_type=NULL, update_key=NULL,
-        save_failed_json_to=NULL, test_return_json=FALSE) {
+        test=list()) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -122,10 +128,7 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         dimensions=dimensions,
         data=observations
     ), digits=15, .na="null")  # May need in future: .inf="null"
-    if (test_return_json) {
-        return(body)
-    }
-    post_to_factbase("fact", body, token, save_failed_json_to)
+    post_json_to_factbase(to_url("fact"), body, token, test)
 
     original_data
 }
@@ -172,24 +175,31 @@ add_definition_etc <- function(l, definition, hyperlink, owner) {
     l
 }
 
-#' @importFrom httr POST timeout add_headers content
-post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
+base_url <- "https://factbase.azurewebsites.net/"
+
+to_url <- function(...) {
+    do.call(paste0, c(base_url, list(...)))
+}
+
+post_json_to_factbase <- function(url, body, token, test) {
     if (Encoding(body) == "latin1")
         stop("'body' must be supplied encoded as 'UTF-8' or 'unknown', but we got 'latin1'")
-    request_body_size <- nchar(body, type="bytes")
-    message(paste0("POSTing ", request_body_size, " bytes to ", Sys.info()["nodename"], " at ", Sys.time()))
-    url <- paste0("https://factbase.azurewebsites.net/", endpoint)
+    body_size <- nchar(body, type="bytes")
+    post_to_factbase(url, "application/json", body, body_size, token, test)
+}
+
+#' @importFrom httr timeout add_headers content
+post_to_factbase <- function(url, mime_type, body, body_size, token, test) {
+    stop_if_request_too_large(body_size)
+    message(paste0("POSTing ", body_size, " bytes to ", Sys.info()["nodename"], " at ", Sys.time()))
     headers <- add_headers(
         `x-facttoken` = token,
-        `content-type` = 'application/json; charset=utf-8')
-    MAX_BODY_SIZE <- 500000000  # matches FUNCTIONS_REQUEST_BODY_SIZE_LIMIT in portal > Factbase > Configuration
-    if (request_body_size > MAX_BODY_SIZE)
-        stop(paste0("Your data uses ", request_body_size, "bytes, but the limit is ", MAX_BODY_SIZE), ".  Reduce the quantity of data you are sending.")
-    r <- POST(url, body = body, headers, timeout(3600))
+        `content-type` = mime_type)
+    r <- httrPOST(url, body=body, headers, timeout(3600))
     if (r$status_code != 200) {
-        if (!is.null(save_failed_json_to)) {
-            connection <- QFileOpen(save_failed_json_to, "w",
-                mime.type="application/json")
+        if (!is.null(test$save_failed_json_to)) {
+            connection <- QFileOpen(test$save_failed_json_to, "w",
+                                    mime.type=mime_type)
             writeLines(body, connection)
             close(connection)
         }
@@ -197,7 +207,18 @@ post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
     }
 }
 
+# Used instead of POST so that we can mock it.
+#' @importFrom httr POST
+httrPOST <- function(url=NULL, config=list(), ..., body=NULL, encode=c("multipart", "form", "json", "raw"), handle=NULL) {
+    arg_list <- c(list(url=url, config=config), list(...), list(encode=encode, handle=handle))
+    do.call(POST, arg_list)
+}
 
+stop_if_request_too_large <- function (request_body_size) {
+    MAX_BODY_SIZE <- 500000000  # matches FUNCTIONS_REQUEST_BODY_SIZE_LIMIT in portal > Factbase > Configuration
+    if (request_body_size > MAX_BODY_SIZE)
+        stop(paste0("Your data uses ", request_body_size, "bytes, but the limit is ", MAX_BODY_SIZE), ".  Reduce the quantity of data you are sending.")
+}
 
 #' Upload a relationship to Factbase.
 #'
@@ -215,8 +236,7 @@ post_to_factbase <- function(endpoint, body, token, save_failed_json_to) {
 #' @importFrom RJSONIO toJSON
 #' @export
 UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
-        definition=NULL, hyperlink=NULL, owner=NULL,
-        save_failed_json_to=NULL, test_return_json=FALSE) {
+        definition=NULL, hyperlink=NULL, owner=NULL, test=list()) {
     if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
@@ -256,12 +276,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
         dimensions=dimensions,
         data=observations
     ), digits=15, .na="null")
-    message(paste("Dimensions:", paste(vapply(dimensions, function(d) {d$name}, ""),
-        collapse=", ")))
-    if (test_return_json) {
-        return(body)
-    }
-    post_to_factbase("fact", body, token, save_failed_json_to)
+    post_json_to_factbase(to_url("fact"), body, token, test)
 
     original_data
 }
@@ -275,15 +290,15 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #'   numeric, boolean (converted to character) and date/time (`Date` or `POSIXt`) columns are acceptable.
 #' @param na_columns (optional) If set then this should be a character vector naming the
 #'   columns that may contain NAs, which will be converted into nulls int the resultant table.
-#' @param test_return_json (optional) For testing only.  Ignore.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
 #'
 #' @importFrom flipTime AsDateTime
+#' @importFrom arrow write_parquet BufferOutputStream
 #' @importFrom RJSONIO toJSON
 #' @export
-UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", definition=NULL, hyperlink=NULL, owner=NULL, na_columns=NULL, test_return_json=FALSE) {
+UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", definition=NULL, hyperlink=NULL, owner=NULL, na_columns=NULL, test=list()) {
     if (!is.character(table_name))
         stop('table_name must be a unitary character vector')
     if (!is.data.frame(data))
@@ -299,39 +314,57 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", d
     }
     original_data <- data
     
-    columns <- mapply(function(v, name, i) {
-        nullable <- if(is.null(na_columns)){F}else{name %in% na_columns}
-        if (!nullable && any(is.na(v)))
-            stop(paste0('data[["', name, '"]] contains NAs.  Factbase will accept these and convert them into nulls if you supply this column name in the na_columns parameter'))
-        list(
-            name=name,
-            valueType=value_type_for_vector(v, name),
-            mayContainNulls=nullable)
-    }, data, names(data), SIMPLIFY=FALSE, USE.NAMES=FALSE)
-    
-    data <- data.frame(mapply(function(v, name) {
-        if (value_type_for_vector(v, name) == "datetime")
-            datetimes_for_factbase(v)
-        else
-            v
-    }, data, names(data), SIMPLIFY=FALSE));
-    
-    observations <- dataframe_to_json_ready_observations(data)
-    
-    body <- list(
-        tableName=table_name,
-        update=mode,
-        columnDefinitions=columns,
-        rows=observations
-    )
-    body <- add_definition_etc(body, definition, hyperlink, owner);
-    
-    request_body <- toJSON(body, digits=15, .na="null")
-    if (test_return_json) {
-        return(request_body)
+    ndata_points <- nrow(data) * length(data)
+    use_parquet <- ndata_points > 1000000 || isTRUE(test$force_parquet)
+    endpoint <- "table"
+    if (use_parquet) {
+        # Row-oriented Apache parquet format
+        stream <- BufferOutputStream$create()
+        write_parquet(data, sink=stream)
+        buffer <- stream$finish()
+        body <- buffer$data()
+        body_size <- length(body)
+        url <- to_url(
+            endpoint,
+            "?table=", URLencode(table_name),
+            "&update=", URLencode(mode),
+            "&definition=", URLencode(definition),
+            "&hyperlink=", URLencode(hyperlink),
+            "&owner=", URLencode(owner))
+        post_to_factbase(url, 'application/vnd.apache.parquet', body, body_size, token)
+    } else {
+        # Ye olde JSON format.  Simple to understand, but slow.  Large quantities of row-oriented
+        # JSON is very slow to produce (30 mins for 400MB).
+        columns <- mapply(function(v, name, i) {
+            nullable <- if(is.null(na_columns)){F}else{name %in% na_columns}
+            if (!nullable && any(is.na(v)))
+                stop(paste0('data[["', name, '"]] contains NAs.  Factbase will accept these and convert them into nulls if you supply this column name in the na_columns parameter'))
+            list(
+                name=name,
+                valueType=value_type_for_vector(v, name),
+                mayContainNulls=nullable)
+        }, data, names(data), SIMPLIFY=FALSE, USE.NAMES=FALSE)
+        
+        data <- data.frame(mapply(function(v, name) {
+            if (value_type_for_vector(v, name) == "datetime")
+                datetimes_for_factbase(v)
+            else
+                v
+        }, data, names(data), SIMPLIFY=FALSE));
+        
+        observations <- dataframe_to_json_ready_observations(data)
+        
+        body <- list(
+            tableName=table_name,
+            update=mode,
+            columnDefinitions=columns,
+            rows=observations
+        )
+        body <- add_definition_etc(body, definition, hyperlink, owner);
+        
+        request_body <- toJSON(body, digits=15, .na="null")
+        post_json_to_factbase(to_url(endpoint), request_body, token, test)
     }
-    post_to_factbase("table", request_body, token, NULL)
-    
     original_data
 }
 
@@ -378,7 +411,7 @@ ensureDefinitionHyperlinkOwnerSupplied <- function(definition, hyperlink, owner)
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
-UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, denominator, dimensions_to_count, definition, hyperlink, owner, test_return_json=F) {
+UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, denominator, dimensions_to_count, definition, hyperlink, owner, test=list()) {
     if (!is.character(metric_name) || length(metric_name) != 1)
         stop("metric_name must be a character vector of length 1")
     if (!is.character(token) || length(token) != 1)
@@ -397,18 +430,13 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
         denominatorMetricName=denominator,
         dimensionsToCount=list(dimensions_to_count)
     ))
-    if (test_return_json)
-        return(body)
-    
-    url <- paste0(
-        "https://factbase.azurewebsites.net/formula?metric=",
-        URLencode(metric_name),
+
+    url <- to_url(
+        "formula?metric=", URLencode(metric_name),
         "&definition=", URLencode(definition),
         "&hyperlink=", URLencode(hyperlink),
         "&owner=", URLencode(owner))
-    r <- POST(url, body = body, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
-    if (r$status_code != 200)
-        stop(paste0(r$status_code, ": ", content(r, "text")))
+    post_json_to_factbase(url, body, token, test)
 }
 
 #' Creates or updates a metric described by a formula over two existing metrics.
@@ -425,7 +453,7 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
-UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominator, definition, hyperlink, owner, smoothing.window=NULL, smoothing.sum=F, test_return_json=F) {
+UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominator, definition, hyperlink, owner, smoothing.window=NULL, smoothing.sum=F, test=list()) {
     if (!is.character(metric_name) || length(metric_name) != 1)
         stop("metric_name must be a character vector of length 1")
     if (!is.character(token) || length(token) != 1)
@@ -452,18 +480,13 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
         )
     
     json <- toJSON(body)
-    if (test_return_json)
-        return(json)
-    
-    url <- paste0(
-        "https://factbase.azurewebsites.net/formula?metric=",
-        URLencode(metric_name),
+
+    url <- to_url(
+        "formula?metric=", URLencode(metric_name),
         "&definition=", URLencode(definition),
         "&hyperlink=", URLencode(hyperlink),
         "&owner=", URLencode(owner))
-    r <- POST(url, body = json, encode = "json", add_headers(`x-facttoken` = token), timeout(3600))
-    if (r$status_code != 200)
-        stop(paste0(r$status_code, ": ", content(r, "text")))
+    post_json_to_factbase(url, json, token, test)
 }
 
 #' WARNING: THIS FEATURE IS INCOMPLETE.  DO NOT USE THIS FUNCTION.

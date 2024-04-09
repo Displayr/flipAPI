@@ -13,7 +13,7 @@ UploadTableToFactbase(
   hyperlink = NULL,
   owner = NULL,
   na_columns = NULL,
-  test_return_json = FALSE
+  test = list()
 )
 }
 \arguments{
@@ -39,7 +39,7 @@ or questions about this data.}
 \item{na_columns}{(optional) If set then this should be a character vector naming the
 columns that may contain NAs, which will be converted into nulls int the resultant table.}
 
-\item{test_return_json}{(optional) For testing only.  Ignore.}
+\item{test}{(optional) For testing only.  Ignore.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the

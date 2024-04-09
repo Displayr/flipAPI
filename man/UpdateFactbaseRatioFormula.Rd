@@ -15,7 +15,7 @@ UpdateFactbaseRatioFormula(
   owner,
   smoothing.window = NULL,
   smoothing.sum = F,
-  test_return_json = F
+  test = list()
 )
 }
 \arguments{
@@ -42,7 +42,7 @@ or questions about this data.}
 \item{smoothing.sum}{(optional) TRUE to smooth using a rolling sum.  If not specified then a rolling
 average will be used.  See the documentation reference above.}
 
-\item{test_return_json}{(optional) For testing only.  Ignore.}
+\item{test}{(optional) For testing only.  Ignore.}
 }
 \value{
 The value of `data` that was passed in, so caller can see data uploaded if this is the
