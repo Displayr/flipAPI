@@ -333,7 +333,7 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", d
             "&hyperlink=", URLencode(hyperlink),
             "&owner=", URLencode(owner),
             test=test)
-        post_to_factbase(url, 'application/vnd.apache.parquet', body, body_size, token)
+        post_to_factbase(url, 'application/vnd.apache.parquet', body, body_size, token, test)
     } else {
         # Ye olde JSON format.  Simple to understand, but slow.  Large quantities of row-oriented
         # JSON is very slow to produce (30 mins for 400MB).
