@@ -327,11 +327,11 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", d
         body_size <- length(body)
         url <- to_url(
             endpoint,
-            "?table=", URLencode(table_name),
-            "&update=", URLencode(mode),
-            "&definition=", URLencode(definition),
-            "&hyperlink=", URLencode(hyperlink),
-            "&owner=", URLencode(owner),
+            "?table=", URLencode(table_name, reserved=T),
+            "&update=", URLencode(mode, reserved=T),
+            "&definition=", URLencode(definition, reserved=T),
+            "&hyperlink=", URLencode(hyperlink, reserved=T),
+            "&owner=", URLencode(owner, reserved=T),
             test=test)
         post_to_factbase(url, 'application/vnd.apache.parquet', body, body_size, token, test)
     } else {
@@ -434,10 +434,10 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
     ))
 
     url <- to_url(
-        "formula?metric=", URLencode(metric_name),
-        "&definition=", URLencode(definition),
-        "&hyperlink=", URLencode(hyperlink),
-        "&owner=", URLencode(owner),
+        "formula?metric=", URLencode(metric_name, reserved=T),
+        "&definition=", URLencode(definition, reserved=T),
+        "&hyperlink=", URLencode(hyperlink, reserved=T),
+        "&owner=", URLencode(owner, reserved=T),
         test=test)
     post_json_to_factbase(url, body, token, test)
 }
@@ -485,10 +485,10 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
     json <- toJSON(body)
 
     url <- to_url(
-        "formula?metric=", URLencode(metric_name),
-        "&definition=", URLencode(definition),
-        "&hyperlink=", URLencode(hyperlink),
-        "&owner=", URLencode(owner),
+        "formula?metric=", URLencode(metric_name, reserved=T),
+        "&definition=", URLencode(definition, reserved=T),
+        "&hyperlink=", URLencode(hyperlink, reserved=T),
+        "&owner=", URLencode(owner, reserved=T),
         test=test)
     post_json_to_factbase(url, json, token, test)
 }

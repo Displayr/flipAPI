@@ -258,7 +258,7 @@ null
 test_that("UploadTableToFactbase() can use parquet", {
     local_mocked_bindings(
         httrPOST=function(url, body, config, timeout_result) {
-            expect_equal(url, "https://factbase.azurewebsites.net/table?table=My%20Table&update=replace_all&definition=My%20table%20upload&hyperlink=https://fake.example.com&owner=bob.jones@example.com")
+            expect_equal(url, "https://factbase.azurewebsites.net/table?table=My%20Table&update=replace_all&definition=My%20table%20upload&hyperlink=https%3A%2F%2Ffake.example.com&owner=bob.jones%40example.com")
             expect_true(is.raw(body))
             expect_gt(length(body), 0)
             expect_equal(config$headers[['content-type']], 'application/vnd.apache.parquet')
@@ -307,7 +307,7 @@ test_that("UpdateFactbasePenetrationFormula() produces correct JSON", {
  "Office dog name" 
 ] 
 }'
-    expected_path = "formula?metric=query.test.ts%20Barks%20penetration%20vs%20Number%20of%20dogs%20in%20office&definition=definition%20of%20the%20new%20metric&hyperlink=https://example.com&owner=bob.jane@tmart.com"
+    expected_path = "formula?metric=query.test.ts%20Barks%20penetration%20vs%20Number%20of%20dogs%20in%20office&definition=definition%20of%20the%20new%20metric&hyperlink=https%3A%2F%2Fexample.com&owner=bob.jane%40tmart.com"
     expect_json_httrPOST(url_path=expected_path, expected_json)
     UpdateFactbasePenetrationFormula(
         metric_name="query.test.ts Barks penetration vs Number of dogs in office",
@@ -332,7 +332,7 @@ test_that("UpdateFactbaseRatioFormula() produces correct JSON", {
 "sum": true 
 } 
 }'
-    expected_path <- "formula?metric=HR:%20Employee%20turnover&definition=definition%20of%20the%20new%20metric&hyperlink=https://example.com&owner=bob.jane@tmart.com"
+    expected_path <- "formula?metric=HR%3A%20Employee%20turnover&definition=definition%20of%20the%20new%20metric&hyperlink=https%3A%2F%2Fexample.com&owner=bob.jane%40tmart.com"
     expect_json_httrPOST(url_path=expected_path, expected_json)
     UpdateFactbaseRatioFormula(
         metric_name="HR: Employee turnover",
