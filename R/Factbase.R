@@ -201,7 +201,6 @@ post_to_factbase <- function(url, mime_type, body, body_size, token, test) {
         if (!is.null(test$save_failed_json_to)) {
             connection <- QFileOpen(test$save_failed_json_to, "w",
                                     mime.type=mime_type)
-            writeLines(body, connection)
             close(connection)
         }
         stop(paste0(r$status_code, ": ", content(r, "text")))
@@ -211,7 +210,7 @@ post_to_factbase <- function(url, mime_type, body, body_size, token, test) {
 # Used instead of POST so that we can mock it.
 #' @importFrom httr POST
 httrPOST <- function(url=NULL, config=list(), ..., body=NULL, encode=c("multipart", "form", "json", "raw"), handle=NULL) {
-    arg_list <- c(list(url=url, config=config), list(...), list(encode=encode, handle=handle))
+    arg_list <- c(list(url=url, config=config), list(...), list(body=body, encode=encode, handle=handle))
     do.call(POST, arg_list)
 }
 
@@ -291,6 +290,9 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #'   numeric, boolean (converted to character) and date/time (`Date` or `POSIXt`) columns are acceptable.
 #' @param na_columns (optional) If set then this should be a character vector naming the
 #'   columns that may contain NAs, which will be converted into nulls int the resultant table.
+#' @param unique_columns (optional) If set then this should be a character vector naming the
+#'   columns that will contain values that are all unique.  This allows you to use other values than
+#'   'update_all' for 'mode'.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -299,7 +301,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #' @importFrom arrow write_parquet BufferOutputStream
 #' @importFrom RJSONIO toJSON
 #' @export
-UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", definition=NULL, hyperlink=NULL, owner=NULL, na_columns=NULL, test=list()) {
+UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", definition=NULL, hyperlink=NULL, owner=NULL, na_columns=NULL, unique_columns=NULL, test=list()) {
     if (!is.character(table_name))
         stop('table_name must be a unitary character vector')
     if (!is.data.frame(data))
@@ -327,23 +329,29 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", d
         body_size <- length(body)
         url <- to_url(
             endpoint,
-            "?table=", URLencode(table_name),
-            "&update=", URLencode(mode),
-            "&definition=", URLencode(definition),
-            "&hyperlink=", URLencode(hyperlink),
-            "&owner=", URLencode(owner),
+            "?table=", URLencode(table_name, reserved=T),
+            "&update=", URLencode(mode, reserved=T),
+            "&definition=", URLencode(definition, reserved=T),
+            "&hyperlink=", URLencode(hyperlink, reserved=T),
+            "&owner=", URLencode(owner, reserved=T),
             test=test)
-        post_to_factbase(url, 'application/vnd.apache.parquet', body, body_size, token)
+        if (length(na_columns) >= 1)
+            url <- paste0(url, '&', paste0('na_column=', URLencode(na_columns, reserved=T), collapse='&'))
+        if (length(unique_columns) >= 1)
+            url <- paste0(url, '&', paste0('unique_column=', URLencode(unique_columns, reserved=T), collapse='&'))
+        post_to_factbase(url, 'application/vnd.apache.parquet', body, body_size, token, test)
     } else {
         # Ye olde JSON format.  Simple to understand, but slow.  Large quantities of row-oriented
         # JSON is very slow to produce (30 mins for 400MB).
         columns <- mapply(function(v, name, i) {
             nullable <- if(is.null(na_columns)){F}else{name %in% na_columns}
+            unique <- if(is.null(unique_columns)){F}else{name %in% unique_columns}
             if (!nullable && any(is.na(v)))
                 stop(paste0('data[["', name, '"]] contains NAs.  Factbase will accept these and convert them into nulls if you supply this column name in the na_columns parameter'))
             list(
                 name=name,
                 valueType=value_type_for_vector(v, name),
+                unique=unique,
                 mayContainNulls=nullable)
         }, data, names(data), SIMPLIFY=FALSE, USE.NAMES=FALSE)
         
@@ -434,10 +442,10 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
     ))
 
     url <- to_url(
-        "formula?metric=", URLencode(metric_name),
-        "&definition=", URLencode(definition),
-        "&hyperlink=", URLencode(hyperlink),
-        "&owner=", URLencode(owner),
+        "formula?metric=", URLencode(metric_name, reserved=T),
+        "&definition=", URLencode(definition, reserved=T),
+        "&hyperlink=", URLencode(hyperlink, reserved=T),
+        "&owner=", URLencode(owner, reserved=T),
         test=test)
     post_json_to_factbase(url, body, token, test)
 }
@@ -485,11 +493,12 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
     json <- toJSON(body)
 
     url <- to_url(
-        "formula?metric=", URLencode(metric_name),
-        "&definition=", URLencode(definition),
-        "&hyperlink=", URLencode(hyperlink),
-        "&owner=", URLencode(owner),
+        "formula?metric=", URLencode(metric_name, reserved=T),
+        "&definition=", URLencode(definition, reserved=T),
+        "&hyperlink=", URLencode(hyperlink, reserved=T),
+        "&owner=", URLencode(owner, reserved=T),
         test=test)
+    message(json)
     post_json_to_factbase(url, json, token, test)
 }
 
