@@ -201,7 +201,6 @@ post_to_factbase <- function(url, mime_type, body, body_size, token, test) {
         if (!is.null(test$save_failed_json_to)) {
             connection <- QFileOpen(test$save_failed_json_to, "w",
                                     mime.type=mime_type)
-            writeLines(body, connection)
             close(connection)
         }
         stop(paste0(r$status_code, ": ", content(r, "text")))
@@ -211,7 +210,7 @@ post_to_factbase <- function(url, mime_type, body, body_size, token, test) {
 # Used instead of POST so that we can mock it.
 #' @importFrom httr POST
 httrPOST <- function(url=NULL, config=list(), ..., body=NULL, encode=c("multipart", "form", "json", "raw"), handle=NULL) {
-    arg_list <- c(list(url=url, config=config), list(...), list(encode=encode, handle=handle))
+    arg_list <- c(list(url=url, config=config), list(...), list(body=body, encode=encode, handle=handle))
     do.call(POST, arg_list)
 }
 
@@ -490,6 +489,7 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
         "&hyperlink=", URLencode(hyperlink, reserved=T),
         "&owner=", URLencode(owner, reserved=T),
         test=test)
+    message(json)
     post_json_to_factbase(url, json, token, test)
 }
 
