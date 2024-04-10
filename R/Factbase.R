@@ -332,6 +332,8 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", d
             "&hyperlink=", URLencode(hyperlink, reserved=T),
             "&owner=", URLencode(owner, reserved=T),
             test=test)
+        if (length(na_columns) >= 1)
+            url <- paste0(url, '&', paste0('na_column=', URLencode(na_columns, reserved=T), collapse='&'))
         post_to_factbase(url, 'application/vnd.apache.parquet', body, body_size, token, test)
     } else {
         # Ye olde JSON format.  Simple to understand, but slow.  Large quantities of row-oriented

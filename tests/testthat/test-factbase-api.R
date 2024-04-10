@@ -258,7 +258,7 @@ null
 test_that("UploadTableToFactbase() can use parquet", {
     local_mocked_bindings(
         httrPOST=function(url, body, config, timeout_result) {
-            expect_equal(url, "https://factbase.azurewebsites.net/table?table=My%20Table&update=replace_all&definition=My%20table%20upload&hyperlink=https%3A%2F%2Ffake.example.com&owner=bob.jones%40example.com")
+            expect_equal(url, "https://factbase.azurewebsites.net/table?table=My%20Table&update=replace_all&definition=My%20table%20upload&hyperlink=https%3A%2F%2Ffake.example.com&owner=bob.jones%40example.com&na_column=numbers&na_column=dates")
             expect_true(is.raw(body))
             expect_gt(length(body), 0)
             expect_equal(config$headers[['content-type']], 'application/vnd.apache.parquet')
