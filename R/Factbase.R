@@ -4,6 +4,7 @@
 # $save_failed_json_to  If set then the JSON for this request will be saved to the named file
 #   in your Displayr Drive.  This is helpful when trying to reproduce a problem for debugging.
 # $force_parquet  Pushes uploads to use parquet even when they would prefer JSON.
+# $factbase_host  Override the hostname for Factbase.  e.g. factbase-master.azurewebsites.net
 
 
 #' Upload a metric to Factbase.
@@ -128,7 +129,7 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         dimensions=dimensions,
         data=observations
     ), digits=15, .na="null")  # May need in future: .inf="null"
-    post_json_to_factbase(to_url("fact"), body, token, test)
+    post_json_to_factbase(to_url("fact", test=test), body, token, test)
 
     original_data
 }
@@ -175,9 +176,9 @@ add_definition_etc <- function(l, definition, hyperlink, owner) {
     l
 }
 
-base_url <- "https://factbase.azurewebsites.net/"
-
-to_url <- function(...) {
+to_url <- function(..., test=list()) {
+    hostname <- if (is.character(test$factbase_host)) test$factbase_host[1] else "factbase.azurewebsites.net"
+    base_url <- paste0('https://', hostname, '/')
     do.call(paste0, c(base_url, list(...)))
 }
 
@@ -276,7 +277,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
         dimensions=dimensions,
         data=observations
     ), digits=15, .na="null")
-    post_json_to_factbase(to_url("fact"), body, token, test)
+    post_json_to_factbase(to_url("fact", test=test), body, token, test)
 
     original_data
 }
@@ -330,7 +331,8 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", d
             "&update=", URLencode(mode),
             "&definition=", URLencode(definition),
             "&hyperlink=", URLencode(hyperlink),
-            "&owner=", URLencode(owner))
+            "&owner=", URLencode(owner),
+            test=test)
         post_to_factbase(url, 'application/vnd.apache.parquet', body, body_size, token)
     } else {
         # Ye olde JSON format.  Simple to understand, but slow.  Large quantities of row-oriented
@@ -363,7 +365,7 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", d
         body <- add_definition_etc(body, definition, hyperlink, owner);
         
         request_body <- toJSON(body, digits=15, .na="null")
-        post_json_to_factbase(to_url(endpoint), request_body, token, test)
+        post_json_to_factbase(to_url(endpoint, test=test), request_body, token, test)
     }
     original_data
 }
@@ -435,7 +437,8 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
         "formula?metric=", URLencode(metric_name),
         "&definition=", URLencode(definition),
         "&hyperlink=", URLencode(hyperlink),
-        "&owner=", URLencode(owner))
+        "&owner=", URLencode(owner),
+        test=test)
     post_json_to_factbase(url, body, token, test)
 }
 
@@ -485,7 +488,8 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
         "formula?metric=", URLencode(metric_name),
         "&definition=", URLencode(definition),
         "&hyperlink=", URLencode(hyperlink),
-        "&owner=", URLencode(owner))
+        "&owner=", URLencode(owner),
+        test=test)
     post_json_to_factbase(url, json, token, test)
 }
 
