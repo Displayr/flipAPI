@@ -13,6 +13,7 @@ UploadTableToFactbase(
   hyperlink = NULL,
   owner = NULL,
   na_columns = NULL,
+  unique_columns = NULL,
   test = list()
 )
 }
@@ -38,6 +39,10 @@ or questions about this data.}
 
 \item{na_columns}{(optional) If set then this should be a character vector naming the
 columns that may contain NAs, which will be converted into nulls int the resultant table.}
+
+\item{unique_columns}{(optional) If set then this should be a character vector naming the
+columns that will contain values that are all unique.  This allows you to use other values than
+'update_all' for 'mode'.}
 
 \item{test}{(optional) For testing only.  Ignore.}
 }

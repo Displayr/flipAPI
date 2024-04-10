@@ -290,6 +290,9 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #'   numeric, boolean (converted to character) and date/time (`Date` or `POSIXt`) columns are acceptable.
 #' @param na_columns (optional) If set then this should be a character vector naming the
 #'   columns that may contain NAs, which will be converted into nulls int the resultant table.
+#' @param unique_columns (optional) If set then this should be a character vector naming the
+#'   columns that will contain values that are all unique.  This allows you to use other values than
+#'   'update_all' for 'mode'.
 #'
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
 #'   last call in R code.
@@ -298,7 +301,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 #' @importFrom arrow write_parquet BufferOutputStream
 #' @importFrom RJSONIO toJSON
 #' @export
-UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", definition=NULL, hyperlink=NULL, owner=NULL, na_columns=NULL, test=list()) {
+UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", definition=NULL, hyperlink=NULL, owner=NULL, na_columns=NULL, unique_columns=NULL, test=list()) {
     if (!is.character(table_name))
         stop('table_name must be a unitary character vector')
     if (!is.data.frame(data))
@@ -334,17 +337,21 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", d
             test=test)
         if (length(na_columns) >= 1)
             url <- paste0(url, '&', paste0('na_column=', URLencode(na_columns, reserved=T), collapse='&'))
+        if (length(unique_columns) >= 1)
+            url <- paste0(url, '&', paste0('unique_column=', URLencode(unique_columns, reserved=T), collapse='&'))
         post_to_factbase(url, 'application/vnd.apache.parquet', body, body_size, token, test)
     } else {
         # Ye olde JSON format.  Simple to understand, but slow.  Large quantities of row-oriented
         # JSON is very slow to produce (30 mins for 400MB).
         columns <- mapply(function(v, name, i) {
             nullable <- if(is.null(na_columns)){F}else{name %in% na_columns}
+            unique <- if(is.null(unique_columns)){F}else{name %in% unique_columns}
             if (!nullable && any(is.na(v)))
                 stop(paste0('data[["', name, '"]] contains NAs.  Factbase will accept these and convert them into nulls if you supply this column name in the na_columns parameter'))
             list(
                 name=name,
                 valueType=value_type_for_vector(v, name),
+                unique=unique,
                 mayContainNulls=nullable)
         }, data, names(data), SIMPLIFY=FALSE, USE.NAMES=FALSE)
         
