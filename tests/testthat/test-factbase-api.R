@@ -69,12 +69,13 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
 ] 
 }'
     expect_json_httrPOST(url_path="fact", expected_json)
-    UploadMetricToFactbase(
-        data=data.frame(
-            `Metric name`=c(1, 2),
-            When= as.POSIXct(c("2023-04-18", "2023-04-19"), "%Y-%m-%d", tz="UTC"),
-            Dimension1=c("Dog", "Car"),
-            DimensionWillBeConvertedToText=c(11, 22)),
+    input_data <- data.frame(
+        `Metric name`=c(1, 2),
+        When= as.POSIXct(c("2023-04-18", "2023-04-19"), "%Y-%m-%d", tz="UTC"),
+        Dimension1=c("Dog", "Car"),
+        DimensionWillBeConvertedToText=c(11, 22))
+    data_returned <- UploadMetricToFactbase(
+        data=input_data,
         token="fake-token",
         mode="append_or_update",
         aggregation="sum",
@@ -84,6 +85,7 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
         owner="bob.jones@example.com",
         update_key="When"
     )
+    expect_equal(data_returned, input_data)
 })
 
 test_that("UploadMetricToFactbase() can handle pre-aggregated data and use the `name` argument", {
@@ -363,4 +365,10 @@ test_that("AddFactbaseProvenance adds provenance to a new object", {
     x1 <- AddFactbaseProvenance("dog", "born of four dogs")
     x2 <- AddFactbaseProvenance(x1, "born of two dogs")
     expect_equal(attr(x2, "factbase.provenance")$description, c("born of four dogs", "born of two dogs"))
+})
+
+test_that("truncate_too_large_data*() can truncate", {
+    df <- data.frame(dog=1:3, cat=2:4)
+    truncated <- truncate_too_large_data(df, 5)
+    expect_equal(truncated, data.frame(dog=1:2, cat=2:3))
 })
