@@ -241,7 +241,7 @@ truncate_too_large_data <- function (df, max_data_points=1e4) {
     if (ncols == 0 || ndata_points <= max_data_points)
         return(df)
     message(paste('Truncated data for display, but all', nrows, 'rows have been uploaded to Factbase'))
-    nrows_to_keep <- max_data_points / ncols
+    nrows_to_keep <- floor(max_data_points / ncols)
     df[1:nrows_to_keep, ]
 }
 
