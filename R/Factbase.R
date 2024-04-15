@@ -54,12 +54,7 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         time_aggregation=NULL, definition=NULL, hyperlink=NULL, owner=NULL,
         period_type=NULL, update_key=NULL,
         test=list()) {
-    if (!is.data.frame(data))
-        # Include the data in the error message because often this will be an SQL error,
-        # returned instead of a data.frame.  This makes it easier for users to spot the problem.
-        stop(paste("'data' must be a data.frame, but got", format(data)))
-    if (length(is.data.frame) == 0)
-        stop("There must be at least one column in 'data'")
+    validate_dataframe(data, min_columns=1)
     if (!(aggregation %in% c("none", "minimum", "maximum", "sum", "average", "first", "last")))
         stop(paste("Unknown 'aggregation':", aggregation))
     if (!is.null(time_aggregation) && !(time_aggregation %in% c("none", "minimum", "maximum", "sum", "average", "first", "last")))
@@ -130,8 +125,17 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         data=observations
     ), digits=15, .na="null")  # May need in future: .inf="null"
     post_json_to_factbase(to_url("fact", test=test), body, token, test)
+    
+    truncate_too_large_data(original_data)
+}
 
-    original_data
+validate_dataframe <- function(df, min_columns) {
+    if (!is.data.frame(df))
+        # Include the data in the error message because often this will be an SQL error,
+        # returned instead of a data.frame.  This makes it easier for users to spot the problem.
+        stop(paste("'data' must be a data.frame, but got", format(data)))
+    if (length(df) < min_columns)
+        stop("There must be at least", min_columns, "column(s) in 'data'")
 }
 
 is_when_column <- function(column_name) {
@@ -176,9 +180,12 @@ add_definition_etc <- function(l, definition, hyperlink, owner) {
     l
 }
 
+factbase_hostname <- function(test=list()) {
+    if (is.character(test$factbase_host)) test$factbase_host[1] else "factbase.azurewebsites.net"
+}
+
 to_url <- function(..., test=list()) {
-    hostname <- if (is.character(test$factbase_host)) test$factbase_host[1] else "factbase.azurewebsites.net"
-    base_url <- paste0('https://', hostname, '/')
+    base_url <- paste0('https://', factbase_hostname(), '/')
     do.call(paste0, c(base_url, list(...)))
 }
 
@@ -192,7 +199,7 @@ post_json_to_factbase <- function(url, body, token, test) {
 #' @importFrom httr timeout add_headers content
 post_to_factbase <- function(url, mime_type, body, body_size, token, test) {
     stop_if_request_too_large(body_size)
-    message(paste0("POSTing ", body_size, " bytes to ", Sys.info()["nodename"], " at ", Sys.time()))
+    message(paste0("POSTing ", body_size, " bytes to ", factbase_hostname(), " at ", Sys.time()))
     headers <- add_headers(
         `x-facttoken` = token,
         `content-type` = mime_type)
@@ -217,7 +224,25 @@ httrPOST <- function(url=NULL, config=list(), ..., body=NULL, encode=c("multipar
 stop_if_request_too_large <- function (request_body_size) {
     MAX_BODY_SIZE <- 500000000  # matches FUNCTIONS_REQUEST_BODY_SIZE_LIMIT in portal > Factbase > Configuration
     if (request_body_size > MAX_BODY_SIZE)
-        stop(paste0("Your data uses ", request_body_size, "bytes, but the limit is ", MAX_BODY_SIZE), ".  Reduce the quantity of data you are sending.")
+        stop(paste0("Your data uses ", request_body_size, " bytes, but the limit is ", MAX_BODY_SIZE, ".  Reduce the quantity of data you are sending."))
+    if (request_body_size > MAX_BODY_SIZE * .8)
+        warning("Your data uses ", request_body_size, " bytes, which is close to the limit of ", MAX_BODY_SIZE, ".  Consider sending less data.")
+}
+
+# Returning very large data frames for display has two problems:
+# 1. It increases the size of the project file because this output is large,
+#    making the project slow to load/save/undo.
+# 2. In extreme cases the upload will fail because we've breached the maximum
+#    data that can be returned from R calculations.
+truncate_too_large_data <- function (df, max_data_points=1e4) {
+    ncols <- length(df)
+    nrows <- nrow(df)
+    ndata_points <- nrows * ncols
+    if (ncols == 0 || ndata_points <= max_data_points)
+        return(df)
+    message(paste('Truncated data for display, but all', nrows, 'rows have been uploaded to Factbase'))
+    nrows_to_keep <- floor(max_data_points / ncols)
+    df[1:nrows_to_keep, ]
 }
 
 #' Upload a relationship to Factbase.
@@ -237,12 +262,7 @@ stop_if_request_too_large <- function (request_body_size) {
 #' @export
 UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
         definition=NULL, hyperlink=NULL, owner=NULL, test=list()) {
-    if (!is.data.frame(data))
-        # Include the data in the error message because often this will be an SQL error,
-        # returned instead of a data.frame.  This makes it easier for users to spot the problem.
-        stop(paste("'data' must be a data.frame, but got", format(data)))
-    if (length(data) < 2)
-        stop("There must be at least two columns in 'data'")
+    validate_dataframe(data, min_columns=2)
     ensureDefinitionHyperlinkOwnerSupplied(definition, hyperlink, owner)
     original_data <- data
 
@@ -277,8 +297,8 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
         data=observations
     ), digits=15, .na="null")
     post_json_to_factbase(to_url("fact", test=test), body, token, test)
-
-    original_data
+    
+    truncate_too_large_data(original_data)
 }
 
 
@@ -304,12 +324,7 @@ UploadRelationshipToFactbase <- function(data, token, mode="replace_all",
 UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", definition=NULL, hyperlink=NULL, owner=NULL, na_columns=NULL, unique_columns=NULL, test=list()) {
     if (!is.character(table_name))
         stop('table_name must be a unitary character vector')
-    if (!is.data.frame(data))
-        # Include the data in the error message because often this will be an SQL error,
-        # returned instead of a data.frame.  This makes it easier for users to spot the problem.
-        stop(paste("'data' must be a data.frame, but got", format(data)))
-    if (length(data) < 1)
-        stop("There must be at least one column in 'data'")
+    validate_dataframe(data, min_columns=1)
     ensureDefinitionHyperlinkOwnerSupplied(definition, hyperlink, owner)
     if (!is.null(na_columns)) {
         if (!is.character(na_columns))
@@ -375,7 +390,7 @@ UploadTableToFactbase <- function(table_name, data, token, mode="replace_all", d
         request_body <- toJSON(body, digits=15, .na="null")
         post_json_to_factbase(to_url(endpoint, test=test), request_body, token, test)
     }
-    original_data
+    truncate_too_large_data(original_data)
 }
 
 value_type_for_vector <- function(v, column_name) {
@@ -498,7 +513,6 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
         "&hyperlink=", URLencode(hyperlink, reserved=T),
         "&owner=", URLencode(owner, reserved=T),
         test=test)
-    message(json)
     post_json_to_factbase(url, json, token, test)
 }
 
