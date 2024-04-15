@@ -372,3 +372,16 @@ test_that("truncate_too_large_data*() can truncate", {
     truncated <- truncate_too_large_data(df, 5)
     expect_equal(truncated, data.frame(dog=1:2, cat=2:3))
 })
+
+test_that("validate_aggregation() works in a simple case", {
+    c(aggregation, distinct_by) %<-% validate_aggregation('sum', data.frame())
+    expect_equal(aggregation, 'sum')
+    expect_null(distinct_by)
+})
+
+test_that("validate_aggregation() works with distinct_by", {
+    c(aggregation, distinct_by) %<-% validate_aggregation('countdistinct(bob)', data.frame(a=1, bob=2))
+    expect_equal(aggregation, 'count')
+    expect_equal(distinct_by, 'bob')
+})
+

@@ -23,7 +23,9 @@
 #'   be used.
 #' @param mode (optional) One of "replace_all", "append" or "append_or_update" See comments for
 #'   FactPostUpdateType.
-#' @param aggregation (optional) One of "none", "minimum", "maximum", "sum", "average", "first", "last".
+#' @param aggregation (optional) One of "none", "minimum", "maximum", "sum", "average", "first", "last",
+#'   "median", "percentile90", "percentile95", "countdistinct(<dimensionname>)" (where <dimensionname>
+#'   is one of the label dimensions in data).
 #' @param time_aggregation (optional) One of "minimum", "maximum", "sum", "average", "first", "last".
 #'   If supplied then this operation will be used when aggregating data in different periods,
 #'   and `aggregation` will only be used to aggregate data in different label dimensions.
@@ -49,14 +51,14 @@
 #'
 #' @importFrom RJSONIO toJSON
 #' @importFrom flipTime AsDateTime
+#' @import zeallot
 #' @export
 UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", aggregation="sum",
         time_aggregation=NULL, definition=NULL, hyperlink=NULL, owner=NULL,
         period_type=NULL, update_key=NULL,
         test=list()) {
     validate_dataframe(data, min_columns=1)
-    if (!(aggregation %in% c("none", "minimum", "maximum", "sum", "average", "first", "last")))
-        stop(paste("Unknown 'aggregation':", aggregation))
+    c(aggregation, distinct_by) %<-% validate_aggregation(aggregation, data)
     if (!is.null(time_aggregation) && !(time_aggregation %in% c("none", "minimum", "maximum", "sum", "average", "first", "last")))
         stop(paste("Unknown 'time_aggregation':", time_aggregation))
     if (!is.null(period_type) && !(period_type %in% c("day", "week", "month", "quarter", "year")))
@@ -117,6 +119,8 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         aggregation=aggregation,
         timeAggregation=time_aggregation
     )
+    if (!is.null(distinct_by))
+        metric$distinctBy <- distinct_by
     metric <- add_definition_etc(metric, definition, hyperlink, owner)
     body <- toJSON(list(
         metric=metric,
@@ -136,6 +140,21 @@ validate_dataframe <- function(df, min_columns) {
         stop(paste("'data' must be a data.frame, but got", format(data)))
     if (length(df) < min_columns)
         stop("There must be at least", min_columns, "column(s) in 'data'")
+}
+
+#' @importFrom stringr str_match
+validate_aggregation <- function(aggregation, data) {
+    if (!is.character(aggregation) || length(aggregation) != 1)
+        stop("'aggregation' must be a character vector of length 1")
+    if (aggregation %in% c("none", "minimum", "maximum", "sum", "average", "first", "last", "median", "percentile90", "percentile95"))
+        return (list(aggregation = aggregation, distinct_by=NULL))
+    distinct_by <- str_match(aggregation, 'countdistinct\\(([^)]+)\\)')[1, 2]
+    if (is.character(distinct_by)) {
+        if (!(distinct_by %in% names(data)))
+            stop(paste0("Column '", distinct_by, "' is referred to in 'aggregation' but does not exist in 'data'"))
+        return (list(aggregation = 'count', distinctBy = distinct_by))
+    }
+    stop(paste("Unknown 'aggregation':", aggregation))
 }
 
 is_when_column <- function(column_name) {
