@@ -1,34 +1,11 @@
-#' The R code for the standard R item *Upload to Factbase*, which provides a
+#' This function is for Displary internal use only.
+#' 
+#'  The R code for the standard R item *Upload to Factbase*, which provides a
 #' zero code way to upload a metric using the Factbase R API.
 #' 
 #' Parameters come out of the R UI JavaScript code in
 #' https://github.com/Displayr/factbase/blob/master/displayr/Upload%20to%20Factbase.RScript
 #' See that code to understand the meaning of those controls.
-#' 
-#' @param factbase.token See above
-#' @param mode See above
-#' @param aggregation See above
-#' @param time_aggregation See above
-#' @param period_type See above
-#' @param definition See above
-#' @param hyperlink See above
-#' @param owner See above
-#' @param do.upload See above
-#' @param selection.type See above
-#' @param input.table See above
-#' @param make.dummy.metric See above
-#' @param metric.variables See above
-#' @param metric.column.names See above
-#' @param date.column.name See above
-#' @param date.variable See above
-#' @param dimension.column.names See above
-#' @param dimension.variables See above
-#' @param output.type See above
-#' @param start.date See above
-#' @param time.zone See above
-#' @param update.period See above
-#' @param update.frequency See above
-#' @param us.format See above
 #'
 #' @return An HTMLwidget that shows summary details about the upload.
 #'
@@ -36,6 +13,7 @@
 #' @importFrom flipTime UpdateEvery
 #' @importFrom flipU ConvertCommaSeparatedStringToVector
 #' @export
+#' @noRd
 FactBaseMetricWidget <- function(factbase.token = "",
                                  mode = "Replace all",
                                  aggregation = "None",
@@ -202,8 +180,6 @@ DataSummaryForFactBase <- function(df) {
 #' @importFrom verbs Min Max
 #' @importFrom stats quantile median
 SummarizeFactBaseVariable <- function(x) {
-    require(verbs)
-    
     n.missing = 0
     summary.statistics = ""
     type = "unknown"
@@ -358,11 +334,14 @@ ConditioanllyRenameVariables <- function(data, names) {
     data
 }
 
+#' @importFrom flipFormat createTempFile
+#' @importFrom flipFormat createCata
+#' @importFrom flipFormat addCss
+#' @importFrom flipFormat boxIframeless
+#' @importFrom knitr kable
 CreateFactBaseMetricSummary <- function (x) {
-    require(flipFormat)
-    require(knitr)
     addTable <-function(data) {
-        out <- knitr::kable(data, format = "html", col.names = "",
+        out <- kable(data, format = "html", col.names = "",
                             table.attr = "class=\"cmd-table-one-stat\"")
         ## change table headers to span multiple columns
         out <- gsub("<th style=\"text-align:right;\">  </th>", "", out, fixed = TRUE)
@@ -376,13 +355,13 @@ CreateFactBaseMetricSummary <- function (x) {
     variable.types <- vapply(x, FUN = function(x) x[["Type"]], FUN.VALUE = character(1))
     
     
-    tfile <- flipFormat:::createTempFile()
-    cata <- flipFormat:::createCata(tfile)
+    tfile <- createTempFile()
+    cata <- createCata(tfile)
     
     
     
     ## Use same styling as our Choice Modeling - Experimental Design widghet
-    flipFormat:::addCss("analysisreport.css", cata)
+    addCss("analysisreport.css", cata)
     
     ## Needed so that Box has scollbar
     cata("<div class=\"analysis-report-main-container\">")
@@ -411,9 +390,9 @@ CreateFactBaseMetricSummary <- function (x) {
     
     html <- paste(readLines(tfile), collapse = "\n")
     ## browseURL(tfile)
-    out <- flipFormat:::boxIframeless(html, text.as.html = TRUE,
-                                      font.family = "Circular, Arial, sans-serif",
-                                      background.color = "White",
-                                      font.size = 8)
+    out <- boxIframeless(html, text.as.html = TRUE,
+                         font.family = "Circular, Arial, sans-serif",
+                         background.color = "White",
+                         font.size = 8)
     out
 }
