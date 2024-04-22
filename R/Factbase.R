@@ -130,12 +130,12 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
     truncate_too_large_data(original_data)
 }
 
-validate_dataframe <- function(df, min_columns) {
-    if (!is.data.frame(df))
+validate_dataframe <- function(data, min_columns) {
+    if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
         stop(paste("'data' must be a data.frame, but got", format(data)))
-    if (length(df) < min_columns)
+    if (length(data) < min_columns)
         stop("There must be at least", min_columns, "column(s) in 'data'")
 }
 
