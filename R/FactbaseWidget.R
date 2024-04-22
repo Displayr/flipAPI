@@ -13,8 +13,9 @@ FactBaseMetricWidget <- function(factbase.token = "",
                                  aggregation = "None",
                                  time_aggregation = NULL,
                                  period_type = NULL,
-                                 definition = "",
-                                 hyperlink = "",
+                                 definition = NULL,
+                                 hyperlink = NULL,
+                                 owner = NULL,
                                  do.upload = TRUE,
                                  selection.type = "Table",
                                  input.table = NULL,
@@ -33,6 +34,7 @@ FactBaseMetricWidget <- function(factbase.token = "",
                                  us.format = FALSE) {
     require(flipAPI)
     require(flipTime)
+    require(flipU)
     
     # Set Updating
     if (start.date != "") {
@@ -142,7 +144,8 @@ FactBaseMetricWidget <- function(factbase.token = "",
                 time_aggregation = ParseFactBaseOption(time_aggregation),
                 period_type = period_type,
                 definition = definition,
-                hyperlink = hyperlink
+                hyperlink = hyperlink,
+                owner = owner
             )   
         }
     } else {
@@ -170,6 +173,8 @@ DataSummaryForFactBase <- function(df) {
 # Compute summary statistics for a variable based on
 # it's type
 SummarizeFactBaseVariable <- function(x) {
+    require(verbs)
+    
     n.missing = 0
     summary.statistics = ""
     type = "unknown"
