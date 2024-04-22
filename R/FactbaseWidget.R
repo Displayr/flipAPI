@@ -4,9 +4,37 @@
 #' Parameters come out of the R UI JavaScript code in
 #' https://github.com/Displayr/factbase/blob/master/displayr/Upload%20to%20Factbase.RScript
 #' See that code to understand the meaning of those controls.
+#' 
+#' @param factbase.token See above
+#' @param mode See above
+#' @param aggregation See above
+#' @param time_aggregation See above
+#' @param period_type See above
+#' @param definition See above
+#' @param hyperlink See above
+#' @param owner See above
+#' @param do.upload See above
+#' @param selection.type See above
+#' @param input.table See above
+#' @param make.dummy.metric See above
+#' @param metric.variables See above
+#' @param metric.column.names See above
+#' @param date.column.name See above
+#' @param date.variable See above
+#' @param dimension.column.names See above
+#' @param dimension.variables See above
+#' @param output.type See above
+#' @param start.date See above
+#' @param time.zone See above
+#' @param update.period See above
+#' @param update.frequency See above
+#' @param us.format See above
 #'
 #' @return An HTMLwidget that shows summary details about the upload.
 #'
+#' @importFrom flipTime UpdateAt
+#' @importFrom flipTime UpdateEvery
+#' @importFrom flipU ConvertCommaSeparatedStringToVector
 #' @export
 FactBaseMetricWidget <- function(factbase.token = "",
                                  mode = "Replace all",
@@ -20,7 +48,7 @@ FactBaseMetricWidget <- function(factbase.token = "",
                                  selection.type = "Table",
                                  input.table = NULL,
                                  make.dummy.metric = NULL,
-                                 metric.variabless = NULL,
+                                 metric.variables = NULL,
                                  metric.column.names = "",
                                  date.column.name = "",
                                  date.variable = NULL,
@@ -32,10 +60,6 @@ FactBaseMetricWidget <- function(factbase.token = "",
                                  update.period = "days",
                                  update.frequency = 1,
                                  us.format = FALSE) {
-    require(flipAPI)
-    require(flipTime)
-    require(flipU)
-    
     # Set Updating
     if (start.date != "") {
         if (time.zone == "") time.zone <- "UTC"
@@ -95,7 +119,7 @@ FactBaseMetricWidget <- function(factbase.token = "",
         
     } else {
         date.var <- date.variable
-        if (formMakeDummyMetric) {
+        if (make.dummy.metric) {
             metric.data <- matrix(rep(1, NROW(date.var)), ncol = 1)
         } else {
             metric.data <- data.frame(metric.variables)    
@@ -163,6 +187,8 @@ FactBaseMetricWidget <- function(factbase.token = "",
 
 # Given a data frame intended for factbase,
 # comute summary information for each column
+#' @importFrom verbs Sum
+#' @importFrom stats complete.cases
 DataSummaryForFactBase <- function(df) {
     summaries <- lapply(df, SummarizeFactBaseVariable)
     attr(summaries, "Sample Size") <- nrow(df)
@@ -172,6 +198,9 @@ DataSummaryForFactBase <- function(df) {
 
 # Compute summary statistics for a variable based on
 # it's type
+#' @importFrom flipTime IsDateTime
+#' @importFrom verbs Min Max
+#' @importFrom stats quantile median
 SummarizeFactBaseVariable <- function(x) {
     require(verbs)
     
@@ -226,6 +255,8 @@ SummarizeFactBaseVariable <- function(x) {
          "Type" = type)
 }
 
+#' @importFrom flipTime IsDateTime
+#' @importFrom flipTime AsDate
 CheckFactBaseDateVariable <- function(date.var) {
     # Check Date ("_When") column
     date.issues <- character(0)
@@ -349,9 +380,6 @@ CreateFactBaseMetricSummary <- function (x) {
     cata <- flipFormat:::createCata(tfile)
     
     
-    
-    format1 <- function(x)
-        format(x, nsmall = nsmall, digits = digits)
     
     ## Use same styling as our Choice Modeling - Experimental Design widghet
     flipFormat:::addCss("analysisreport.css", cata)

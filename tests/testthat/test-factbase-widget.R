@@ -44,7 +44,7 @@ test_that("FactBaseMetricWidget", {
         selection.type = "Table",
         input.table = input_table,
         make.dummy.metric = FALSE,
-        metric.variabless = NULL,
+        metric.variables = NULL,
         metric.column.names = "ChurnScore, Current",
         date.column.name = "RenewalDate",
         date.variable = NULL,

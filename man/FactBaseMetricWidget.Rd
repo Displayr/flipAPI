@@ -11,13 +11,14 @@ FactBaseMetricWidget(
   aggregation = "None",
   time_aggregation = NULL,
   period_type = NULL,
-  definition = "",
-  hyperlink = "",
+  definition = NULL,
+  hyperlink = NULL,
+  owner = NULL,
   do.upload = TRUE,
   selection.type = "Table",
   input.table = NULL,
   make.dummy.metric = NULL,
-  metric.variabless = NULL,
+  metric.variables = NULL,
   metric.column.names = "",
   date.column.name = "",
   date.variable = NULL,
@@ -30,6 +31,55 @@ FactBaseMetricWidget(
   update.frequency = 1,
   us.format = FALSE
 )
+}
+\arguments{
+\item{factbase.token}{See above}
+
+\item{mode}{See above}
+
+\item{aggregation}{See above}
+
+\item{time_aggregation}{See above}
+
+\item{period_type}{See above}
+
+\item{definition}{See above}
+
+\item{hyperlink}{See above}
+
+\item{owner}{See above}
+
+\item{do.upload}{See above}
+
+\item{selection.type}{See above}
+
+\item{input.table}{See above}
+
+\item{make.dummy.metric}{See above}
+
+\item{metric.variables}{See above}
+
+\item{metric.column.names}{See above}
+
+\item{date.column.name}{See above}
+
+\item{date.variable}{See above}
+
+\item{dimension.column.names}{See above}
+
+\item{dimension.variables}{See above}
+
+\item{output.type}{See above}
+
+\item{start.date}{See above}
+
+\item{time.zone}{See above}
+
+\item{update.period}{See above}
+
+\item{update.frequency}{See above}
+
+\item{us.format}{See above}
 }
 \value{
 An HTMLwidget that shows summary details about the upload.

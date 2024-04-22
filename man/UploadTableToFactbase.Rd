@@ -23,8 +23,7 @@ UploadTableToFactbase(
 \item{data}{A data.frame containing columns of data.  Character, factor (converted to character),
 numeric, boolean (converted to character) and date/time (`Date` or `POSIXt`) columns are acceptable.}
 
-\item{token}{A guid that identifies and authenticates the request.  Talk to Oliver if you need
-one of these.}
+\item{token}{A Personal Access Token generated in Factbase at Add data > personal access tokens.}
 
 \item{mode}{(optional) One of "replace_all", "append" or "append_or_update" See comments for
 FactPostUpdateType.}
