@@ -16,6 +16,7 @@
 RunSQL <- function(query, data_provider, server, database, user, password = "",
                    max_records = 100, port = 1433, warehouse = "")
 {
+    cat("data_provider:" data_provider, "\n")
     if (data_provider %in% c("MySQL", "Postgres", "Redshift"))
     {
         drv <- switch(data_provider,
@@ -55,6 +56,7 @@ RunSQL <- function(query, data_provider, server, database, user, password = "",
                     port = port,
                     warehouse = warehouse)
     }
+    print(con)
     res <- dbGetQuery(con, query, n = max_records)
     dbDisconnect(con)
     res
