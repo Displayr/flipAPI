@@ -11,7 +11,7 @@
 #' @param max_records Maximum number of rows returned in `query`
 #' @param port Port number to connect to data base
 #' @param warehouse Data base warehouse (only for snowflake database)
-#' @importFrom DBI dbConnect dbGetQuery dbDisconnect
+#' @importFrom DBI dbConnect dbGetInfo dbSendQuery dbFetch dbGetQuery dbDisconnect
 #' @export
 RunSQL <- function(query, data_provider, server, database, user, password = "",
                    max_records = 100, port = 1433, warehouse = "")
@@ -56,8 +56,12 @@ RunSQL <- function(query, data_provider, server, database, user, password = "",
                     port = port,
                     warehouse = warehouse)
     }
-    print(con)
-    res <- dbGetQuery(con, query, n = max_records)
-    dbDisconnect(con)
-    res
+    print(dbGetInfo(con))
+    res <- dbSendQuery(con, query, immediate = TRUE)
+    cat("Query sent")
+    df <- dbFetch(res, n = max_records)
+    print(res)
+    on.exit(dbClearResult(res))
+    on.exit(dbDisconnect(con))
+    return(df)
 }
