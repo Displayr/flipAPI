@@ -29,8 +29,7 @@ UploadMetricToFactbase(
 * …
 * dimension n}
 
-\item{token}{A guid that identifies and authenticates the request.  Talk to Oliver if you need
-one of these.}
+\item{token}{A Personal Access Token generated in Factbase at Add data > personal access tokens.}
 
 \item{name}{(optional) A name for the metric.  If NULL then the name of the first column in `data` will
 be used.}

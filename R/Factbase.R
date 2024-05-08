@@ -6,6 +6,8 @@
 # $force_parquet  Pushes uploads to use parquet even when they would prefer JSON.
 # $factbase_host  Override the hostname for Factbase.  e.g. factbase-master.azurewebsites.net
 
+# Parameter descriptions below have been copied into the prompts fort the GUI controls in
+# https://github.com/Displayr/factbase/blob/master/displayr/Upload%20to%20Factbase.RScript
 
 #' Upload a metric to Factbase.
 #'
@@ -17,8 +19,7 @@
 #'   * dimension 1 (coerced to character).  The column name will be used for the dimension name.
 #'   * …
 #'   * dimension n
-#' @param token A guid that identifies and authenticates the request.  Talk to Oliver if you need
-#'   one of these.
+#' @param token A Personal Access Token generated in Factbase at Add data > personal access tokens.
 #' @param name (optional) A name for the metric.  If NULL then the name of the first column in `data` will
 #'   be used.
 #' @param mode (optional) One of "replace_all", "append" or "append_or_update" See comments for
@@ -129,12 +130,12 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
     truncate_too_large_data(original_data)
 }
 
-validate_dataframe <- function(df, min_columns) {
-    if (!is.data.frame(df))
+validate_dataframe <- function(data, min_columns) {
+    if (!is.data.frame(data))
         # Include the data in the error message because often this will be an SQL error,
         # returned instead of a data.frame.  This makes it easier for users to spot the problem.
         stop(paste("'data' must be a data.frame, but got", format(data)))
-    if (length(df) < min_columns)
+    if (length(data) < min_columns)
         stop("There must be at least", min_columns, "column(s) in 'data'")
 }
 

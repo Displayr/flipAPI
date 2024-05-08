@@ -1,7 +1,7 @@
 Package: flipAPI
 Type: Package
 Title: Web APIs tools
-Version: 1.5.4
+Version: 1.5.5
 Author: Displayr <opensource@displayr.com>
 Maintainer: Displayr <opensource@displayr.com>
 Description: Functions to extract data and interact with web APIs.
@@ -22,15 +22,19 @@ Imports:
     readxl,
     rgeolocate,
     utils,
+    flipFormat,
     flipTime,
     flipTransformations,
+    flipU,
     haven,
     openxlsx,
     gganimate,
     git2r,
+    knitr,
     RJSONIO,
     DBI,
     odbc,
+    rhtmlMetro,
     RMySQL,
     RPostgres,
     zip

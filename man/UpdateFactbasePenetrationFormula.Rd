@@ -20,8 +20,7 @@ UpdateFactbasePenetrationFormula(
 \arguments{
 \item{metric_name}{The name that will appear for selection by Factbase users.}
 
-\item{token}{A guid that identifies and authenticates the request.  Talk to Oliver if you need
-one of these.}
+\item{token}{A Personal Access Token generated in Factbase at Add data > personal access tokens.}
 
 \item{numerator}{The name of an existing metric.  See the documentation reference above.}
 
