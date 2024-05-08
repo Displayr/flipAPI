@@ -165,19 +165,17 @@ FactbaseUploadWidget <- function(factbase.token = "",
 
 # Given a data frame intended for factbase,
 # comute summary information for each column
-#' @importFrom verbs Sum
 #' @importFrom stats complete.cases
 DataSummaryForFactbase <- function(df) {
     summaries <- lapply(df, SummarizeFactbaseVariable)
     attr(summaries, "Sample Size") <- nrow(df)
-    attr(summaries, "Complete Cases") <- Sum(complete.cases(df))
+    attr(summaries, "Complete Cases") <- sum(complete.cases(df))
     summaries
 }
 
 # Compute summary statistics for a variable based on
 # it's type
 #' @importFrom flipTime IsDateTime
-#' @importFrom verbs Min Max
 #' @importFrom stats quantile median
 SummarizeFactbaseVariable <- function(x) {
     n.missing = 0
@@ -188,13 +186,13 @@ SummarizeFactbaseVariable <- function(x) {
         quant <- quantile(x,
                           probs = c(0.05, 0.25, 0.75, 0.95),
                           na.rm = TRUE)
-        s <- c("Minium" = Min(x),
+        s <- c("Minium" = min(x),
                "5th Percentile" = unname(quant["5%"]),
                "25th Percentile" = unname(quant["25%"]),
                "Median" = median(x, na.rm = TRUE),
                "75th Percentile" = unname(quant["75%"]),
                "95th Percentile" = unname(quant["95%"]),
-               "Maximum" = Max(x))
+               "Maximum" = max(x))
         
         s <- round(s, 1)
         summary.statistics <- matrix(s, ncol = 1)
