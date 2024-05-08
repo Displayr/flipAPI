@@ -7,13 +7,42 @@
 #' https://github.com/Displayr/factbase/blob/master/displayr/Upload%20to%20Factbase.RScript
 #' See that code to understand the meaning of those controls.
 #'
+#' We would prefer not to export this function, but not doing so causes build
+#' failures.  We cannot move the function into flipFormat because it calls
+#' functions in flipAPI that would trigger circular import dependencies because
+#' flipAPI depends on flipFormat.
+#'
 #' @return An HTMLwidget that shows summary details about the upload.
+#'
+#' @param factbase.token Undocumented
+#' @param mode Undocumented
+#' @param aggregation Undocumented
+#' @param time_aggregation Undocumented
+#' @param period_type Undocumented
+#' @param definition Undocumented
+#' @param hyperlink Undocumented
+#' @param owner Undocumented
+#' @param do.upload Undocumented
+#' @param selection.type Undocumented
+#' @param input.table Undocumented
+#' @param make.dummy.metric Undocumented
+#' @param metric.variables Undocumented
+#' @param metric.column.names Undocumented
+#' @param date.column.name Undocumented
+#' @param date.variable Undocumented
+#' @param dimension.column.names Undocumented
+#' @param dimension.variables Undocumented
+#' @param output.type Undocumented
+#' @param start.date Undocumented
+#' @param time.zone Undocumented
+#' @param update.period Undocumented
+#' @param update.frequency Undocumented
+#' @param us.format Undocumented
 #'
 #' @importFrom flipTime UpdateAt
 #' @importFrom flipTime UpdateEvery
 #' @importFrom flipU ConvertCommaSeparatedStringToVector
 #' @export
-#' @noRd
 FactbaseUploadWidget <- function(factbase.token = "",
                                  mode = "Replace all",
                                  aggregation = "None",
@@ -390,7 +419,6 @@ CreateFactbaseMetricSummary <- function (x) {
                          font.size = 8)
     out
 }
-
 
 # Copied from flipFormat because they are internal and I couldn't figure out
 # how to export it without including it in the generated documentation.

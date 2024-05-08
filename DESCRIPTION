@@ -37,7 +37,6 @@ Imports:
     rhtmlMetro,
     RMySQL,
     RPostgres,
-    verbs,
     zip
 Remotes: Displayr/flipTransformations,
     Tatvic/RGoogleAnalytics,
