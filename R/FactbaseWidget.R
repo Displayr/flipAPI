@@ -1,8 +1,8 @@
-#' This function is for Displary internal use only.
-#' 
-#'  The R code for the standard R item *Upload to Factbase*, which provides a
+#' This function is for Displayr internal use only.
+#'
+#' The R code for the standard R item *Upload to Factbase*, which provides a
 #' zero code way to upload a metric using the Factbase R API.
-#' 
+#'
 #' Parameters come out of the R UI JavaScript code in
 #' https://github.com/Displayr/factbase/blob/master/displayr/Upload%20to%20Factbase.RScript
 #' See that code to understand the meaning of those controls.
@@ -14,7 +14,7 @@
 #' @importFrom flipU ConvertCommaSeparatedStringToVector
 #' @export
 #' @noRd
-FactBaseMetricWidget <- function(factbase.token = "",
+FactbaseUploadWidget <- function(factbase.token = "",
                                  mode = "Replace all",
                                  aggregation = "None",
                                  time_aggregation = NULL,
@@ -55,8 +55,8 @@ FactBaseMetricWidget <- function(factbase.token = "",
     
     getNewVariableNamesFromGui <- function(base.name) {
         n.names <- .nInputs(base.name)
-        names.from.gui <- vapply(seq_len(n.names), 
-                                 FUN = function(x, base.name) get0(paste0(base.name, x)), 
+        names.from.gui <- vapply(seq_len(n.names),
+                                 FUN = function(x, base.name) get0(paste0(base.name, x)),
                                  FUN.VALUE = character(1),
                                  base.name = base.name)
     }
@@ -69,7 +69,7 @@ FactBaseMetricWidget <- function(factbase.token = "",
             input.data <- cbind("_Dummy" = rep(1, nrow(input.data)), input.data)
             selected.metric.columns <- "_Dummy"
         } else {
-            selected.metric.columns <- ConvertCommaSeparatedStringToVector(metric.column.names)    
+            selected.metric.columns <- ConvertCommaSeparatedStringToVector(metric.column.names)
         }
         
         n.metrics <- length(selected.metric.columns)
@@ -85,7 +85,7 @@ FactBaseMetricWidget <- function(factbase.token = "",
         selected.date.column <- date.column.name
         
         selected.columns <- c(selected.metric.columns, selected.date.column, selected.dimension.columns)
-        missing.columns <- ! selected.columns %in% colnames(input.data) 
+        missing.columns <- ! selected.columns %in% colnames(input.data)
         if (any(missing.columns)) {
             stop("Some of the selected columns were not found in the input table: ", paste0(selected.columns[missing.columns], collapse = ", "))
         }
@@ -100,7 +100,7 @@ FactBaseMetricWidget <- function(factbase.token = "",
         if (make.dummy.metric) {
             metric.data <- matrix(rep(1, NROW(date.var)), ncol = 1)
         } else {
-            metric.data <- data.frame(metric.variables)    
+            metric.data <- data.frame(metric.variables)
         }
         dimension.data <- data.frame(dimension.variables)
     }
@@ -120,11 +120,11 @@ FactBaseMetricWidget <- function(factbase.token = "",
     
     input.data <- do.call(cbind, data.list)
     
-    data.check <- CheckDataForFactBaseMetricUpload(input.data)
+    data.check <- CheckDataForFactbaseMetricUpload(input.data)
     data.errors <- attr(data.check, "data.errors")
     
     # Check period_type argument
-    period_type = ParseFactBaseOption(period_type)
+    period_type = ParseFactbaseOption(period_type)
     if (!is.null(period_type) && period_type == "none")
         period_type <- NULL
     
@@ -133,7 +133,7 @@ FactBaseMetricWidget <- function(factbase.token = "",
     # but all dimensions included each time
     if (do.upload) {
         if (data.errors)
-            stop("Errors were detected in the data and it has not been uploaded to FactBase. Uncheck FACTBASE > Upload to FactBase and select OUTPUT > Display > Data Summaries for more details.")
+            stop("Errors were detected in the data and it has not been uploaded to Factbase. Uncheck FACTBASE > Upload to Factbase and select OUTPUT > Display > Data Summaries for more details.")
         n.metrics <- NCOL(metric.data)
         non.metric.ind <- (n.metrics + 1):NCOL(input.data)
         for (j in seq_len(n.metrics)) {
@@ -141,34 +141,34 @@ FactBaseMetricWidget <- function(factbase.token = "",
             UploadMetricToFactbase(
                 this.upload.data,
                 token = factbase.token,
-                mode = ParseFactBaseOption(mode),
-                aggregation = ParseFactBaseOption(aggregation),
-                time_aggregation = ParseFactBaseOption(time_aggregation),
+                mode = ParseFactbaseOption(mode),
+                aggregation = ParseFactbaseOption(aggregation),
+                time_aggregation = ParseFactbaseOption(time_aggregation),
                 period_type = period_type,
                 definition = definition,
                 hyperlink = hyperlink,
                 owner = owner
-            )   
+            )
         }
     } else {
-        warning("Not uploading to FactBase. Tick FACTBASE > Upload to FactBase when you are ready to upload.")
+        warning("Not uploading to Factbase. Tick FACTBASE > Upload to Factbase when you are ready to upload.")
     }
     
     
     # Output
-    FactBaseOutput(
+    FactbaseOutput(
         output.type = output.type,
-        input.data = input.data,  
+        input.data = input.data,
         data.summaries = data.check
-    ) 
+    )
 }
 
 # Given a data frame intended for factbase,
 # comute summary information for each column
 #' @importFrom verbs Sum
 #' @importFrom stats complete.cases
-DataSummaryForFactBase <- function(df) {
-    summaries <- lapply(df, SummarizeFactBaseVariable)
+DataSummaryForFactbase <- function(df) {
+    summaries <- lapply(df, SummarizeFactbaseVariable)
     attr(summaries, "Sample Size") <- nrow(df)
     attr(summaries, "Complete Cases") <- Sum(complete.cases(df))
     summaries
@@ -179,14 +179,14 @@ DataSummaryForFactBase <- function(df) {
 #' @importFrom flipTime IsDateTime
 #' @importFrom verbs Min Max
 #' @importFrom stats quantile median
-SummarizeFactBaseVariable <- function(x) {
+SummarizeFactbaseVariable <- function(x) {
     n.missing = 0
     summary.statistics = ""
     type = "unknown"
     if (is.numeric(x)) {
         n.missing <- sum(is.na(x))
-        quant <- quantile(x, 
-                          probs = c(0.05, 0.25, 0.75, 0.95), 
+        quant <- quantile(x,
+                          probs = c(0.05, 0.25, 0.75, 0.95),
                           na.rm = TRUE)
         s <- c("Minium" = Min(x),
                "5th Percentile" = unname(quant["5%"]),
@@ -233,7 +233,7 @@ SummarizeFactBaseVariable <- function(x) {
 
 #' @importFrom flipTime IsDateTime
 #' @importFrom flipTime AsDate
-CheckFactBaseDateVariable <- function(date.var) {
+CheckFactbaseDateVariable <- function(date.var) {
     # Check Date ("_When") column
     date.issues <- character(0)
     if (!IsDateTime(date.var)) {
@@ -250,8 +250,8 @@ CheckFactBaseDateVariable <- function(date.var) {
 }
 
 # x is a list of summaries of variables generated by
-# DataSummaryForFactBase 
-IdentifyFactBaseDataIssues <- function(x) {
+# DataSummaryForFactbase
+IdentifyFactbaseDataIssues <- function(x) {
     n.cases <- attr(x, "Sample Size")
     x <- x[names(x) != "_When"]
     v.names <- names(x)
@@ -272,19 +272,19 @@ IdentifyFactBaseDataIssues <- function(x) {
                 }
             } else if (type == "Date") {
                 data.integrity.issues <- c(data.integrity.issues,
-                                           paste0(v.names[j], " has ", n.missing, " missing cases. These cases cannot be used in FactBase"))
+                                           paste0(v.names[j], " has ", n.missing, " missing cases. These cases cannot be used in Factbase"))
             } else {
-                data.integrity.issues <- c(data.integrity.issues, 
+                data.integrity.issues <- c(data.integrity.issues,
                                            paste0(v.names[j], " has ", n.missing, " missing cases."))
             }
             if (type == "Text") {
                 if (variable[["Summary"]]["Numeric Entries"] > 0)
-                    possible.data.mess <- c(possible.data.mess, 
+                    possible.data.mess <- c(possible.data.mess,
                                             paste0(v.names[j], " looks to contain a mix of numeric and text entries."))
                 prop.unique <- variable[["Summary"]]["Unique Entries"] / n.cases
                 if (prop.unique > 0.95 && prop.unique < 1 ) {
                     possible.data.mess <- c(possible.data.mess,
-                                            paste0(v.names[j], " looks like an ID variable but its entries are not unique.")) 
+                                            paste0(v.names[j], " looks like an ID variable but its entries are not unique."))
                 }
             }
         }
@@ -294,17 +294,17 @@ IdentifyFactBaseDataIssues <- function(x) {
 }
 
 
-FactBaseOutput <- function(input.data, data.summaries, output.type = "Data Summaries") {
+FactbaseOutput <- function(input.data, data.summaries, output.type = "Data Summaries") {
     if (output.type == "Data")
         return (input.data)
     
-    CreateFactBaseMetricSummary(data.summaries)   
+    CreateFactbaseMetricSummary(data.summaries)
 }
 
-CheckDataForFactBaseMetricUpload <- function(input.data, warn = TRUE) {
-    data.summaries <- DataSummaryForFactBase(input.data)
-    date.issues <- CheckFactBaseDateVariable(input.data[, "_When"])
-    data.issues <- IdentifyFactBaseDataIssues(data.summaries)
+CheckDataForFactbaseMetricUpload <- function(input.data, warn = TRUE) {
+    data.summaries <- DataSummaryForFactbase(input.data)
+    date.issues <- CheckFactbaseDateVariable(input.data[, "_When"])
+    data.issues <- IdentifyFactbaseDataIssues(data.summaries)
     if (warn) {
         all.issues <- c(date.issues, unlist(data.issues))
         lapply(all.issues, FUN = function (x) warning(x))
@@ -315,7 +315,7 @@ CheckDataForFactBaseMetricUpload <- function(input.data, warn = TRUE) {
     data.summaries
 }
 
-ParseFactBaseOption <- function(selection) {
+ParseFactbaseOption <- function(selection) {
     if (is.null(selection))
         return(NULL)
     selection <- gsub(" ", "_", selection)
@@ -334,15 +334,11 @@ ConditioanllyRenameVariables <- function(data, names) {
     data
 }
 
-#' @importFrom flipFormat createTempFile
-#' @importFrom flipFormat createCata
-#' @importFrom flipFormat addCss
-#' @importFrom flipFormat boxIframeless
 #' @importFrom knitr kable
-CreateFactBaseMetricSummary <- function (x) {
+CreateFactbaseMetricSummary <- function (x) {
     addTable <-function(data) {
         out <- kable(data, format = "html", col.names = "",
-                            table.attr = "class=\"cmd-table-one-stat\"")
+                     table.attr = "class=\"cmd-table-one-stat\"")
         ## change table headers to span multiple columns
         out <- gsub("<th style=\"text-align:right;\">  </th>", "", out, fixed = TRUE)
         out <- gsub("<th style=\"text-align:left;\">",
@@ -367,9 +363,9 @@ CreateFactBaseMetricSummary <- function (x) {
     cata("<div class=\"analysis-report-main-container\">")
     
     ## Title
-    cata("<h1>Upload to FactBase</h1>")
+    cata("<h1>Upload to Factbase</h1>")
     
-    ## 
+    ##
     cata("<h2>Sample</h2>")
     cata(paste0("Sample Size: ", attr(x, "Sample Size")))
     cata("<br>")
@@ -395,4 +391,51 @@ CreateFactBaseMetricSummary <- function (x) {
                          background.color = "White",
                          font.size = 8)
     out
+}
+
+
+# Copied from flipFormat because they are internal and I couldn't figure out
+# how to export it without including it in the generated documentation.
+# refactor code in CreateChoiceModelDesignWidget
+createTempFile <- function()
+{
+    tfile <- tempfile(fileext = ".html")
+    on.exit(if (file.exists(tfile)) file.remove(tfile))
+    tfile
+}
+
+# Copied from flipFormat because they are internal and I couldn't figure out
+# how to export it without including it in the generated documentation.
+createCata <- function(tfile)
+{
+    cata <- function(...)
+        cat(..., file = tfile, append = TRUE)
+}
+
+# Copied from flipFormat because they are internal and I couldn't figure out
+# how to export it without including it in the generated documentation.
+addCss <- function(file.name, cata, in.css.folder = TRUE)
+{
+    file.path <- if (in.css.folder)
+        system.file("css", file.name, package = "flipFormat")
+    else
+        file.name
+    if (file.exists(file.path))
+    {
+        cata("<style>\n")
+        cata(readLines(file.path))
+        cata("</style>\n\n")
+    }
+    else
+        stop("CSS file ", file.path, " not found.")
+}
+
+# Copied from flipFormat because they are internal and I couldn't figure out
+# how to export it without including it in the generated documentation.
+#' @importFrom rhtmlMetro Box
+boxIframeless <- function(...)
+{
+    w <- Box(...)
+    attr(w, "can-run-in-root-dom") <- TRUE
+    w
 }
