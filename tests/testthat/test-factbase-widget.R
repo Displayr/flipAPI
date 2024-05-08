@@ -22,7 +22,7 @@ test_that("FactBaseMetricWidget", {
             expect_equal(name, NULL)
             expect_equal(mode, "replace_all")
             expect_equal(aggregation, "sum")
-            expect_equal(time_aggregation, "none")
+            expect_equal(time_aggregation, NULL)
             expect_equal(definition, "blah")
             expect_equal(hyperlink, "https://example.com/")
             expect_equal(owner, "oliver.bock@displayr.com")

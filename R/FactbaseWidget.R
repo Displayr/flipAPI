@@ -157,6 +157,11 @@ FactbaseUploadWidget <- function(factbase.token = "",
     if (!is.null(period_type) && period_type == "none")
         period_type <- NULL
     
+    # Check period_type argument
+    time_aggregation = ParseFactbaseOption(time_aggregation)
+    if (!is.null(time_aggregation) && time_aggregation == "none")
+        time_aggregation <- NULL
+    
     # send to factbase
     # have to send 1 metric at a time
     # but all dimensions included each time
@@ -172,7 +177,7 @@ FactbaseUploadWidget <- function(factbase.token = "",
                 token = factbase.token,
                 mode = ParseFactbaseOption(mode),
                 aggregation = ParseFactbaseOption(aggregation),
-                time_aggregation = ParseFactbaseOption(time_aggregation),
+                time_aggregation = time_aggregation,
                 period_type = period_type,
                 definition = definition,
                 hyperlink = hyperlink,
