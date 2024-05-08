@@ -31,7 +31,7 @@ test_that("FactBaseMetricWidget", {
             data
         }
     )
-    FactBaseMetricWidget(
+    FactbaseUploadWidget(
         factbase.token = "fake-token",
         mode = "Replace all",
         aggregation = "Sum",
