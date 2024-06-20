@@ -112,15 +112,14 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
 
     observations <- dataframe_to_json_ready_observations(data)
     
-    # Make HTTP request
+    # Make HTTP request.  `metric` is a FactPostBody 
     metric <- list(
         name=metric_name,
         valueType="real",
         aggregation=aggregation,
         timeAggregation=time_aggregation
     )
-    if (!is.null(distinct_by))
-        metric$distinctBy <- distinct_by
+    metric$distinctBy <- distinct_by  # does nothing if distinct_by is NULL
     metric <- add_definition_etc(metric, definition, hyperlink, owner)
     body <- toJSON(list(
         metric=metric,
@@ -152,7 +151,7 @@ validate_aggregation <- function(aggregation, data) {
     if (is.character(distinct_by)) {
         if (!(distinct_by %in% names(data)))
             stop(paste0("Column '", distinct_by, "' is referred to in 'aggregation' but does not exist in 'data'"))
-        return (list(aggregation = 'count', distinctBy = distinct_by))
+        return (list(aggregation = 'count', distinct_by = distinct_by))
     }
     stop(paste("Unknown 'aggregation':", aggregation))
 }
