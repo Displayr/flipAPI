@@ -37,7 +37,9 @@ be used.}
 \item{mode}{(optional) One of "replace_all", "append" or "append_or_update" See comments for
 FactPostUpdateType.}
 
-\item{aggregation}{(optional) One of "none", "minimum", "maximum", "sum", "average", "first", "last".}
+\item{aggregation}{(optional) One of "none", "minimum", "maximum", "sum", "average", "first", "last",
+"median", "percentile90", "percentile95", "countdistinct(<dimensionname>)" (where <dimensionname>
+is one of the label dimensions in data).}
 
 \item{time_aggregation}{(optional) One of "minimum", "maximum", "sum", "average", "first", "last".
 If supplied then this operation will be used when aggregating data in different periods,
