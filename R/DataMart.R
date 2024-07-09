@@ -355,10 +355,10 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #'
 #' @importFrom httr DELETE add_headers
 #' @importFrom utils URLencode
-#' 
+#'
 #' @return NULL invisibly. Called for the purpose of deleting data
 #' and assumed to succeed if no errors are thrown.
-#' 
+#'
 #' @export
 QDeleteFiles <- function(filenames, company.token = getCompanySecret())
 {
@@ -366,7 +366,7 @@ QDeleteFiles <- function(filenames, company.token = getCompanySecret())
     api.root <- getApiRoot("DataMartBatchDelete")
     url_param_filenames <- sprintf("filenames=%s", filenames)
     filenames.string <- paste(filenames, collapse = ", ")
-    res <- try(DELETE(paste0(api.root, "?", URLencode(paste(url_param_filenames, collapse="&"))), 
+    res <- try(DELETE(paste0(api.root, "?", URLencode(paste(url_param_filenames, collapse="&"))),
                 config=add_headers("X-Q-Company-Secret" = company.secret)))
     if (inherits(res, "try-error") || res$status_code != 200)
     {
@@ -760,6 +760,7 @@ uploadQScript <- function(..., filename = NULL,
         script.files <- lapply(script.files, normalizePath)
         qscript.page.candidates <- gsub(git.path, "", script.files)
         correct.slash <- .Platform$file.sep
+        qscript.page.candidates <- gsub(paste0("src", correct.slash), "", qscript.page.candidates)
         leading.qscript <- paste0("^QScript", correct.slash)
         qscript.page.candidates <- Filter(function(x) grepl(leading.qscript, x),
                                           qscript.page.candidates)
