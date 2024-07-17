@@ -45,6 +45,8 @@
 #' @param update_key (optional) The name of a column that can be used to update the data, when `mode` is
 #'   "append_or_update".  Data in this column must be unique, which implies some sort of aggregation
 #'   for date/time data.
+#' @param as_percentage If set to TRUE then when shown this formula's values will be multiplied
+#'   by 100 and given a '%' sign.
 #' @param test (optional) For testing only.  Ignore.
 #' 
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
@@ -56,7 +58,7 @@
 #' @export
 UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", aggregation="sum",
         time_aggregation=NULL, definition=NULL, hyperlink=NULL, owner=NULL,
-        period_type=NULL, update_key=NULL,
+        period_type=NULL, update_key=NULL, as_percentage=F,
         test=list()) {
     validate_dataframe(data, min_columns=1)
     c(aggregation, distinct_by) %<-% validate_aggregation(aggregation, data)
@@ -70,6 +72,8 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         if (length(update_key) != 1)
             stop("'update_key' currently only supports a single column name.  Complain to us if this is causing you trouble")
     }
+    if (!is.logical(as_percentage) || length(as_percentage) != 1)
+        stop("as_percentage must contain a logical vector of length 1")
     ensureDefinitionHyperlinkOwnerSupplied(definition, hyperlink, owner)
     
     # Build dimensions.
@@ -118,7 +122,8 @@ UploadMetricToFactbase <- function(data, token, name=NULL, mode="replace_all", a
         name=metric_name,
         valueType="real",
         aggregation=aggregation,
-        timeAggregation=time_aggregation
+        timeAggregation=time_aggregation,
+        showAsPercentage=as_percentage
     )
     metric$distinctBy <- distinct_by  # does nothing if distinct_by is NULL
     metric <- add_definition_etc(metric, definition, hyperlink, owner)
@@ -455,7 +460,7 @@ ensureDefinitionHyperlinkOwnerSupplied <- function(definition, hyperlink, owner)
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
-UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, denominator, dimensions_to_count, definition, hyperlink, owner, test=list()) {
+UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, denominator, dimensions_to_count, definition, hyperlink, owner, as_percentage=F, test=list()) {
     if (!is.character(metric_name) || length(metric_name) != 1)
         stop("metric_name must be a character vector of length 1")
     if (!is.character(token) || length(token) != 1)
@@ -464,14 +469,18 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
         stop("numerator must be a character vector of length 1")
     if (!is.character(denominator) || length(denominator) != 1)
         stop("denominator must be a character vector of length 1")
-    if (!is.character(dimensions_to_count) || length(metric_name) < 1)
+    if (!is.character(dimensions_to_count) || length(dimensions_to_count) < 1)
         stop("dimensions_to_count must contain a character vector with a length of at least 1")
+    if (!is.logical(as_percentage) || length(as_percentage) != 1)
+        stop("as_percentage must contain a logical vector of length 1")
     ensureDefinitionHyperlinkOwnerSupplied(definition, hyperlink, owner)
 
+    # PenetrationFormulaDefinition
     body <- toJSON(list(
         type="penetration",
         numeratorMetricName=numerator,
         denominatorMetricName=denominator,
+        showAsPercentage=as_percentage,
         dimensionsToCount=list(dimensions_to_count)
     ))
 
@@ -498,7 +507,7 @@ UpdateFactbasePenetrationFormula <- function(metric_name, token, numerator, deno
 #'
 #' @importFrom RJSONIO toJSON
 #' @export
-UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominator, definition, hyperlink, owner, smoothing.window=NULL, smoothing.sum=F, test=list()) {
+UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominator, definition, hyperlink, owner, as_percentage=F, smoothing.window=NULL, smoothing.sum=F, test=list()) {
     if (!is.character(metric_name) || length(metric_name) != 1)
         stop("metric_name must be a character vector of length 1")
     if (!is.character(token) || length(token) != 1)
@@ -511,12 +520,16 @@ UpdateFactbaseRatioFormula <- function(metric_name, token, numerator, denominato
         stop(paste("Unknown 'smoothing.window':", smoothing.window))
     if (!is.logical(smoothing.sum) || length(smoothing.sum) != 1)
         stop("smoothing.sum must be a logical vector of length 1")
+    if (!is.logical(as_percentage) || length(as_percentage) != 1)
+        stop("as_percentage must contain a logical vector of length 1")
     ensureDefinitionHyperlinkOwnerSupplied(definition, hyperlink, owner)
     
+    # RatioFormulaDefinition
     body <- list(
         type="ratio",
         numeratorMetricName=numerator,
-        denominatorMetricName=denominator
+        denominatorMetricName=denominator,
+        showAsPercentage=as_percentage
     )
     if (!is.null(smoothing.window))
         body$smoothing <- list(

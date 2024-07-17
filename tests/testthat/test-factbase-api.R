@@ -28,6 +28,7 @@ test_that("UploadMetricToFactbase() produces correct JSON", {
 "valueType": "real",
 "aggregation": "sum",
 "timeAggregation": "last",
+"showAsPercentage": false,
 "definition": "Our definition",
 "hyperlink": "https://example.com/",
 "owner": "bob.jones@example.com" 
@@ -95,6 +96,7 @@ test_that("UploadMetricToFactbase() can handle pre-aggregated data and use the `
 "valueType": "real",
 "aggregation": "sum",
 "timeAggregation": null,
+"showAsPercentage": false,
 "definition": "fake definition",
 "hyperlink": "https://fake.example.com",
 "owner": "bob.jones@example.com" 
@@ -311,6 +313,7 @@ test_that("UpdateFactbasePenetrationFormula() produces correct JSON", {
  "type": "penetration",
 "numeratorMetricName": "query.test.ts Barks",
 "denominatorMetricName": "query.test.ts Number of dogs in office",
+"showAsPercentage": false,
 "dimensionsToCount": [
  "Office dog name" 
 ] 
@@ -335,6 +338,7 @@ test_that("UpdateFactbaseRatioFormula() produces correct JSON", {
  "type": "ratio",
 "numeratorMetricName": "HR: Employee Attrition By Team",
 "denominatorMetricName": "HR: Employees - Headcount By Team",
+"showAsPercentage": true,
 "smoothing": {
  "window": "year",
 "sum": true 
@@ -351,7 +355,8 @@ test_that("UpdateFactbaseRatioFormula() produces correct JSON", {
         smoothing.sum=T,
         definition="definition of the new metric",
         hyperlink='https://example.com',
-        owner='bob.jane@tmart.com'
+        owner='bob.jane@tmart.com',
+        as_percentage=T
     )
 })
 
