@@ -46,7 +46,7 @@
 #'   "append_or_update".  Data in this column must be unique, which implies some sort of aggregation
 #'   for date/time data.
 #' @param as_percentage If set to TRUE then when shown this formula's values will be multiplied
-#'   by 100 and given a '%' sign.
+#'   by 100 and given a percent sign.
 #' @param test (optional) For testing only.  Ignore.
 #' 
 #' @return The value of `data` that was passed in, so caller can see data uploaded if this is the
