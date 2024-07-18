@@ -67,7 +67,7 @@ metric, but Factbase will automatically choose the correct data according to the
 for date/time data.}
 
 \item{as_percentage}{If set to TRUE then when shown this formula's values will be multiplied
-by 100 and given a '%' sign.}
+by 100 and given a percent sign.}
 
 \item{test}{(optional) For testing only.  Ignore.}
 }
