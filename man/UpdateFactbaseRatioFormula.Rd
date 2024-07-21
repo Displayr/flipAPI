@@ -13,6 +13,7 @@ UpdateFactbaseRatioFormula(
   definition,
   hyperlink,
   owner,
+  as_percentage = F,
   smoothing.window = NULL,
   smoothing.sum = F,
   test = list()
@@ -34,6 +35,9 @@ Preferably this is a link into the system that calls this function.}
 
 \item{owner}{The name (usually an email address) of whoever should be contacted to deal with problems
 or questions about this data.}
+
+\item{as_percentage}{If set to TRUE then when shown this formula's values will be multiplied
+by 100 and given a percent sign.}
 
 \item{smoothing.window}{(optional) The period over which to smooth the data.  One of "day", "week",
 "month", "quarter" or "year".  See the documentation reference above.}

@@ -16,6 +16,7 @@ UploadMetricToFactbase(
   owner = NULL,
   period_type = NULL,
   update_key = NULL,
+  as_percentage = F,
   test = list()
 )
 }
@@ -64,6 +65,9 @@ metric, but Factbase will automatically choose the correct data according to the
 \item{update_key}{(optional) The name of a column that can be used to update the data, when `mode` is
 "append_or_update".  Data in this column must be unique, which implies some sort of aggregation
 for date/time data.}
+
+\item{as_percentage}{If set to TRUE then when shown this formula's values will be multiplied
+by 100 and given a percent sign.}
 
 \item{test}{(optional) For testing only.  Ignore.}
 }

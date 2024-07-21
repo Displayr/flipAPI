@@ -14,6 +14,7 @@ UpdateFactbasePenetrationFormula(
   definition,
   hyperlink,
   owner,
+  as_percentage = F,
   test = list()
 )
 }
@@ -36,6 +37,9 @@ Preferably this is a link into the system that calls this function.}
 
 \item{owner}{The name (usually an email address) of whoever should be contacted to deal with problems
 or questions about this data.}
+
+\item{as_percentage}{If set to TRUE then when shown this formula's values will be multiplied
+by 100 and given a percent sign.}
 
 \item{test}{(optional) For testing only.  Ignore.}
 }
