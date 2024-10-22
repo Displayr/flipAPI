@@ -39,8 +39,6 @@
 #' @param update.frequency Undocumented
 #' @param us.format Undocumented
 #'
-#' @importFrom flipTime UpdateAt
-#' @importFrom flipTime UpdateEvery
 #' @importFrom flipU ConvertCommaSeparatedStringToVector
 #' @export
 FactbaseUploadWidget <- function(factbase.token = "",
@@ -67,13 +65,6 @@ FactbaseUploadWidget <- function(factbase.token = "",
                                  update.period = "days",
                                  update.frequency = 1,
                                  us.format = FALSE) {
-    # Set Updating
-    if (start.date != "") {
-        if (time.zone == "") time.zone <- "UTC"
-        UpdateAt(start.date, us.format = us.format, time.zone = time.zone,
-                 units = tolower(update.period), frequency = update.frequency, options = "wakeup")
-    } else
-        UpdateEvery(update.frequency, units = tolower(update.period), options = "wakeup")
     options(digits.secs = 6)
     automatic.updating <- paste0("Automatic Updating\nLast updated on Displayr's East Coast US Server Time Zone:\n", format(Sys.time(), "%a %b %d  %X %Y"))
     
