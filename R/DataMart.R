@@ -318,10 +318,19 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
                                      "X-Q-Project-ID" = client.id),
                 encode = "raw",
                 body = upload_file(tmpfile)))
+    has.errored <- inherits(res, "try-error")
 
-    if (!inherits(res, "try-error") && res$status_code == 413)  # 413 comes from IIS when we violate its web.config limits
+    if (!has.errored && res$status_code == 413) # 413 comes from IIS when we violate its web.config limits
+    {
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
-    else if (inherits(res, "try-error") || res$status_code != 200)
+    }
+    else if (!has.errored && res$status_code == 422)
+    {
+        stop("QSaveData has encountered an unknown error. ",
+             "422: The file could not properly be saved. ",
+             "The likely cause was an incorrect path preceding the filename.")
+    }
+    else if (has.errored || res$status_code != 200)
     {
         warning("QSaveData has encountered an unknown error.")
         stopBadRequest(res, "Could not save file.")

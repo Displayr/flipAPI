@@ -53,6 +53,22 @@ test_that("Save/Load Data: bad cases", {
   # - note that we don't have tests for Content-Types
   expect_error(QSaveData(mtcars,"mtcars.notrdsorcsv"))
   expect_error(QLoadData("mtcars.notrdsorcsv"))
+    # 422 Error
+    mockedPOST <- function() {
+        list(status_code = 422)
+    }
+    formals(mockedPOST) <- formals(httr::POST)
+    with_mocked_bindings(
+        POST = mockedPOST,
+        QSaveData(mtcars, r"(mtcars\\file.rds)")
+    ) |>
+        expect_error(
+            paste0("QSaveData has encountered an unknown error. ",
+                "422: The file could not properly be saved. ",
+                "The likely cause was an incorrect path preceding the filename."
+                ),
+            fixed = TRUE
+        )
 })
 
 test_that("File Connection: raw", {
@@ -136,7 +152,7 @@ test_that("DS-3269: Data Mart unavailable",
     })
 })
 
-test_that("Delete Data", 
+test_that("Delete Data",
 {
   skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
 
