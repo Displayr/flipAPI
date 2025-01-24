@@ -16,7 +16,8 @@ QFileOpen(
 )
 }
 \arguments{
-\item{filename}{character string. Name of file to be opened}
+\item{filename}{character string. Name of file to be opened.
+To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").}
 
 \item{open}{character string. See documentation for connections.}
 
@@ -30,7 +31,7 @@ QFileOpen(
 
 \item{mime.type}{character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.}
 
-\item{company.token}{Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.}
+\item{company.token}{Use this if you need to read from a different company's Displayr Cloud Drive. You need to contact Support to get this token.}
 }
 \value{
 A curl connection (read) or a file connection (write)
