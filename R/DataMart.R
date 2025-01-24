@@ -5,6 +5,7 @@ MAX.FILENAME.LENGTH <- 100L
 #' Check whether a file of a given name exists in the Displayr Cloud Drive.
 #'
 #' @param filename character string. Name of the file to search for.
+#'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #' @param show.warning logical scalar. Whether to show a warning when the file
 #'   does not exist.
 #'
@@ -44,14 +45,15 @@ QFileExists <- function(filename, show.warning = TRUE)
 #' Note that writing to a file which already exists will overwrite that file's contents.
 #' For more documentation on this function's parameters, see R documentation for opening connections.
 #'
-#' @param filename character string. Name of file to be opened
+#' @param filename character string. Name of file to be opened.
+#'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #' @param open character string. See documentation for connections.
 #' @param blocking logical. See documentation for connections.
 #' @param encoding character string. See documentation for connections.
 #' @param raw logical. See documentation for connections.
 #' @param method character string. See documentation for connections.
 #' @param mime.type character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.
-#' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
+#' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive. You need to contact Support to get this token.
 #'
 #' @return A curl connection (read) or a file connection (write)
 #'
@@ -174,6 +176,7 @@ close.qpostcon = function(con, ...)
 #' converts this to an R object.
 #'
 #' @param filename character string. Name of the file to be opened from the Displayr Cloud Drive.
+#'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
 #' @param ... Other parameters to pass to read.csv.
 #'
@@ -243,6 +246,7 @@ QLoadData <- function(filename, company.token = NA, ...)
 #'
 #' @param object object. The object to be uploaded.
 #' @param filename character string. Name of the file to be written to.
+#'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #' @param compression.file.size.threshold numeric scalar. Files of size
 #' (in bytes) larger than this value will be compressed into a zip file.
 #' Defaults to NULL, in which case no compression occurs.
@@ -360,6 +364,7 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #' Deletes a list of objects by filename from the Displayr cloud drive
 #'
 #' @param filenames collection of character strings. Names of the files to delete.
+#'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
 #'
 #' @importFrom httr DELETE add_headers
@@ -506,7 +511,7 @@ getClientId <- function()
 
 #' Guesses the type of file from the filename. Used for QSaveData/QLoadData
 #'
-#' @param filename string. Filename which we are checking
+#' @param filename string. Filename which we are checking.
 #'
 #' @importFrom mime guess_type
 #' @importFrom tools file_ext
