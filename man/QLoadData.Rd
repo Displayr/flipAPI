@@ -7,7 +7,8 @@
 QLoadData(filename, company.token = NA, ...)
 }
 \arguments{
-\item{filename}{character string. Name of the file to be opened from the Displayr Cloud Drive.}
+\item{filename}{character string. Name of the file to be opened from the Displayr Cloud Drive.
+To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").}
 
 \item{company.token}{Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.}
 

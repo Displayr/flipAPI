@@ -7,7 +7,8 @@
 QDeleteFiles(filenames, company.token = getCompanySecret())
 }
 \arguments{
-\item{filenames}{collection of character strings. Names of the files to delete.}
+\item{filenames}{collection of character strings. Names of the files to delete.
+To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").}
 
 \item{company.token}{Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.}
 }

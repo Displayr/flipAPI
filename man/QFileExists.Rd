@@ -7,7 +7,8 @@
 QFileExists(filename, show.warning = TRUE)
 }
 \arguments{
-\item{filename}{character string. Name of the file to search for.}
+\item{filename}{character string. Name of the file to search for.
+To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").}
 
 \item{show.warning}{logical scalar. Whether to show a warning when the file
 does not exist.}

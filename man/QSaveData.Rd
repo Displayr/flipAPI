@@ -9,7 +9,8 @@ QSaveData(object, filename, compression.file.size.threshold = NULL, ...)
 \arguments{
 \item{object}{object. The object to be uploaded.}
 
-\item{filename}{character string. Name of the file to be written to.}
+\item{filename}{character string. Name of the file to be written to.
+To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").}
 
 \item{compression.file.size.threshold}{numeric scalar. Files of size
 (in bytes) larger than this value will be compressed into a zip file.
