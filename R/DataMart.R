@@ -183,6 +183,7 @@ close.qpostcon = function(con, ...)
 #' @importFrom readxl read_excel
 #' @importFrom httr GET add_headers write_disk
 #' @importFrom utils URLencode
+#' @importFrom flipU StopForUserError
 #'
 #' @export
 QLoadData <- function(filename, company.token = NA, ...)
@@ -205,9 +206,9 @@ QLoadData <- function(filename, company.token = NA, ...)
     else if (res$status_code != 200)
     {
         if (!QFileExists(filename, show.warning = FALSE))
-            stop("The data file '", filename, "' does not exist in the Displayr cloud drive. ",
-                 "Ensure that the data file is in the Displayr cloud drive and its name has been correctly specified.",
-                 call. = FALSE)
+            StopForUserError("The data file '", filename, "' does not exist in the Displayr cloud drive. ",
+                             "Ensure that the data file is in the Displayr cloud drive and its name has been correctly specified.",
+                             call. = FALSE)
         else
             stopBadRequest(res, msg)
     }
@@ -217,8 +218,8 @@ QLoadData <- function(filename, company.token = NA, ...)
         type <- getFileType(filename)
 
     if (is.null(type) || type == "gif")
-        stop("Invalid file type specified. Only 'rds', 'csv', 'xlsx', or 'sav' files ",
-             "are supported.")
+        StopForUserError("Invalid file type specified. Only 'rds', 'csv', 'xlsx', or 'sav' files ",
+                         "are supported.")
 
 
     if (file.exists(tmpfile))
@@ -266,13 +267,14 @@ QLoadData <- function(filename, company.token = NA, ...)
 #'
 #' When saving to .xlsx file, \code{object} is first coerced to a data.frame using
 #' \code{\link{as.data.frame}}.
+#' @importFrom flipU StopForUserError
 #' @export
 QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
                       ...)
 {
     type <- getFileType(filename)
     if (is.null(type) || type == "rda")
-        stop("Invalid file type specified. Please name an '.rds' or '.csv' file.")
+        StopForUserError("Invalid file type specified. Please name an '.rds' or '.csv' file.")
 
     tmpfile <- tempfile(fileext = paste0(".", type))
     if (type == "csv")
@@ -284,15 +286,15 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
     else if (type == "pptx" && inherits(object, "rpptx") && requireNamespace("officer"))
         officer:::print.rpptx(object, tmpfile)
     else if (type == "pptx")
-        stop("To save as a Powerpoint pptx file, the input must be created with ",
-             "officer::read_pptx()")
+        StopForUserError("To save as a Powerpoint pptx file, the input must be created with ",
+                         "officer::read_pptx()")
     else if (type == "xlsx")
         openxlsx::write.xlsx(as.data.frame(object, check.names = FALSE), tmpfile, ...)
     else if (type == "gif" && inherits(object, c("gganim", "gif_image")))
         anim_save(tmpfile, object, ...)
     else if (type == "gif")
-        stop("Sorry, current gif files can only be saved to the Cloud Drive for ",
-             "outputs from the gganimate package.")
+        StopForUserError("Sorry, current gif files can only be saved to the Cloud Drive for ",
+                         "outputs from the gganimate package.")
 
     is.compressed <- !is.null(compression.file.size.threshold) &&
                      file.size(tmpfile) > compression.file.size.threshold
