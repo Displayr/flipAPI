@@ -15,10 +15,11 @@
 #' @examples
 #' GeocodeIPs(c("123.51.111.134", "216.27.61.137", "2001:780:53d2::1"))
 #' @importFrom rgeolocate maxmind
+#' @importFrom flipU StopForUserError
 #' @export
 
 GeocodeIPs <- function(ips) {
-    
+
     if (length(dim(ips)) == 2)
     {
         if (dim(ips)[2] != 1)
@@ -26,13 +27,12 @@ GeocodeIPs <- function(ips) {
         ips <- ips[, 1]
     }
     if (!((is.character(ips) && is.null(dim(ips))) || is.factor(ips)))
-        stop("Please provide a character vector of IP addresses.")
+        StopForUserError("Please provide a character vector of IP addresses.")
 
     file <- system.file("extdata", "GeoLite2-Country.mmdb", package = "rgeolocate")
-    
+
     locations <- maxmind(ips, file,
                          fields = c("continent_name", "country_name", "country_code"))
-    
+
     return(cbind(ips = ips, locations))
 }
-

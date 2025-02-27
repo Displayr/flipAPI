@@ -25,7 +25,7 @@ Imports:
     flipFormat,
     flipTime,
     flipTransformations,
-    flipU,
+    flipU (>= 1.6.1),
     haven,
     openxlsx,
     gganimate,
