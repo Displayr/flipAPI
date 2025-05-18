@@ -1,7 +1,7 @@
 Package: flipAPI
 Type: Package
 Title: Web APIs tools
-Version: 1.5.9
+Version: 1.5.10
 Author: Displayr <opensource@displayr.com>
 Maintainer: Displayr <opensource@displayr.com>
 Description: Functions to extract data and interact with web APIs.
@@ -15,12 +15,12 @@ Imports:
     tools,
     mime,
     httr,
+    ip2location,
     jsonlite,
     lubridate,
     RGoogleAnalytics,
     stringr,
     readxl,
-    rgeolocate,
     utils,
     flipFormat,
     flipTime,
@@ -43,6 +43,7 @@ Remotes: Displayr/flipTransformations,
     Tatvic/RGoogleAnalytics,
     cran/rgeolocate
 Suggests:
+    countrycode,
     testthat,
     httptest,
     officer,

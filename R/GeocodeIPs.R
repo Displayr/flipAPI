@@ -9,17 +9,12 @@
 #' \item \code{country_name} - the name of the country where the IP is located
 #' \item \code{country_code} - the 2 letter country code (ISO Alpha-2)
 #' }
-#' @details Uses the \href{https://www.maxmind.com/en/home}{MaxMind} database from
-#'    the \code{\link[rgeolocate:maxmind]{rgeolocate}} package.
-#'    Returns \code{\link{NA}} when no data is available.
 #' @examples
 #' GeocodeIPs(c("123.51.111.134", "216.27.61.137", "2001:780:53d2::1"))
-#' @importFrom rgeolocate maxmind
+#' @importFrom ip2location get_all
 #' @importFrom flipU StopForUserError
 #' @export
-
 GeocodeIPs <- function(ips) {
-
     if (length(dim(ips)) == 2)
     {
         if (dim(ips)[2] != 1)
@@ -29,10 +24,58 @@ GeocodeIPs <- function(ips) {
     if (!((is.character(ips) && is.null(dim(ips))) || is.factor(ips)))
         StopForUserError("Please provide a character vector of IP addresses.")
 
-    file <- system.file("extdata", "GeoLite2-Country.mmdb", package = "rgeolocate")
+    loadDatabase()
+    lapply(ips, get_all) |> standardiseGeocodeIPsColumns(ips = ips)
+}
 
-    locations <- maxmind(ips, file,
-                         fields = c("continent_name", "country_name", "country_code"))
+getIP2LocationDatabasePath <- function() {
+    db.path <- Sys.getenv("IP2LOCATION_DB_PATH", unset = NA)
+    if (is.na(db.path)) {
+        StopForUserError(
+            "The IP2Location database is not installed. ",
+            "Please download it from https://www.ip2location.com and ",
+            "set the IP2LOCATION_DB_PATH environment variable to the database path."
+        )
+    }
+    db.path
+}
 
-    return(cbind(ips = ips, locations))
+requiredGeocodeIPsColumns <- c("ip", "country_short", "country_long")
+
+#' @importFrom ip2location open
+loadDatabase <- function() {
+    db.path <- getIP2LocationDatabasePath()
+    ip2location::open(db.path)
+}
+
+#' @importFrom countrycode countrycode
+standardiseGeocodeIPsColumns <- function(responses, ips) {
+    required.names <- c("ip", "country_short", "country_long")
+    invalid.ips <- vapply(responses, `[[`, character(1), "country_short") == "INVALID IP ADDRESS"
+    if (any(invalid.ips)) {
+        templates <- lapply(
+            ips[invalid.ips],
+            function(x) list(ip = x, country_short = NA_character_, country_long = NA_character_)
+        )
+        responses[invalid.ips] <- templates
+    }
+    output <- do.call(rbind.data.frame, args = responses)
+    if (!all(required.names %in% colnames(output))) {
+        StopForUserError("The database names have changed.")
+    }
+    invalid.responses <- is.na(output[["country_short"]])
+    if (!"continent_name" %in% names(output)) {
+        output[["continent_name"]] <- NA
+        if (requireNamespace("countrycode", quietly = TRUE)) {
+            output[!invalid.responses, "continent_name"] <- countrycode(
+                output[!invalid.responses, "country_short"],
+                origin = "iso2c",
+                destination = "continent"
+            )
+        }
+    }
+    database.names <- c("ip", "continent_name", "country_long", "country_short")
+    output <- output[match(database.names, names(output), incomparables = 0L)]
+    names(output) <- c("ips", "continent_name", "country_name", "country_code")
+    output
 }

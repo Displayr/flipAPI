@@ -21,11 +21,6 @@ A \code{\link{data.frame}} with columns
 \description{
 Returns the country and continent of a vector of IPv4 or IPv6 strings.
 }
-\details{
-Uses the \href{https://www.maxmind.com/en/home}{MaxMind} database from
-   the \code{\link[rgeolocate:maxmind]{rgeolocate}} package.
-   Returns \code{\link{NA}} when no data is available.
-}
 \examples{
 GeocodeIPs(c("123.51.111.134", "216.27.61.137", "2001:780:53d2::1"))
 }
