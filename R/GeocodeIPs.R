@@ -5,21 +5,16 @@
 #' @return A \code{\link{data.frame}} with columns
 #' \itemize{
 #' \item \code{ips} - the original input ips
-#' \item \code{continent_name} - the name of the continent where the IP is located
+#' \item \code{status} - the result of the geocoding query
 #' \item \code{country_name} - the name of the country where the IP is located
-#' \item \code{country_code} - the 2 letter country code (ISO Alpha-2)
+#' \item \code{city} - the name of the city where the IP is located
 #' }
-#' @details Uses the \href{https://www.maxmind.com/en/home}{MaxMind} database from
-#'    the \code{\link[rgeolocate:maxmind]{rgeolocate}} package.
-#'    Returns \code{\link{NA}} when no data is available.
 #' @examples
 #' GeocodeIPs(c("123.51.111.134", "216.27.61.137", "2001:780:53d2::1"))
-#' @importFrom rgeolocate maxmind
+#' @importFrom locateip locate_ip
 #' @importFrom flipU StopForUserError
 #' @export
-
 GeocodeIPs <- function(ips) {
-
     if (length(dim(ips)) == 2)
     {
         if (dim(ips)[2] != 1)
@@ -29,10 +24,13 @@ GeocodeIPs <- function(ips) {
     if (!((is.character(ips) && is.null(dim(ips))) || is.factor(ips)))
         StopForUserError("Please provide a character vector of IP addresses.")
 
-    file <- system.file("extdata", "GeoLite2-Country.mmdb", package = "rgeolocate")
-
-    locations <- maxmind(ips, file,
-                         fields = c("continent_name", "country_name", "country_code"))
-
-    return(cbind(ips = ips, locations))
+    responses <- lapply(ips, locate_ip, fields = c("status,country,city"))
+    valid.responses <- lengths(responses) == 3L
+    if (any(!valid.responses)) {
+        responses[!valid.responses] <- data.frame(status = "error", country = NA, city = NA) |> list()
+    }
+    results <- do.call(rbind, responses) |> as.data.frame()
+    results <- cbind(ips, results)
+    names(results) <- c("ips", "status", "country_name", "city")
+    results
 }

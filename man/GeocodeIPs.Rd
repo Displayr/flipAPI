@@ -13,18 +13,13 @@ GeocodeIPs(ips)
 A \code{\link{data.frame}} with columns
 \itemize{
 \item \code{ips} - the original input ips
-\item \code{continent_name} - the name of the continent where the IP is located
+\item \code{status} - the result of the geocoding query
 \item \code{country_name} - the name of the country where the IP is located
-\item \code{country_code} - the 2 letter country code (ISO Alpha-2)
+\item \code{city} - the name of the city where the IP is located
 }
 }
 \description{
 Returns the country and continent of a vector of IPv4 or IPv6 strings.
-}
-\details{
-Uses the \href{https://www.maxmind.com/en/home}{MaxMind} database from
-   the \code{\link[rgeolocate:maxmind]{rgeolocate}} package.
-   Returns \code{\link{NA}} when no data is available.
 }
 \examples{
 GeocodeIPs(c("123.51.111.134", "216.27.61.137", "2001:780:53d2::1"))
