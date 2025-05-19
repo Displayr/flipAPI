@@ -51,7 +51,7 @@ loadDatabase <- function() {
 #' @importFrom countrycode countrycode
 standardiseGeocodeIPsColumns <- function(responses, ips) {
     required.names <- c("ip", "country_short", "country_long")
-    invalid.ips <- vapply(responses, `[[`, character(1), "country_short") == "INVALID IP ADDRESS"
+    invalid.ips <- vapply(responses, `[[`, character(1), "country_short") %in% c("-", "INVALID IP ADDRESS")
     if (any(invalid.ips)) {
         templates <- lapply(
             ips[invalid.ips],
