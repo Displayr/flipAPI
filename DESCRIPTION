@@ -11,6 +11,7 @@ LazyData: TRUE
 Depends: R (>= 3.5.0)
 Imports:
     arrow,
+    countrycode,
     curl,
     tools,
     mime,

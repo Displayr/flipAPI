@@ -1,5 +1,6 @@
 context("Geocode IPs")
 
+skip_if(Sys.getenv("IP2LOCATION_DB_PATH") == "", "No IP2Location database path set. This is required for geocoding.")
 
 test_that("Geocoding", {
     input.ips <- c("2001:780:53d2::1", "123.51.111.134", "84.70.75.194", "185.208.152.121")
