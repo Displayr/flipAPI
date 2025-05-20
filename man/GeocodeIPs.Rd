@@ -21,6 +21,17 @@ A \code{\link{data.frame}} with columns
 \description{
 Returns the country and continent of a vector of IPv4 or IPv6 strings.
 }
+\details{
+Uses the \href{https://lite.ip2location.com/ip2location-lite}{IP2Location LITE}
+   database from IP2Location to resolve country locations from IP addresses.
+   The database must be downloaded and the database path set as the environment variable
+   \code{IP2LOCATION_DB_PATH} before use. The database can be downloaded from
+   the \href{https://lite.ip2location.com/ip2location-lite}{IP2Location LITE}.
+   To interact with the database a python environment is required that has the
+   \href{https://pypi.org/project/IP2Location/}{IP2Location} python package installed.
+   If an invalid IP address or the information is not available in the database,
+   the \code{country_name} and \code{country_code} columns will be set to \code{NA}.
+}
 \examples{
 \dontrun{
 GeocodeIPs(c("123.51.111.134", "216.27.61.137", "2001:780:53d2::1"))
