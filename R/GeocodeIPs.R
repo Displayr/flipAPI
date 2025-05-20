@@ -10,7 +10,9 @@
 #' \item \code{country_code} - the 2 letter country code (ISO Alpha-2)
 #' }
 #' @examples
+#' \dontrun{
 #' GeocodeIPs(c("123.51.111.134", "216.27.61.137", "2001:780:53d2::1"))
+#' }
 #' @importFrom ip2location get_all
 #' @importFrom flipU StopForUserError
 #' @export
