@@ -44,7 +44,6 @@ Remotes: Displayr/flipTransformations,
     Tatvic/RGoogleAnalytics,
     cran/rgeolocate
 Suggests:
-    countrycode,
     testthat,
     httptest,
     officer,
