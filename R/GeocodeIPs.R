@@ -25,6 +25,7 @@ GeocodeIPs <- function(ips) {
         StopForUserError("Please provide a character vector of IP addresses.")
 
     loadDatabase()
+    checkIP2LocationLibraryAvailable()
     lapply(ips, get_all) |> standardiseGeocodeIPsColumns(ips = ips)
 }
 
@@ -59,6 +60,16 @@ requiredGeocodeIPsColumns <- c("ip", "country_short", "country_long")
 loadDatabase <- function() {
     db.path <- getIP2LocationDatabasePath()
     ip2location::open(db.path)
+}
+
+#' @importFrom reticulate py_module_available
+checkIP2LocationLibraryAvailable <- function() {
+    if (!py_module_available("IP2Location")) {
+        StopForUserError(
+            "The IP2Location python package is not installed. ",
+            "Install it before calling GeocodeIPs()"
+        )
+    }
 }
 
 #' @importFrom countrycode countrycode

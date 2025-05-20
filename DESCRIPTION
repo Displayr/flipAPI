@@ -37,6 +37,7 @@ Imports:
     odbc,
     rhtmlMetro,
     RMySQL,
+    reticulate,
     RPostgres,
     zeallot,
     zip
