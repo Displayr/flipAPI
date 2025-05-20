@@ -22,5 +22,7 @@ A \code{\link{data.frame}} with columns
 Returns the country and continent of a vector of IPv4 or IPv6 strings.
 }
 \examples{
+\dontrun{
 GeocodeIPs(c("123.51.111.134", "216.27.61.137", "2001:780:53d2::1"))
+}
 }
