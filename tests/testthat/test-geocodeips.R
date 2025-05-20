@@ -33,6 +33,7 @@ test_that("Geocode database file is found", {
     })
 })
 
+skip_if_not(reticulate::py_module_available("IP2Location"), "IP2Location python module not available")
 test_that("Geocoding", {
     input.ips <- c("2001:780:53d2::1", "123.51.111.134", "84.70.75.194", "185.208.152.121")
     expected.output <- data.frame(
