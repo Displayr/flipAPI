@@ -2,6 +2,37 @@ context("Geocode IPs")
 
 skip_if(Sys.getenv("IP2LOCATION_DB_PATH") == "", "No IP2Location database path set. This is required for geocoding.")
 
+
+test_that("Geocode database file is found", {
+    db.path <- Sys.getenv("IP2LOCATION_DB_PATH")
+    # File exists
+    file.exists(db.path) |> expect_true()
+    # Can read the file
+    file.access(db.path, 4) |> expect_equal(setNames(0, db.path))
+    getIP2LocationDatabasePath() |> expect_equal(db.path)
+    tmp.file <- tempfile(fileext = ".bin")
+    Sys.setenv(IP2LOCATION_DB_PATH = "/foo/bar/baz")
+    getIP2LocationDatabasePath() |> expect_error(
+        "The IP2Location database was not found at the path: /foo/bar/baz. Please check the path and try again."
+    )
+    file.create(tmp.file)
+    Sys.setenv(IP2LOCATION_DB_PATH = tmp.file)
+    getIP2LocationDatabasePath() |> expect_equal(tmp.file)
+    # Remove read permission
+    Sys.chmod(tmp.file, mode = "300")
+    getIP2LocationDatabasePath() |> expect_error(
+        paste0(
+            "The IP2Location database is not readable at the path: ",
+            tmp.file, ". ",
+            "Please check the file permissions and try again."
+        )
+    )
+    on.exit({
+        Sys.setenv(IP2LOCATION_DB_PATH = db.path)
+        file.remove(tmp.file)
+    })
+})
+
 test_that("Geocoding", {
     input.ips <- c("2001:780:53d2::1", "123.51.111.134", "84.70.75.194", "185.208.152.121")
     expected.output <- data.frame(

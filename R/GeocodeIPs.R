@@ -37,6 +37,19 @@ getIP2LocationDatabasePath <- function() {
             "set the IP2LOCATION_DB_PATH environment variable to the database path."
         )
     }
+    if (!file.exists(db.path)) {
+        StopForUserError(
+            "The IP2Location database was not found at the path: ", db.path, ". ",
+            "Please check the path and try again."
+        )
+    }
+    # Check it is readable
+    if (file.access(db.path, mode = 4L) != 0L) {
+        StopForUserError(
+            "The IP2Location database is not readable at the path: ", db.path, ". ",
+            "Please check the file permissions and try again."
+        )
+    }
     db.path
 }
 
