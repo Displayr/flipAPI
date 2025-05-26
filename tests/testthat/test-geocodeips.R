@@ -15,6 +15,21 @@ test_that("Geocode database file is found", {
     getIP2LocationDatabasePath() |> expect_error(
         "The IP2Location database was not found at the path: /foo/bar/baz. Please check the path and try again."
     )
+    with_mocked_bindings(
+        IsRServer = function() TRUE,
+        getIP2LocationDatabasePath(),
+        .package = "flipAPI"
+    ) |> expect_error(
+        paste0(
+            "There was a problem with the IP address database. ",
+            "Please contact support if this is causing hardship. ",
+            "Error details: ",
+            "The IP2Location database was not found at the path: ",
+            "/foo/bar/baz. ",
+            "Please check the path and try again."
+        ),
+        fixed = TRUE
+    )
     file.create(tmp.file)
     Sys.setenv(IP2LOCATION_DB_PATH = tmp.file)
     getIP2LocationDatabasePath() |> expect_equal(tmp.file)

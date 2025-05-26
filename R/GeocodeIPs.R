@@ -10,14 +10,20 @@
 #' \item \code{country_code} - the 2 letter country code (ISO Alpha-2)
 #' }
 #' @details Uses the \href{https://lite.ip2location.com/ip2location-lite}{IP2Location LITE}
-#'    database from IP2Location to resolve country locations from IP addresses.
+#'    or \href{https://www.ip2location.com/database/ip2location}{IP2Location} databases
+#'    from IP2Location to resolve country locations from IP addresses.
 #'    The database must be downloaded and the database path set as the environment variable
 #'    \code{IP2LOCATION_DB_PATH} before use. The database can be downloaded from
-#'    the \href{https://lite.ip2location.com/ip2location-lite}{IP2Location LITE}.
+#'    \href{https://lite.ip2location.com/ip2location-lite}{IP2Location LITE} or
+#'    \href{https://www.ip2location.com/database/ip2location}{IP2Location}.
 #'    To interact with the database a python environment is required that has the
 #'    \href{https://pypi.org/project/IP2Location/}{IP2Location} python package installed.
 #'    If an invalid IP address or the information is not available in the database,
 #'    the \code{country_name} and \code{country_code} columns will be set to \code{NA}.
+#'    The LITE database should achieve an accuracy at the country level of 98\%. If
+#'    you need more accuracy, you can use the commercial license with the IP2Location
+#'    database. More details on the differences between the databases can be found
+#'    at \href{https://lite.ip2location.com/edition-comparison}{IP2Location comparisons}.
 #' @examples
 #' \dontrun{
 #' GeocodeIPs(c("123.51.111.134", "216.27.61.137", "2001:780:53d2::1"))
@@ -43,21 +49,21 @@ GeocodeIPs <- function(ips) {
 getIP2LocationDatabasePath <- function() {
     db.path <- Sys.getenv("IP2LOCATION_DB_PATH", unset = NA)
     if (is.na(db.path)) {
-        StopForUserError(
+        throwErrorWithSupportIfOnRServer(
             "The IP2Location database is not installed. ",
             "Please download it from https://www.ip2location.com and ",
             "set the IP2LOCATION_DB_PATH environment variable to the database path."
         )
     }
     if (!file.exists(db.path)) {
-        StopForUserError(
+        throwErrorWithSupportIfOnRServer(
             "The IP2Location database was not found at the path: ", db.path, ". ",
             "Please check the path and try again."
         )
     }
     # Check it is readable
     if (file.access(db.path, mode = 4L) != 0L) {
-        StopForUserError(
+        throwErrorWithSupportIfOnRServer(
             "The IP2Location database is not readable at the path: ", db.path, ". ",
             "Please check the file permissions and try again."
         )
@@ -76,7 +82,7 @@ loadDatabase <- function() {
 #' @importFrom reticulate py_module_available
 checkIP2LocationLibraryAvailable <- function() {
     if (!py_module_available("IP2Location")) {
-        StopForUserError(
+        throwErrorWithSupportIfOnRServer(
             "The IP2Location python package is not installed. ",
             "Install it before calling GeocodeIPs()"
         )
@@ -96,7 +102,7 @@ standardiseGeocodeIPsColumns <- function(responses, ips) {
     }
     output <- do.call(rbind.data.frame, args = responses)
     if (!all(required.names %in% colnames(output))) {
-        StopForUserError("The database names have changed.")
+        throwErrorWithSupportIfOnRServer("The database names have changed.")
     }
     invalid.responses <- is.na(output[["country_short"]])
     if (!"continent_name" %in% names(output)) {
@@ -113,4 +119,18 @@ standardiseGeocodeIPsColumns <- function(responses, ips) {
     output <- output[match(database.names, names(output), incomparables = 0L)]
     names(output) <- c("ips", "continent_name", "country_name", "country_code")
     output
+}
+
+#' @importFrom flipU IsRServer
+throwErrorWithSupportIfOnRServer <- function(...) {
+    message <- paste0(...)
+    if (IsRServer()) {
+        message <- paste0(
+            "There was a problem with the IP address database. ",
+            "Please contact support if this is causing hardship. ",
+            "Error details: ",
+            message
+        )
+    }
+    stop(message)
 }
