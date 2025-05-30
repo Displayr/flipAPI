@@ -22,10 +22,24 @@ A \code{\link{data.frame}} with columns
 Returns the country and continent of a vector of IPv4 or IPv6 strings.
 }
 \details{
-Uses the \href{https://www.maxmind.com/en/home}{MaxMind} database from
-   the \code{\link[rgeolocate:maxmind]{rgeolocate}} package.
-   Returns \code{\link{NA}} when no data is available.
+Uses the \href{https://lite.ip2location.com/ip2location-lite}{IP2Location LITE}
+   or \href{https://www.ip2location.com/database/ip2location}{IP2Location} databases
+   from IP2Location to resolve country locations from IP addresses.
+   The database must be downloaded and the database path set as the environment variable
+   \code{IP2LOCATION_DB_PATH} before use. The database can be downloaded from
+   \href{https://lite.ip2location.com/ip2location-lite}{IP2Location LITE} or
+   \href{https://www.ip2location.com/database/ip2location}{IP2Location}.
+   To interact with the database a python environment is required that has the
+   \href{https://pypi.org/project/IP2Location/}{IP2Location} python package installed.
+   If an invalid IP address or the information is not available in the database,
+   the \code{country_name} and \code{country_code} columns will be set to \code{NA}.
+   The LITE database should achieve an accuracy at the country level of 98\%. If
+   you need more accuracy, you can use the commercial license with the IP2Location
+   database. More details on the differences between the databases can be found
+   at \href{https://lite.ip2location.com/edition-comparison}{IP2Location comparisons}.
 }
 \examples{
+\dontrun{
 GeocodeIPs(c("123.51.111.134", "216.27.61.137", "2001:780:53d2::1"))
+}
 }

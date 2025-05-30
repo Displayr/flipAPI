@@ -1,7 +1,7 @@
 Package: flipAPI
 Type: Package
 Title: Web APIs tools
-Version: 1.5.9
+Version: 1.6.0
 Author: Displayr <opensource@displayr.com>
 Maintainer: Displayr <opensource@displayr.com>
 Description: Functions to extract data and interact with web APIs.
@@ -11,16 +11,17 @@ LazyData: TRUE
 Depends: R (>= 3.5.0)
 Imports:
     arrow,
+    countrycode,
     curl,
     tools,
     mime,
     httr,
+    ip2location,
     jsonlite,
     lubridate,
     RGoogleAnalytics,
     stringr,
     readxl,
-    rgeolocate,
     utils,
     flipFormat,
     flipTime,
@@ -36,12 +37,12 @@ Imports:
     odbc,
     rhtmlMetro,
     RMySQL,
+    reticulate,
     RPostgres,
     zeallot,
     zip
 Remotes: Displayr/flipTransformations,
     Tatvic/RGoogleAnalytics,
-    cran/rgeolocate
 Suggests:
     testthat,
     httptest,
