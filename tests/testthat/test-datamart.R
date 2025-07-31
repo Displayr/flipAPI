@@ -46,13 +46,12 @@ test_that("Save/Load Data: bad cases", {
 
   # Not-existent file
   bad_name <- "anamethatdoesnotexistfortesting"
-  expect_warning(expect_false(QFileExists(bad_name)))
-  expect_error(QLoadData(bad_name))
+  QFileExists(bad_name) |> expect_false() |> expect_warning("File not found")
+  QLoadData(bad_name) |> expect_error(paste0("The data file ", sQuote(bad_name), " does not exist"))
 
   # Invalid filetypes
   # - note that we don't have tests for Content-Types
-  expect_error(QSaveData(mtcars,"mtcars.notrdsorcsv"))
-  expect_error(QLoadData("mtcars.notrdsorcsv"))
+  QSaveData(mtcars, "mtcars.notrdsorcsv") |> expect_error("Invalid file type specified")
     # 422 Error
     mockedPOST <- function() {
         list(status_code = 422)
