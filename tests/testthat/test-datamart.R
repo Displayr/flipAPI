@@ -47,7 +47,7 @@ test_that("Save/Load Data: bad cases", {
   # Not-existent file
   bad_name <- "anamethatdoesnotexistfortesting"
   QFileExists(bad_name) |> expect_false() |> expect_warning("File not found")
-  QLoadData(bad_name) |> expect_error(paste0("The data file ", sQuote(bad_name), " does not exist"))
+  QLoadData(bad_name) |> expect_error(paste0("The data file ", sQuote(bad_name, q = FALSE), " does not exist"))
 
   # Invalid filetypes
   # - note that we don't have tests for Content-Types
