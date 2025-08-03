@@ -211,7 +211,7 @@ QLoadData <- function(filename, company.token = NA, ...)
         if (!QFileExists(filename, show.warning = FALSE))
             StopForUserError(
                 "The data file '", filename, "' does not exist in the Displayr cloud drive. ",
-                "Ensure that the data file is in the Displayr cloud drive and its name has been correctly specified.",
+                "Ensure that the data file is in the Displayr cloud drive and its name has been correctly specified."
             )
         else
             stopBadRequest(res, msg)
