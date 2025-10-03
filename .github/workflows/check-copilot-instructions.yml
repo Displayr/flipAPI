@@ -1,0 +1,9 @@
+name: Check Copilot Instructions Sync
+
+on:
+  pull_request:
+    branches: '*'
+
+jobs:
+  check-copilot-instructions:
+    uses: Displayr/flipU/.github/workflows/check-copilot-instructions.yml@master
