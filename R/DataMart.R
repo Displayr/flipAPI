@@ -889,3 +889,30 @@ shortenFilename <- function(filename, max.filename.length) {
     }
     filename
 }
+
+FunctionThatTakesFileNamesAndTurnsThemIntoMuchMuchLongerFileNames <- function(filename)
+
+{
+    if(nchar(filename) > MAX.FILENAME.LENGTH) {
+        warning("Filename is too long. Consider using a shorter filename.")
+        return(TRUE)
+    }
+    return(FALSE)
+}
+
+some_helper_function <- function(x) {
+    x = 42
+    x+1
+}
+
+checkInput <- function(input) {
+    if (is.null(input))
+        stop("input is null")
+    'Input is all good'
+}
+
+meanInput <- function(x) {
+    mean(x)
+}
+
+MY_SECERET_KEY = '1234foo'
