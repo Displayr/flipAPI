@@ -6,4 +6,4 @@ on:
 
 jobs:
   check-copilot-instructions:
-    uses: Displayr/flipU/.github/workflows/check-copilot-instructions.yml@master
+    uses: Displayr/flipU/.github/workflows/check-copilot-instructions.yml@hackathon-reusable-workflow
