@@ -5,5 +5,5 @@ on:
     branches: '*'
 
 jobs:
-  check-copilot-sync:
+  check-copilot-instructions:
     uses: Displayr/flipU/.github/workflows/check-copilot-instructions.yml@hackathon-reusable-workflow
