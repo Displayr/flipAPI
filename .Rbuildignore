@@ -3,3 +3,4 @@
 .*~
 ^\.circleci/config\.yml$
 ^\.lintr$
+^\.github
