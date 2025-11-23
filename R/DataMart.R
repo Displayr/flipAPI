@@ -15,13 +15,15 @@ MAX.FILENAME.LENGTH <- 100L
 #' @importFrom utils URLencode
 #'
 #' @export
-QFileExists <- function(filename, show.warning = TRUE)
+QFileExists <- function(filename, show.warning = TRUE, company.token = NA, document.token = NA)
 {
-    company.secret <- getCompanySecret()
+    company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+    project.secret <- if (missing(document.token)) getProjectSecret() else document.token
     client.id <- getClientId()
     api.root <- getApiRoot("DataMartFileExists")
     res <- try(GET(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                     config=add_headers("X-Q-Company-Secret" = company.secret,
+                                       "X-Q-Project-Secret" = project.secret,
                                        "X-Q-Project-ID" = client.id)))
 
     if (is.null(res$status_code) || res$status_code != 200)
@@ -66,17 +68,19 @@ QFileExists <- function(filename, show.warning = TRUE)
 QFileOpen <- function(filename, open = "r", blocking = TRUE,
                       encoding = getOption("encoding"), raw = FALSE,
                       method = getOption("url.method", "default"),
-                      mime.type = NA, company.token = NA)
+                      mime.type = NA, company.token = NA, document.token = NA)
 {
     mode <- tolower(open)
     if (mode == "r" || mode == "rb")
     {
         company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+        project.secret <- if (missing(document.token)) getProjectSecret() else document.token
         client.id <- getClientId()
         api.root <- getApiRoot()
         h <- new_handle()
         handle_setheaders(h,
             "X-Q-Company-Secret" = company.secret,
+            "X-Q-Project-Secret" = project.secret,
             "X-Q-Project-ID" = client.id
         )
         uri <- paste0(api.root, "?filename=", URLencode(filename, TRUE))
@@ -149,11 +153,13 @@ close.qpostcon = function(con, ...)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
     company.secret <- getCompanySecret()
+    project.secret <- getProjectSecret()
     client.id <- getClientId()
     api.root <- getApiRoot()
     res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                 config = add_headers("Content-Type" = mimetype,
                                      "X-Q-Company-Secret" = company.secret,
+                                     "X-Q-Project-Secret" = project.secret,
                                      "X-Q-Project-ID" = client.id),
                 encode = "raw",
                 body = upload_file(tmpfile)))
@@ -189,14 +195,16 @@ close.qpostcon = function(con, ...)
 #' @importFrom flipU StopForUserError
 #'
 #' @export
-QLoadData <- function(filename, company.token = NA, ...)
+QLoadData <- function(filename, company.token = NA, document.token = NA,...)
 {
     tmpfile <- tempfile()
     company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+    project.secret <- if (missing(document.token)) getProjectSecret() else document.token
     client.id <- getClientId()
     api.root <- getApiRoot()
     res <- try(GET(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                config=add_headers("X-Q-Company-Secret" = company.secret,
+                                  "X-Q-Project-Secret" = project.secret,
                                   "X-Q-Project-ID" = client.id),
                write_disk(tmpfile, overwrite = TRUE)))
 
@@ -317,11 +325,13 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
     company.secret <- getCompanySecret()
+    project.secret <- getProjectSecret()
     client.id <- getClientId()
     api.root <- getApiRoot()
     res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                 config = add_headers("Content-Type" = guess_type(filename),
                                      "X-Q-Company-Secret" = company.secret,
+                                     "X-Q-Project-Secret" = project.secret,
                                      "X-Q-Project-ID" = client.id),
                 encode = "raw",
                 body = upload_file(tmpfile)))
@@ -368,7 +378,7 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #'
 #' @param filenames collection of character strings. Names of the files to delete.
 #'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
-#' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
+#' @param company.token Use this if you need to delete files from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
 #'
 #' @importFrom httr DELETE add_headers
 #' @importFrom utils URLencode
@@ -377,14 +387,15 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #' and assumed to succeed if no errors are thrown.
 #'
 #' @export
-QDeleteFiles <- function(filenames, company.token = getCompanySecret())
+QDeleteFiles <- function(filenames, company.token = getCompanySecret(), document.token = getProjectSecret())
 {
     company.secret <- company.token
     api.root <- getApiRoot("DataMartBatchDelete")
     url_param_filenames <- sprintf("filenames=%s", filenames)
     filenames.string <- paste(filenames, collapse = ", ")
     res <- try(DELETE(paste0(api.root, "?", URLencode(paste(url_param_filenames, collapse="&"))),
-                config=add_headers("X-Q-Company-Secret" = company.secret)))
+                config=add_headers("X-Q-Company-Secret" = company.secret,
+                                   "X-Q-Project-Secret" = document.token)))
     if (inherits(res, "try-error") || res$status_code != 200)
     {
         warning("Encountered an error deleting the following files: ", filenames.string)
@@ -406,11 +417,13 @@ qSaveImage <- function(filename)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
     company.secret <- getCompanySecret()
+    project.secret <- getProjectSecret()
     client.id <- getClientId()
     api.root <- getApiRoot()
     res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                     config = add_headers("Content-Type" = guess_type(filename),
                                          "X-Q-Company-Secret" = company.secret,
+                                         "X-Q-Project-Secret" = project.secret,
                                          "X-Q-Project-ID" = client.id),
                     encode = "raw",
                     body = upload_file(tmpfile)))
@@ -431,14 +444,16 @@ qSaveImage <- function(filename)
     invisible()
 }
 
-qLoadImage <- function(filename, company.token = NA)
+qLoadImage <- function(filename, company.token = NA, document.token = NA)
 {
     tmpfile <- tempfile()
     company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+    project.secret <- if (missing(document.token)) getProjectSecret() else document.token
     client.id <- getClientId()
     api.root <- getApiRoot()
     res <- try(GET(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                    config=add_headers("X-Q-Company-Secret" = company.secret,
+                                      "X-Q-Project-Secret" = project.secret,
                                       "X-Q-Project-ID" = client.id),
                    write_disk(tmpfile, overwrite = TRUE)))
 
@@ -481,6 +496,26 @@ getCompanySecret <- function()
 {
     secret <- get0("companySecret", ifnotfound = "")
     if (secret == "") stopNotDisplayr("companySecret")
+    return (secret)
+}
+
+#' Gets document secret from the environment. Throws an error if not found.
+#'
+#' @return Document secret token as a string.
+#'
+#' @noRd
+getProjectSecret <- function()
+{
+    secret <- get0("projectSecret", ifnotfound = "")
+    # projectSecret might not have been copied into global projectSecret by a newer R Server, 
+    # but it could have been stored by QServer in user secrets which are copied into userSecrets by older R servers.
+    if (secret == "") {
+        secret <- tryCatch({
+            val <- userSecrets$projectSecret
+            if (is.character(val) && nzchar(val)) val else ""
+        },
+        error = function(e) "")
+    }
     return (secret)
 }
 
