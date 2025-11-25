@@ -516,7 +516,7 @@ getProjectSecret <- function()
     # but it could have been stored by QServer in user secrets which are copied into userSecrets by older R servers.
     if (secret == "") {
         secret <- tryCatch({
-            val <- userSecrets$projectSecret
+            val <- .GlobalEnv$userSecrets$projectSecret
             if (is.character(val) && nzchar(val)) val else ""
         },
         error = function(e) "")
