@@ -17,7 +17,7 @@ To reference a file in a subdirectory, use double backslashes after each folder 
 Defaults to NULL, in which case no compression occurs.}
 
 \item{...}{Other parameters to pass to \code{\link{write.csv}}, \code{\link{saveRDS}},
-\code{\link{write.xlsx}}, or \code{\link{write_sav}}.}
+\code{\link[openxlsx]{write.xlsx}}, or \code{\link[haven]{write_sav}}.}
 }
 \value{
 NULL invisibly. Called for the purpose of uploading data
