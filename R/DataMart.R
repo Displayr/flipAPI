@@ -265,7 +265,7 @@ QLoadData <- function(filename, company.token = NA, document.token = NA,...)
 #' (in bytes) larger than this value will be compressed into a zip file.
 #' Defaults to NULL, in which case no compression occurs.
 #' @param ... Other parameters to pass to \code{\link{write.csv}}, \code{\link{saveRDS}},
-#' \code{\link{write.xlsx}}, or \code{\link{write_sav}}.
+#' \code{\link[openxlsx]{write.xlsx}}, or \code{\link[haven]{write_sav}}.
 #'
 #' @importFrom haven write_sav
 #' @importFrom httr POST add_headers upload_file

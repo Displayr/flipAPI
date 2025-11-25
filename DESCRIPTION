@@ -23,7 +23,6 @@ Imports:
     stringr,
     readxl,
     utils,
-    flipFormat,
     flipTime,
     flipTransformations,
     flipU (>= 1.6.1),
