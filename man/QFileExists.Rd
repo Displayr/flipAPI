@@ -4,7 +4,12 @@
 \alias{QFileExists}
 \title{Check if a file exists}
 \usage{
-QFileExists(filename, show.warning = TRUE)
+QFileExists(
+  filename,
+  show.warning = TRUE,
+  company.token = NA,
+  document.token = NA
+)
 }
 \arguments{
 \item{filename}{character string. Name of the file to search for.
@@ -12,6 +17,10 @@ To reference a file in a subdirectory, use double backslashes after each folder 
 
 \item{show.warning}{logical scalar. Whether to show a warning when the file
 does not exist.}
+
+\item{company.token}{Use this if you need to access a different company's Displayr Cloud Drive. You need to contact Support to get this token.}
+
+\item{document.token}{Reserved}
 }
 \value{
 TRUE if the file exists, otherwise FALSE.

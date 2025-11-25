@@ -4,13 +4,19 @@
 \alias{QDeleteFiles}
 \title{Deletes a set of objects}
 \usage{
-QDeleteFiles(filenames, company.token = getCompanySecret())
+QDeleteFiles(
+  filenames,
+  company.token = getCompanySecret(),
+  document.token = getProjectSecret()
+)
 }
 \arguments{
 \item{filenames}{collection of character strings. Names of the files to delete.
 To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").}
 
-\item{company.token}{Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.}
+\item{company.token}{Use this if you need to delete files from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.}
+
+\item{document.token}{Reserved}
 }
 \value{
 NULL invisibly. Called for the purpose of deleting data
