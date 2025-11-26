@@ -1,9 +1,23 @@
 library(testthat)
 library(httr)
 
+companySecretValueName <- "companySecret"
 
-companySecret <- "test_company_secret"
-assign("companySecret", companySecret, envir = .GlobalEnv)
+setup({
+    old_companySecret <- get0(companySecretValueName, envir = .GlobalEnv, ifnotfound = NULL)
+    companySecret <- "test_company_secret"
+    assign(companySecretValueName, companySecret, envir = .GlobalEnv)
+})
+
+teardown({
+    if (exists("old_companySecret", envir = parent.frame())) {
+        assign(companySecretValueName, old_companySecret, envir = .GlobalEnv)
+    } else {
+        if (exists(companySecretValueName, envir = .GlobalEnv)) {
+            rm(list = companySecretValueName, envir = .GlobalEnv)
+        }
+    }
+})
 
 test_env = new.env()
 
