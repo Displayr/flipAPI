@@ -1,25 +1,9 @@
 library(testthat)
 library(httr)
 
-companySecretValueName <- "companySecret"
+localGlobal("companySecret", "test_company_secret")
 
-setup({
-    old_companySecret <- get0(companySecretValueName, envir = .GlobalEnv, ifnotfound = NULL)
-    companySecret <- "test_company_secret"
-    assign(companySecretValueName, companySecret, envir = .GlobalEnv)
-})
-
-teardown({
-    if (exists("old_companySecret", envir = parent.frame())) {
-        assign(companySecretValueName, old_companySecret, envir = .GlobalEnv)
-    } else {
-        if (exists(companySecretValueName, envir = .GlobalEnv)) {
-            rm(list = companySecretValueName, envir = .GlobalEnv)
-        }
-    }
-})
-
-test_env = new.env()
+test_env = new.env() # holds HTTP header verification result that is put there by mocked HTTP function and is used by testthat tests
 
 verifyHttpHeaders <- function(headers = list(), expect_header_to_be_equivalent_to_company_secret) 
 {
