@@ -58,7 +58,7 @@ QFileExists <- function(filename, show.warning = TRUE, company.token = NA, docum
 #' @param method character string. See documentation for connections.
 #' @param mime.type character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.
 #' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive. You need to contact Support to get this token.
-#' @param document.token Reserved
+#' @inheritParams QFileExists params = c("document.token")
 #'
 #' @return A curl connection (read) or a file connection (write)
 #'
@@ -74,10 +74,11 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
                       mime.type = NA, company.token = NA, document.token = NA)
 {
     mode <- tolower(open)
+    company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+    project.secret <- if (missing(document.token)) getProjectSecret() else document.token
+
     if (mode == "r" || mode == "rb")
     {
-        company.secret <- if (missing(company.token)) getCompanySecret() else company.token
-        project.secret <- if (missing(document.token)) getProjectSecret() else document.token
         client.id <- getClientId()
         api.root <- getApiRoot()
         h <- new_handle()
@@ -123,6 +124,8 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         attr(con, "filename") <- filename
         if (missing(mime.type)) mime.type <- guess_type(filename)
         attr(con, "mimetype") <- mime.type
+        attr(con, "company.secret") <- company.secret
+        attr(con, "project.secret") <- project.secret
 
         return (con)
     }
@@ -153,10 +156,10 @@ close.qpostcon = function(con, ...)
     filename <- attr(con, "filename")
     tmpfile <- attr(con, "tmpfile")
     mimetype <- attr(con, "mimetype")
+    company.secret <- attr(con, "company.secret")
+    project.secret <- attr(con, "project.secret")
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
-    company.secret <- getCompanySecret()
-    project.secret <- getProjectSecret()
     client.id <- getClientId()
     api.root <- getApiRoot()
     res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
@@ -187,7 +190,7 @@ close.qpostcon = function(con, ...)
 #' @param filename character string. Name of the file to be opened from the Displayr Cloud Drive.
 #'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
-#' @param document.token Reserved
+#' @inheritParams QFileExists params = c("document.token")
 #' @param ... Other parameters to pass to read.csv.
 #'
 #' @return An R object
@@ -383,7 +386,7 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #' @param filenames collection of character strings. Names of the files to delete.
 #'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #' @param company.token Use this if you need to delete files from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
-#' @param document.token Reserved
+#' @inheritParams QFileExists params = c("document.token")
 #'
 #' @importFrom httr DELETE add_headers
 #' @importFrom utils URLencode
@@ -511,17 +514,11 @@ getCompanySecret <- function()
 #' @noRd
 getProjectSecret <- function()
 {
-    secret <- get0("projectSecret", ifnotfound = "")
-    # projectSecret might not have been copied into global projectSecret by a newer R Server, 
-    # but it could have been stored by QServer in user secrets which are copied into userSecrets by older R servers.
-    if (secret == "") {
-        secret <- tryCatch({
-            val <- .GlobalEnv$userSecrets$projectSecret
-            if (is.character(val) && nzchar(val)) val else ""
-        },
-        error = function(e) "")
-    }
-    return (secret)
+    get0("projectSecret", ifnotfound = NULL) %||%
+        # projectSecret might not have been copied into global projectSecret by an older R Server, 
+        # but it could have been stored by QServer in user secrets which are copied into userSecrets by older R servers.
+        get0("userSecrets", mode = "list", ifnotfound = NULL)[["projectSecret"]] %||%
+        ""
 }
 
 #' Gets region from the environment and builds the api root. Throws an error if not found.
