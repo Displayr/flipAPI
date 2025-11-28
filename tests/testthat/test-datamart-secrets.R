@@ -50,7 +50,7 @@ expect_successful_headers_verification <- function() {
     if (!test_env$headersVerificationResult$asExpected) {
         fail(test_env$headersVerificationResult$messages)
     } else {
-        pass()
+        testthat::pass()
     }
 }
 
