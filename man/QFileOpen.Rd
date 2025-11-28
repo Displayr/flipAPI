@@ -34,7 +34,7 @@ To reference a file in a subdirectory, use double backslashes after each folder 
 
 \item{company.token}{Use this if you need to read from a different company's Displayr Cloud Drive. You need to contact Support to get this token.}
 
-\item{document.token}{Reserved}
+\item{document.token}{Reserved.}
 }
 \value{
 A curl connection (read) or a file connection (write)

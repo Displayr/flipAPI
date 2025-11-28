@@ -16,7 +16,7 @@ To reference a file in a subdirectory, use double backslashes after each folder 
 
 \item{company.token}{Use this if you need to delete files from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.}
 
-\item{document.token}{Reserved}
+\item{document.token}{Reserved.}
 }
 \value{
 NULL invisibly. Called for the purpose of deleting data

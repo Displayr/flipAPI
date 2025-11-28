@@ -9,7 +9,7 @@ MAX.FILENAME.LENGTH <- 100L
 #' @param show.warning logical scalar. Whether to show a warning when the file
 #'   does not exist.
 #' @param company.token Use this if you need to access a different company's Displayr Cloud Drive. You need to contact Support to get this token.
-#' @param document.token Reserved
+#' @param document.token Reserved.
 #'
 #' @return TRUE if the file exists, otherwise FALSE.
 #'
@@ -58,7 +58,7 @@ QFileExists <- function(filename, show.warning = TRUE, company.token = NA, docum
 #' @param method character string. See documentation for connections.
 #' @param mime.type character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.
 #' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive. You need to contact Support to get this token.
-#' @inheritParams QFileExists params = c("document.token")
+#' @inheritParams QFileExists
 #'
 #' @return A curl connection (read) or a file connection (write)
 #'
@@ -190,7 +190,7 @@ close.qpostcon = function(con, ...)
 #' @param filename character string. Name of the file to be opened from the Displayr Cloud Drive.
 #'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
-#' @inheritParams QFileExists params = c("document.token")
+#' @inheritParams QFileExists
 #' @param ... Other parameters to pass to read.csv.
 #'
 #' @return An R object
@@ -386,7 +386,7 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #' @param filenames collection of character strings. Names of the files to delete.
 #'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #' @param company.token Use this if you need to delete files from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
-#' @inheritParams QFileExists params = c("document.token")
+#' @inheritParams QFileExists
 #'
 #' @importFrom httr DELETE add_headers
 #' @importFrom utils URLencode

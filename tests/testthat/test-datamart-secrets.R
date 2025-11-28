@@ -172,42 +172,32 @@ test_that("getProjectSecret correctly extracts project secret from environment",
     userSecretsValueName <- "userSecrets"
     testProjectSecretValue <- "test_project_secret"
     projectSecretValueInUserSecrets <- paste0(testProjectSecretValue, "_from_user_secrets")
-
-    clearProjectSecret <- function () {
-        envs <- find(projectSecretValueName)
-        for (env in envs) {
-            remove(list = projectSecretValueName, envir = as.environment(env))
-        }
-      
-        if (exists(userSecretsValueName, envir = .GlobalEnv)) {
-            userSecrets <- get0(userSecretsValueName, envir = .GlobalEnv)
-            if (projectSecretValueName %in% names(userSecrets)) {
-                userSecrets[[projectSecretValueName]] <- NULL
-                assign(userSecretsValueName, userSecrets, envir = .GlobalEnv)
-            }
-        }
-    }
     
     # Case #1: projectSecret is set in environment in projectSecret
-    clearProjectSecret()
-    assign(projectSecretValueName, testProjectSecretValue, envir = .GlobalEnv)
-    expect_equal(getProjectSecret(), testProjectSecretValue)
+    {
+        localGlobal(projectSecretValueName, testProjectSecretValue)
+        expect_equal(getProjectSecret(), testProjectSecretValue)
+    }
   
     # Case #2: projectSecret is not set in environment in projectSecret, but is set in environment in userSecrets$projectSecret
-    clearProjectSecret()
-    userSecretsValue <- list(projectSecret = testProjectSecretValue)
-    assign(userSecretsValueName, userSecretsValue, envir = .GlobalEnv)
-    expect_equal(getProjectSecret(), testProjectSecretValue)
-  
+    {
+        userSecretsValue <- list(projectSecret = testProjectSecretValue)
+        localGlobal(userSecretsValueName, userSecretsValue)
+        expect_equal(getProjectSecret(), testProjectSecretValue)
+    }
+
     # Case #3: projectSecret is set in both places, getProjectSecret() should prefer projectSecret
-    clearProjectSecret()
-    assign(projectSecretValueName, testProjectSecretValue, envir = .GlobalEnv)
-    userSecretsValue <- list(projectSecret = paste0(testProjectSecretValue, "_different"))
-    assign(userSecretsValueName, userSecretsValue, envir = .GlobalEnv)
-    expect_equal(getProjectSecret(), testProjectSecretValue)
+    {
+        localGlobal(projectSecretValueName, testProjectSecretValue)
+        userSecretsValue <- list(projectSecret = testProjectSecretValue)
+        localGlobal(userSecretsValueName, userSecretsValue)
+        expect_equal(getProjectSecret(), testProjectSecretValue)
+    }
 
     # Case #4: projectSecret is not set in either place
-    clearProjectSecret()
-    rm(list = userSecretsValueName, envir = .GlobalEnv)
-    expect_equal(getProjectSecret(), "")
+    {
+        rm(list = projectSecretValueName, envir = .GlobalEnv)
+        rm(list = userSecretsValueName, envir = .GlobalEnv)
+        expect_equal(getProjectSecret(), "", info = "Case #4")
+    }
 })

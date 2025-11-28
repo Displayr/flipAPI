@@ -20,7 +20,7 @@ does not exist.}
 
 \item{company.token}{Use this if you need to access a different company's Displayr Cloud Drive. You need to contact Support to get this token.}
 
-\item{document.token}{Reserved}
+\item{document.token}{Reserved.}
 }
 \value{
 TRUE if the file exists, otherwise FALSE.
