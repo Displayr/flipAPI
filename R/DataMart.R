@@ -507,7 +507,7 @@ getCompanySecret <- function()
     return (secret)
 }
 
-#' Gets document secret from the environment. Throws an error if not found.
+#' Gets document secret from the environment or an empty string if not found.
 #'
 #' @return Document secret token as a string.
 #'

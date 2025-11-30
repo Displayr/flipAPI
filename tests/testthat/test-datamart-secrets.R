@@ -3,12 +3,10 @@ localGlobal("projectSecret", "test_project_secret")
 
 test_env = new.env() # holds HTTP header verification result that is put there by mocked HTTP function and is used by the tests below
 
-verifyHttpHeaders <- function(headers = list(), expect_company_secret_header_to_be_equivalent_to_company_secret, expect_project_secret_header_to_be_equivalent_to_project_secret) 
+verifyHttpHeaders <- function(headers = character(0), expect_company_secret_header_to_be_equivalent_to_company_secret, expect_project_secret_header_to_be_equivalent_to_project_secret) 
 {
-    companySecretHeader = headers["X-Q-Company-Secret"];
-    companySecretHeader <- ifelse(is.null(companySecretHeader), "", companySecretHeader)
-    projectSecretHeader = headers["X-Q-Project-Secret"];
-    projectSecretHeader <- ifelse(is.null(projectSecretHeader), "", projectSecretHeader)
+    companySecretHeader = headers[["X-Q-Company-Secret"]] %||% ""
+    projectSecretHeader = headers[["X-Q-Project-Secret"]] %||% ""
     httpResponse <- structure(list(status_code = 200, content = "mock"), class = "response")
     companySecret <- getCompanySecret()
     projectSecret <- getProjectSecret()
