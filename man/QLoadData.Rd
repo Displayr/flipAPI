@@ -4,13 +4,15 @@
 \alias{QLoadData}
 \title{Loads an object}
 \usage{
-QLoadData(filename, company.token = NA, ...)
+QLoadData(filename, company.token = NA, document.token = NA, ...)
 }
 \arguments{
 \item{filename}{character string. Name of the file to be opened from the Displayr Cloud Drive.
 To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").}
 
 \item{company.token}{Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.}
+
+\item{document.token}{Reserved.}
 
 \item{...}{Other parameters to pass to read.csv.}
 }

@@ -12,7 +12,8 @@ QFileOpen(
   raw = FALSE,
   method = getOption("url.method", "default"),
   mime.type = NA,
-  company.token = NA
+  company.token = NA,
+  document.token = NA
 )
 }
 \arguments{
@@ -32,6 +33,8 @@ To reference a file in a subdirectory, use double backslashes after each folder 
 \item{mime.type}{character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.}
 
 \item{company.token}{Use this if you need to read from a different company's Displayr Cloud Drive. You need to contact Support to get this token.}
+
+\item{document.token}{Reserved.}
 }
 \value{
 A curl connection (read) or a file connection (write)

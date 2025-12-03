@@ -1,7 +1,7 @@
 Package: flipAPI
 Type: Package
 Title: Web APIs tools
-Version: 1.6.0
+Version: 1.6.5
 Author: Displayr <opensource@displayr.com>
 Maintainer: Displayr <opensource@displayr.com>
 Description: Functions to extract data and interact with web APIs.
@@ -23,7 +23,6 @@ Imports:
     stringr,
     readxl,
     utils,
-    flipFormat,
     flipTime,
     flipTransformations,
     flipU (>= 1.6.1),
@@ -48,4 +47,4 @@ Suggests:
     httptest,
     officer,
     gifski
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3

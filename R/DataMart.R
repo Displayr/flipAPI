@@ -8,6 +8,8 @@ MAX.FILENAME.LENGTH <- 100L
 #'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #' @param show.warning logical scalar. Whether to show a warning when the file
 #'   does not exist.
+#' @param company.token Use this if you need to access a different company's Displayr Cloud Drive. You need to contact Support to get this token.
+#' @param document.token Reserved.
 #'
 #' @return TRUE if the file exists, otherwise FALSE.
 #'
@@ -15,13 +17,15 @@ MAX.FILENAME.LENGTH <- 100L
 #' @importFrom utils URLencode
 #'
 #' @export
-QFileExists <- function(filename, show.warning = TRUE)
+QFileExists <- function(filename, show.warning = TRUE, company.token = NA, document.token = NA)
 {
-    company.secret <- getCompanySecret()
+    company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+    project.secret <- if (missing(document.token)) getProjectSecret() else document.token
     client.id <- getClientId()
     api.root <- getApiRoot("DataMartFileExists")
     res <- try(GET(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                     config=add_headers("X-Q-Company-Secret" = company.secret,
+                                       "X-Q-Project-Secret" = project.secret,
                                        "X-Q-Project-ID" = client.id)))
 
     if (is.null(res$status_code) || res$status_code != 200)
@@ -54,6 +58,7 @@ QFileExists <- function(filename, show.warning = TRUE)
 #' @param method character string. See documentation for connections.
 #' @param mime.type character string. The mime-type of this file. If not provided, it will be interpreted from the file extension.
 #' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive. You need to contact Support to get this token.
+#' @inheritParams QFileExists
 #'
 #' @return A curl connection (read) or a file connection (write)
 #'
@@ -66,17 +71,20 @@ QFileExists <- function(filename, show.warning = TRUE)
 QFileOpen <- function(filename, open = "r", blocking = TRUE,
                       encoding = getOption("encoding"), raw = FALSE,
                       method = getOption("url.method", "default"),
-                      mime.type = NA, company.token = NA)
+                      mime.type = NA, company.token = NA, document.token = NA)
 {
     mode <- tolower(open)
+    company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+    project.secret <- if (missing(document.token)) getProjectSecret() else document.token
+
     if (mode == "r" || mode == "rb")
     {
-        company.secret <- if (missing(company.token)) getCompanySecret() else company.token
         client.id <- getClientId()
         api.root <- getApiRoot()
         h <- new_handle()
         handle_setheaders(h,
             "X-Q-Company-Secret" = company.secret,
+            "X-Q-Project-Secret" = project.secret,
             "X-Q-Project-ID" = client.id
         )
         uri <- paste0(api.root, "?filename=", URLencode(filename, TRUE))
@@ -116,6 +124,8 @@ QFileOpen <- function(filename, open = "r", blocking = TRUE,
         attr(con, "filename") <- filename
         if (missing(mime.type)) mime.type <- guess_type(filename)
         attr(con, "mimetype") <- mime.type
+        attr(con, "company.secret") <- company.secret
+        attr(con, "project.secret") <- project.secret
 
         return (con)
     }
@@ -146,14 +156,16 @@ close.qpostcon = function(con, ...)
     filename <- attr(con, "filename")
     tmpfile <- attr(con, "tmpfile")
     mimetype <- attr(con, "mimetype")
+    company.secret <- attr(con, "company.secret")
+    project.secret <- attr(con, "project.secret")
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
-    company.secret <- getCompanySecret()
     client.id <- getClientId()
     api.root <- getApiRoot()
     res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                 config = add_headers("Content-Type" = mimetype,
                                      "X-Q-Company-Secret" = company.secret,
+                                     "X-Q-Project-Secret" = project.secret,
                                      "X-Q-Project-ID" = client.id),
                 encode = "raw",
                 body = upload_file(tmpfile)))
@@ -178,6 +190,7 @@ close.qpostcon = function(con, ...)
 #' @param filename character string. Name of the file to be opened from the Displayr Cloud Drive.
 #'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
+#' @inheritParams QFileExists
 #' @param ... Other parameters to pass to read.csv.
 #'
 #' @return An R object
@@ -189,14 +202,16 @@ close.qpostcon = function(con, ...)
 #' @importFrom flipU StopForUserError
 #'
 #' @export
-QLoadData <- function(filename, company.token = NA, ...)
+QLoadData <- function(filename, company.token = NA, document.token = NA,...)
 {
     tmpfile <- tempfile()
     company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+    project.secret <- if (missing(document.token)) getProjectSecret() else document.token
     client.id <- getClientId()
     api.root <- getApiRoot()
     res <- try(GET(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                config=add_headers("X-Q-Company-Secret" = company.secret,
+                                  "X-Q-Project-Secret" = project.secret,
                                   "X-Q-Project-ID" = client.id),
                write_disk(tmpfile, overwrite = TRUE)))
 
@@ -253,7 +268,7 @@ QLoadData <- function(filename, company.token = NA, ...)
 #' (in bytes) larger than this value will be compressed into a zip file.
 #' Defaults to NULL, in which case no compression occurs.
 #' @param ... Other parameters to pass to \code{\link{write.csv}}, \code{\link{saveRDS}},
-#' \code{\link{write.xlsx}}, or \code{\link{write_sav}}.
+#' \code{\link[openxlsx]{write.xlsx}}, or \code{\link[haven]{write_sav}}.
 #'
 #' @importFrom haven write_sav
 #' @importFrom httr POST add_headers upload_file
@@ -317,11 +332,13 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
     company.secret <- getCompanySecret()
+    project.secret <- getProjectSecret()
     client.id <- getClientId()
     api.root <- getApiRoot()
     res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                 config = add_headers("Content-Type" = guess_type(filename),
                                      "X-Q-Company-Secret" = company.secret,
+                                     "X-Q-Project-Secret" = project.secret,
                                      "X-Q-Project-ID" = client.id),
                 encode = "raw",
                 body = upload_file(tmpfile)))
@@ -368,7 +385,8 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #'
 #' @param filenames collection of character strings. Names of the files to delete.
 #'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
-#' @param company.token Use this if you need to read from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
+#' @param company.token Use this if you need to delete files from a different company's Displayr Cloud Drive.  You need to contact Support to get this token.
+#' @inheritParams QFileExists
 #'
 #' @importFrom httr DELETE add_headers
 #' @importFrom utils URLencode
@@ -377,14 +395,15 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #' and assumed to succeed if no errors are thrown.
 #'
 #' @export
-QDeleteFiles <- function(filenames, company.token = getCompanySecret())
+QDeleteFiles <- function(filenames, company.token = getCompanySecret(), document.token = getProjectSecret())
 {
     company.secret <- company.token
     api.root <- getApiRoot("DataMartBatchDelete")
     url_param_filenames <- sprintf("filenames=%s", filenames)
     filenames.string <- paste(filenames, collapse = ", ")
     res <- try(DELETE(paste0(api.root, "?", URLencode(paste(url_param_filenames, collapse="&"))),
-                config=add_headers("X-Q-Company-Secret" = company.secret)))
+                config=add_headers("X-Q-Company-Secret" = company.secret,
+                                   "X-Q-Project-Secret" = document.token)))
     if (inherits(res, "try-error") || res$status_code != 200)
     {
         warning("Encountered an error deleting the following files: ", filenames.string)
@@ -406,11 +425,13 @@ qSaveImage <- function(filename)
     on.exit(if(file.exists(tmpfile)) file.remove(tmpfile))
 
     company.secret <- getCompanySecret()
+    project.secret <- getProjectSecret()
     client.id <- getClientId()
     api.root <- getApiRoot()
     res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                     config = add_headers("Content-Type" = guess_type(filename),
                                          "X-Q-Company-Secret" = company.secret,
+                                         "X-Q-Project-Secret" = project.secret,
                                          "X-Q-Project-ID" = client.id),
                     encode = "raw",
                     body = upload_file(tmpfile)))
@@ -431,14 +452,16 @@ qSaveImage <- function(filename)
     invisible()
 }
 
-qLoadImage <- function(filename, company.token = NA)
+qLoadImage <- function(filename, company.token = NA, document.token = NA)
 {
     tmpfile <- tempfile()
     company.secret <- if (missing(company.token)) getCompanySecret() else company.token
+    project.secret <- if (missing(document.token)) getProjectSecret() else document.token
     client.id <- getClientId()
     api.root <- getApiRoot()
     res <- try(GET(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
                    config=add_headers("X-Q-Company-Secret" = company.secret,
+                                      "X-Q-Project-Secret" = project.secret,
                                       "X-Q-Project-ID" = client.id),
                    write_disk(tmpfile, overwrite = TRUE)))
 
@@ -482,6 +505,20 @@ getCompanySecret <- function()
     secret <- get0("companySecret", ifnotfound = "")
     if (secret == "") stopNotDisplayr("companySecret")
     return (secret)
+}
+
+#' Gets document secret from the environment or an empty string if not found.
+#'
+#' @return Document secret token as a string.
+#'
+#' @noRd
+getProjectSecret <- function()
+{
+    get0("projectSecret", ifnotfound = NULL) %||%
+        # projectSecret might not have been copied into global projectSecret by an older R Server, 
+        # but it could have been stored by QServer in user secrets which are copied into userSecrets by older R servers.
+        get0("userSecrets", mode = "list", ifnotfound = NULL)[["projectSecret"]] %||%
+        ""
 }
 
 #' Gets region from the environment and builds the api root. Throws an error if not found.
