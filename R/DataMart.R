@@ -13,7 +13,7 @@ MAX.FILENAME.LENGTH <- 100L
 #'
 #' @return TRUE if the file exists, otherwise FALSE.
 #'
-#' @importFrom httr HEAD add_headers content
+#' @importFrom httr HEAD add_headers
 #' @importFrom utils URLencode
 #'
 #' @export
@@ -30,13 +30,8 @@ QFileExists <- function(filename, show.warning = TRUE, company.token = NA, docum
 
     if (is.null(res$status_code) || res$status_code != 200)
     {
-        if (show.warning) {
-            err <- tryCatch(content(res, as = "text", encoding = "UTF-8"),
-                            error = function(e) "")
-            if (!nzchar(err))
-                err <- "File not found."
-            warning(err)
-        }
+        if (show.warning)
+            warning("This file may not exist in the Displayr Cloud Drive or you may not have permission to access it.")
         return (FALSE)
     }
     else
@@ -347,21 +342,12 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
     has.errored <- inherits(res, "try-error")
 
     if (!has.errored && res$status_code == 413) # 413 comes from IIS when we violate its web.config limits
-    {
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
-    }
-    else if (!has.errored && res$status_code == 404)
-    {
-        err <- tryCatch(content(res, as = "text", encoding = "UTF-8"),
-                        error = function(e) "")
-        if (!nzchar(err))
-            err <- "Could not save file."
-        stop("QSaveData has encountered an unknown error. ", err, call. = FALSE)
-    }
     else if (has.errored || res$status_code != 200)
     {
-        warning("QSaveData has encountered an unknown error.")
-        stopBadRequest(res, "Could not save file.")
+        stop("QSaveData has encountered an unknown error. ",
+            "422: The file could not properly be saved. ",
+            "The likely cause was an incorrect path preceding the filename, or insufficient access to the file path.")
     }
 
     if (!is.compressed) {
@@ -411,11 +397,7 @@ QDeleteFiles <- function(filenames, company.token = getCompanySecret(), document
     if (inherits(res, "try-error") || res$status_code != 200)
     {
         warning("Encountered an error deleting the following files: ", filenames.string)
-        err <- tryCatch(content(res, as = "text", encoding = "UTF-8"),
-                        error = function(e) "")
-        if (nzchar(err))
-            stop("Could not delete files: ", filenames.string, ". ", err, call. = FALSE)
-        stopBadRequest(res, paste0("Could not delete files: ", filenames.string))
+        stopBadRequest(res, paste0("Could not delete files: ", filenames.string, ". These files may not exist in the Displayr Cloud Drive or you may not have permission to access them."))
     }
     msg <- paste0("Successfully deleted files: ", filenames.string)
     message(msg)
