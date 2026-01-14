@@ -343,11 +343,16 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 
     if (!has.errored && res$status_code == 413) # 413 comes from IIS when we violate its web.config limits
         stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
-    else if (has.errored || res$status_code != 200)
+    else if (!has.errored && res$status_code == 404)
     {
         stop("QSaveData has encountered an unknown error. ",
-            "422: The file could not properly be saved. ",
+            "404: The file could not properly be saved. ",
             "The likely cause was an incorrect path preceding the filename, or insufficient access to the file path.")
+    }
+    else if (has.errored || res$status_code != 200)
+    {
+        warning("QSaveData has encountered an unknown error.")
+        stopBadRequest(res, "Could not save file.")
     }
 
     if (!is.compressed) {
