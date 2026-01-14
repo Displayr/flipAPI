@@ -46,8 +46,8 @@ test_that("Save/Load Data: bad cases", {
 
   # Not-existent file
   bad_name <- "anamethatdoesnotexistfortesting"
-  QFileExists(bad_name) |> expect_false() |> expect_warning("File not found")
-  QLoadData(bad_name) |> expect_error(paste0("The data file ", sQuote(bad_name, q = FALSE), " does not exist"))
+  QFileExists(bad_name) |> expect_false() |> expect_warning("may not exist in the Displayr Cloud Drive or you may not have permission")
+  QLoadData(bad_name) |> expect_error("may not exist in the Displayr Cloud Drive or you may not have permission")
 
   # Invalid filetypes
   # - note that we don't have tests for Content-Types
@@ -163,7 +163,7 @@ test_that("Delete Data",
   expect_invisible(QSaveData(mtcars, "mtcars.rds"))
   expect_true(QFileExists("mtcars.rds"))
   expect_invisible(QDeleteFiles(c("mtcars.rds")))
-  expect_warning(QFileExists("mtcars.rds"), "File not found")
+  expect_warning(QFileExists("mtcars.rds"), "may not exist in the Displayr Cloud Drive or you may not have permission")
 
   expect_invisible(QSaveData(mtcars, "mtcars.csv"))
   expect_invisible(QSaveData(mtcars, "mtcars.sav"))
@@ -171,8 +171,8 @@ test_that("Delete Data",
   expect_true(QFileExists("mtcars.sav"))
 
   expect_invisible(QDeleteFiles(c("mtcars.csv", "mtcars.sav")))
-  expect_warning(QFileExists("mtcars.csv"), "File not found")
-  expect_warning(QFileExists("mtcars.sav"), "File not found")
+  expect_warning(QFileExists("mtcars.csv"), "may not exist in the Displayr Cloud Drive or you may not have permission")
+  expect_warning(QFileExists("mtcars.sav"), "may not exist in the Displayr Cloud Drive or you may not have permission")
 
   # Should still succeed even if files don't exist
   expect_invisible(QDeleteFiles(c("mtcars.csv", "mtcars.sav")))
