@@ -382,7 +382,7 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 
 #' Share an object
 #'
-#' Get's the cloud drive share url for an object saved to the Displayr Cloud Drive.
+#' Gets the cloud drive share url for an object saved to the Displayr Cloud Drive.
 #'
 #' If the file has not previously been shared it will be shared else the already existing
 #' share url will be returned.
@@ -390,7 +390,7 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
 #' @param filename character string. Name of the file that is being shared.
 #'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
 #'
-#' @importFrom httr POST add_headers upload_file
+#' @importFrom httr POST add_headers content
 #' @importFrom utils URLencode
 #' @return Share URL as a string
 #' @importFrom flipU StopForUserError
@@ -408,24 +408,22 @@ QGetSharedUrl <- function(filename)
                 encode = "raw"))
     has.errored <- inherits(res, "try-error")
 
-    if (!has.errored && res$status_code == 413) # 413 comes from IIS when we violate its web.config limits
-        stopBadRequest(res, "Could not write to Displayr Cloud Drive. Data to write is too large.")
-    else if (!has.errored && res$status_code == 404)
+    if (res$status_code == 404)
     {
-        stop("QSaveData has encountered an unknown error. ",
+        stop("QGetSharedUrl has encountered an unknown error. ",
             "404: No such file exists. ",
             "The likely cause was an incorrect path preceding the filename, or insufficient access to the file path.")
     }
     else if (has.errored || res$status_code != 200)
     {
-        warning("QSaveData has encountered an unknown error.")
+        warning("QGetSharedUrl has encountered an unknown error.")
         stopBadRequest(res, "Could not share file.")
     }
 
     content <- httr::content(res)
     # The content returns a JSON object with the share url in the 'sharingUrl' field
     # and a boolean (that we ignore) that indicates if the file was newly shared or not
-    return (content$sharingUrl)
+    content$sharingUrl
 }
 
 #' Deletes a set of objects

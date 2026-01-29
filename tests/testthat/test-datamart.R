@@ -151,6 +151,55 @@ test_that("DS-3269: Data Mart unavailable",
     })
 })
 
+test_that("QGetSharedUrl", {
+    skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
+
+    # First save a file to share
+    expect_invisible(QSaveData(mtcars, "mtcars_share_test.rds"))
+    expect_true(QFileExists("mtcars_share_test.rds"))
+
+    # Get the shared URL
+    shared.url <- QGetSharedUrl("mtcars_share_test.rds")
+    expect_true(is.character(shared.url))
+    expect_true(nzchar(shared.url))
+
+    # Calling again should return the same URL (idempotent)
+    shared.url.again <- QGetSharedUrl("mtcars_share_test.rds")
+    expect_equal(shared.url, shared.url.again)
+
+    # Clean up
+    expect_invisible(QDeleteFiles("mtcars_share_test.rds"))
+})
+
+test_that("QGetSharedUrl: bad cases", {
+    skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
+
+    # Non-existent file should return 404 error
+    expect_error(
+        QGetSharedUrl("file_that_does_not_exist.rds"),
+        "404: No such file exists"
+    )
+
+    # 404 error with mocked POST
+    mocked.post <- function(...) {
+        list(status_code = 404)
+    }
+    with_mocked_bindings(
+        POST = mocked.post,
+        QGetSharedUrl("any_file.rds"),
+        .package = "httr"
+    ) |>
+        expect_error(
+            paste0(
+                "QGetSharedUrl has encountered an unknown error. ",
+                "404: No such file exists. ",
+                "The likely cause was an incorrect path preceding the filename, ",
+                "or insufficient access to the file path."
+            ),
+            fixed = TRUE
+        )
+})
+
 test_that("Delete Data",
 {
   skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
