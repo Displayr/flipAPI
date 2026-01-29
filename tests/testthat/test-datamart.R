@@ -152,6 +152,7 @@ test_that("DS-3269: Data Mart unavailable",
 })
 
 test_that("QGetSharedUrl", {
+
     skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
 
     # First save a file to share
