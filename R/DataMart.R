@@ -380,6 +380,52 @@ QSaveData <- function(object, filename, compression.file.size.threshold = NULL,
     }
 }
 
+#' Share an object
+#'
+#' Gets the cloud drive share url for an object saved to the Displayr Cloud Drive.
+#'
+#' If the file has not previously been shared it will be shared else the already existing
+#' share url will be returned.
+#'
+#' @param filename character string. Name of the file that is being shared.
+#'   To reference a file in a subdirectory, use double backslashes after each folder (e.g "subdir\\file.csv").
+#'
+#' @importFrom httr POST add_headers content
+#' @importFrom utils URLencode
+#' @return Share URL as a string
+#' @importFrom flipU StopForUserError
+#' @export
+QGetSharedUrl <- function(filename)
+{
+    company.secret <- getCompanySecret()
+    project.secret <- getProjectSecret()
+    client.id <- getClientId()
+    api.root <- getApiRoot("DataMart/Share")
+    res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
+                config = add_headers("X-Q-Company-Secret" = company.secret,
+                                     "X-Q-Project-Secret" = project.secret,
+                                     "X-Q-Project-ID" = client.id),
+                encode = "raw"))
+    has.errored <- inherits(res, "try-error")
+
+    if (res$status_code == 404)
+    {
+        stop("QGetSharedUrl has encountered an unknown error. ",
+            "404: No such file exists. ",
+            "The likely cause was an incorrect path preceding the filename, or insufficient access to the file path.")
+    }
+    else if (has.errored || res$status_code != 200)
+    {
+        warning("QGetSharedUrl has encountered an unknown error.")
+        stopBadRequest(res, "Could not share file.")
+    }
+
+    content <- httr::content(res)
+    # The content returns a JSON object with the share url in the 'sharingUrl' field
+    # and a boolean (that we ignore) that indicates if the file was newly shared or not
+    content$sharingUrl
+}
+
 #' Deletes a set of objects
 #'
 #' Deletes a list of objects by filename from the Displayr cloud drive
