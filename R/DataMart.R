@@ -402,12 +402,10 @@ QGetSharedUrl <- function(filename)
     client.id <- getClientId()
     api.root <- getApiRoot("DataMart/Share")
     res <- try(POST(paste0(api.root, "?filename=", URLencode(filename, TRUE)),
-                config = add_headers("Content-Type" = guess_type(filename),
-                                     "X-Q-Company-Secret" = company.secret,
+                config = add_headers("X-Q-Company-Secret" = company.secret,
                                      "X-Q-Project-Secret" = project.secret,
                                      "X-Q-Project-ID" = client.id),
-                encode = "raw",
-                body = upload_file(tmpfile)))
+                encode = "raw"))
     has.errored <- inherits(res, "try-error")
 
     if (!has.errored && res$status_code == 413) # 413 comes from IIS when we violate its web.config limits
