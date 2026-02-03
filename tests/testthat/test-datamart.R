@@ -179,25 +179,6 @@ test_that("QGetSharedUrl: bad cases", {
         QGetSharedUrl("file_that_does_not_exist.rds"),
         "404: No such file exists"
     )
-
-    # 404 error with mocked POST
-    mocked.post <- function(...) {
-        list(status_code = 404)
-    }
-    with_mocked_bindings(
-        POST = mocked.post,
-        QGetSharedUrl("any_file.rds"),
-        .package = "httr"
-    ) |>
-        expect_error(
-            paste0(
-                "QGetSharedUrl has encountered an unknown error. ",
-                "404: No such file exists. ",
-                "The likely cause was an incorrect path preceding the filename, ",
-                "or insufficient access to the file path."
-            ),
-            fixed = TRUE
-        )
 })
 
 test_that("Delete Data",

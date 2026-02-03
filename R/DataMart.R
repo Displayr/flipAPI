@@ -408,7 +408,7 @@ QGetSharedUrl <- function(filename)
                 encode = "raw"))
     has.errored <- inherits(res, "try-error")
 
-    if (res$status_code == 404)
+    if (res$status_code == 404 || httr::content(res, as = "text") == "File not found")
     {
         stop("QGetSharedUrl has encountered an unknown error. ",
             "404: No such file exists. ",
