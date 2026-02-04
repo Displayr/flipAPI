@@ -52,6 +52,7 @@ test_that("Save/Load Data: bad cases", {
     # Invalid filetypes
     # - note that we don't have tests for Content-Types
     QSaveData(mtcars, "mtcars.notrdsorcsv") |> expect_error("Invalid file type specified")
+
     # 404 Error
     mockedPOST <- function() {
         list(status_code = 404)
@@ -64,6 +65,23 @@ test_that("Save/Load Data: bad cases", {
         expect_error(
             paste0("QSaveData has encountered an unknown error. ",
                 "404: The file could not properly be saved. ",
+                "The likely cause was an incorrect path preceding the filename, or insufficient access to the file path."
+                ),
+            fixed = TRUE
+        )
+
+    # 422 Error (Bad path)
+    mockedPOST <- function() {
+        list(status_code = 422)
+    }
+    formals(mockedPOST) <- formals(httr::POST)
+    with_mocked_bindings(
+        POST = mockedPOST,
+        QSaveData(mtcars, r"(FolderThatDoesNotExist\\file.rds)")
+    ) |>
+        expect_error(
+            paste0("QSaveData has encountered an unknown error. ",
+                "422: The file could not properly be saved. ",
                 "The likely cause was an incorrect path preceding the filename, or insufficient access to the file path."
                 ),
             fixed = TRUE
