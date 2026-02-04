@@ -81,7 +81,7 @@ test_that("Save/Load Data: bad cases", {
     ) |>
         expect_error(
             paste0("QSaveData has encountered an unknown error. ",
-                "404: The file could not properly be saved. ",
+                "422: The file could not properly be saved. ",
                 "The likely cause was an incorrect path preceding the filename, or insufficient access to the file path."
                 ),
             fixed = TRUE
