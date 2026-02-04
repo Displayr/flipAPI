@@ -176,7 +176,7 @@ test_that("QGetSharedUrl: bad cases", {
 
     # Non-existent file should return 404 error
     expect_error(
-        QGetSharedUrl("file_that_does_not_exist.rds"),
+        QGetSharedUrl("file_that_definitely_does_not_exist_and_if_you_create_it_you_are_silly.rds"),
         "404: No such file exists"
     )
 })
