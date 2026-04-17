@@ -19,7 +19,6 @@ Imports:
     ip2location,
     jsonlite,
     lubridate,
-    RGoogleAnalytics,
     stringr,
     readxl,
     utils,
@@ -41,7 +40,6 @@ Imports:
     zeallot,
     zip
 Remotes: Displayr/flipTransformations,
-    url::https://cran.r-project.org/src/contrib/Archive/RGoogleAnalytics/RGoogleAnalytics_0.1.6.tar.gz,
 Suggests:
     testthat,
     httptest,
