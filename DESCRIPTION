@@ -41,7 +41,7 @@ Imports:
     zeallot,
     zip
 Remotes: Displayr/flipTransformations,
-    url::https://cran.r-project.org/src/contrib/Archive/RGoogleAnalytics/RGoogleAnalytics_0.1.6.tar.gz,
+    cran/RGoogleAnalytics
 Suggests:
     testthat,
     httptest,
