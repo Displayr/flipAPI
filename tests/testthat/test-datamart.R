@@ -1,4 +1,5 @@
 library (testthat)
+library(jsonlite)
 
 test_that("SaveData/LoadData", {
     skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
