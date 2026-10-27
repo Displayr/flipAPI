@@ -44,5 +44,6 @@ Suggests:
     jsonlite,
     withr,
     officer,
-    gifski
+    gifski,
+    webfakes
 RoxygenNote: 7.3.3
