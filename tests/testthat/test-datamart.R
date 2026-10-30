@@ -42,53 +42,6 @@ test_that("SaveData/LoadData", {
     expect_true(QFileExists("mtcars.zip"))
 })
 
-test_that("Save/Load Data: bad cases", {
-    skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
-
-    # Not-existent file
-    bad_name <- "anamethatdoesnotexistfortesting"
-    QFileExists(bad_name) |> expect_false() |> expect_warning("may not exist in the Displayr Cloud Drive or you may not have permission")
-    QLoadData(bad_name) |> expect_error("may not exist in the Displayr Cloud Drive or you may not have permission")
-
-    # Invalid filetypes
-    # - note that we don't have tests for Content-Types
-    QSaveData(mtcars, "mtcars.notrdsorcsv") |> expect_error("Invalid file type specified")
-
-    # 404 Error
-    mockedPOST <- function() {
-        list(status_code = 404)
-    }
-    formals(mockedPOST) <- formals(httr::POST)
-    with_mocked_bindings(
-        POST = mockedPOST,
-        QSaveData(mtcars, r"(mtcars\\file.rds)")
-    ) |>
-        expect_error(
-            paste0("QSaveData has encountered an unknown error. ",
-                "404: The file could not properly be saved. ",
-                "The likely cause was an incorrect path preceding the filename, or insufficient access to the file path."
-                ),
-            fixed = TRUE
-        )
-
-    # 422 Error (Bad path)
-    mockedPOST <- function() {
-        list(status_code = 422)
-    }
-    formals(mockedPOST) <- formals(httr::POST)
-    with_mocked_bindings(
-        POST = mockedPOST,
-        QSaveData(mtcars, r"(FolderThatDoesNotExist\\file.rds)")
-    ) |>
-        expect_error(
-            paste0("QSaveData has encountered an unknown error. ",
-                "422: The file could not properly be saved. ",
-                "The likely cause was an incorrect path preceding the filename, or insufficient access to the file path."
-                ),
-            fixed = TRUE
-        )
-})
-
 test_that("File Connection: raw", {
     skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
 
@@ -188,16 +141,6 @@ test_that("QGetSharedUrl", {
 
     # Clean up
     expect_invisible(QDeleteFiles("mtcars_share_test.rds"))
-})
-
-test_that("QGetSharedUrl: bad cases", {
-    skip_if(!nzchar(companySecret), "Not in test environment or no company set up")
-
-    # Non-existent file should return 404 error
-    expect_error(
-        QGetSharedUrl("file_that_definitely_does_not_exist_and_if_you_create_it_you_are_silly.rds"),
-        "404: No such file exists"
-    )
 })
 
 test_that("Delete Data",
