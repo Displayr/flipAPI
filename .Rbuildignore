@@ -4,3 +4,5 @@
 ^\.circleci/config\.yml$
 ^\.lintr$
 ^\.github
+^AGENTS\.md$
+^CLAUDE\.md$
